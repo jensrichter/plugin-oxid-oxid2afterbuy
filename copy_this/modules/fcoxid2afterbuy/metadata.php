@@ -28,10 +28,10 @@ $aModule = array(
     'title'        => '<img src="' . $sImgUrl . '" alt="FC"> FATCHIP OXID 2 Afterbuy Connector',
     'description'  => array(
         'de'=>'Schnittstelle zur Afterbuy API',
-        'en'=>'Interface to Afterbuy API ',
+        'en'=>'Interface to Afterbuy API',
     ),
     'thumbnail'    => '',
-    'version'      => '1.0.0',
+    'version'      => '%%VERSION%%',
     'author'       => 'Fatchip GmbH',
     'url'          => 'http://www.fatchip.de',
     'email'        => 'support@fatchip.de',
