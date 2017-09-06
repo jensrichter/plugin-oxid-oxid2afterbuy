@@ -57,12 +57,12 @@ $oxid needs to be from oxarticles
                     [{oxhasrights object=$edit field='fcafterbuyactive' readonly=$readonly}]
                     <tr>
                         <td class="edittext" width="120">
-                            [{ oxmultilang ident="ARTICLE_MAIN_ACTIVE" }]
+                            [{ oxmultilang ident="FC_AFTERBUY_ARTICLE_ACTIVE" }]
                         </td>
                         <td class="edittext">
                             <input type="hidden" name="editval[oxarticles__fcafterbuyactive]" value="0">
                             <input class="edittext" type="checkbox" name="editval[oxarticles__fcafterbuyactive]" value='1' [{if $edit->oxarticles__fcafterbuyactive->value == 1}]checked[{/if}]>
-                            [{ oxinputhelp ident="HELP_ARTICLE_MAIN_ACTIVE" }]
+                            [{ oxinputhelp ident="FC_AFTERBUY_ARTICLE_ACTIVE_HELP" }]
                         </td>
                     </tr>
                     [{/oxhasrights}]

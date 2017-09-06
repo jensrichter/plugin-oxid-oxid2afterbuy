@@ -31,4 +31,5 @@ $aLang = array(
     'SHOP_MODULE_sFcAfterbuyUsername'                       => 'Username',
     'SHOP_MODULE_sFcAfterbuyUserPassword'                       => 'Passwort',
     'mxfcafterbuy_article_admin'                                  => 'Afterbuy',
+    'FC_AFTERBUY_ARTICLE_ACTIVE'                            => 'Artikel zu Afterbuy übertragen',
 );
