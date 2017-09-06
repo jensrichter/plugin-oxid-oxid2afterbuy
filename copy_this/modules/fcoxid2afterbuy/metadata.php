@@ -47,11 +47,11 @@ $aModule = array(
         'fco2aorderimport'  => 'fcoxid2afterbuy/core/fco2aorderimport.php',
         'fco2astatusexport' => 'fcoxid2afterbuy/core/fco2astatusexport.php',
 
-        //controllers
-        'fcafterbuy_article_admin' => 'fcoxid2afterbuy/controllers/admin/fcafterbuy_article_admin.php',
+        //controllers->admin
+        'fcafterbuy_article_admin' => 'fcoxid2afterbuy/application/controllers/admin/fcafterbuy_article_admin.php',
     ),
     'templates' => array(
-        'fcafterbuy_article_admin.tpl' => 'fcoxid2afterbuy/views/admin/tpl/fcafterbuy_article_admin.tpl',
+        'fcafterbuy_article_admin.tpl' => 'fcoxid2afterbuy/application/views/admin/tpl/fcafterbuy_article_admin.tpl',
     ),
     'blocks' => array(
     ),

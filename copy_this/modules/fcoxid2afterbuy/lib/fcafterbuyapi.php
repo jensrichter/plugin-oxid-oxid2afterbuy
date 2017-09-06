@@ -62,11 +62,29 @@ class fcafterbuyapi {
     protected $sFcAfterbuyUserPassword = "";
 
 
-    function __construct() {
-
-       /**
-        * set variables
-        */
+    /**
+     * fcafterbuyapi constructor.
+     *
+     * The foreseen configuration that is needed has to be a filled array like this
+     * $aConfig = array(
+     *      'sFcAfterbuyShopInterfaceBaseUrl' => <AfterbuyShopInterfaceBaseUrl>,
+     *      'sFcAfterbuyAbiUrl' => <AfterbuyAbiUrl>,
+     *      'sFcAfterbuyPartnerId' => <AfterbuyPartnerId>,
+     *      'sFcAfterbuyPartnerPassword' => <AfterbuyPartnerPassword>,
+     *      'sFcAfterbuyUsername' => <AfterbuyUsername>,
+     *      'sFcAfterbuyUserPassword' => <AfterbuyUserPassword>,
+     *      'iFcLogLevel' => <LogLevel>,
+     * );
+     *
+     * @param $aConfig
+     * @throws Exception
+     */
+    function __construct($aConfig) {
+        try {
+            $this->_fcSetConfig($aConfig);
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -96,7 +114,7 @@ class fcafterbuyapi {
      * @return string API answer
      * @access protected
      */
-    protected function fcRequestAPI($sXmlData) {
+    public function _fcRequestAPI($sXmlData) {
         $ch = curl_init($this->sFcAfterbuyAbiUrl);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -108,6 +126,43 @@ class fcafterbuyapi {
         curl_close($ch);
 
         return $sOutput;
+    }
+
+    /**
+     * Updates or inserts article to afterbuy and returns API answer
+     *
+     * @param $oArt
+     * @return string
+     */
+    public function updateArticleToAfterbuy($oArt) {
+        $sXmlData = $this->_fcGetUpdateArticleXml($oArt);
+        $aOutput = $this->_fcRequestAPI($sXmlData);
+
+        return $aOutput;
+    }
+
+    public function getSoldItemsFromAfterbuy() {
+        $sXmlData = $this->_fcGetXmlHead('GetSoldItems', 0);
+        $sXmlData .= "<MaxSoldItems>99</MaxSoldItems>";
+        $sXmlData .= "<OrderDirection>1</OrderDirection>";
+        $sXmlData .= $this->_fcGetXmlFoot();
+
+        $aOutput = $this->_fcRequestAPI($sXmlData);
+        return $aOutput;
+    }
+
+    /**
+     * Set configuration for afterbuy connection
+     *
+     * @param $aConfig
+     * @return void
+     */
+    protected function _fcSetConfig($aConfig) {
+        foreach ($aConfig as $sConfigName=>$sConfigValue) {
+            if (isset($this->$sConfigName)) {
+                $this->$sConfigName = $sConfigValue;
+            }
+        }
     }
 
     /**
@@ -136,99 +191,79 @@ class fcafterbuyapi {
         return $sOutput;
     }
 
-    public function updateArticleToAfterbuy($oArt) {
-        $xml_data = $this->fcGetArtAddXml($oArt);
-        //var_dump($xml_data);
-        $aOutput = $this->_fcRequestAPI($xml_data);
-        //var_dump($aOutput);
-        return $aOutput;
-    }
-
-    public function getSoldItemsFromAfterbuy() {
-        $xml_data = $this->fcGetXmlHead('GetSoldItems', 0);
-        $xml_data .= "<MaxSoldItems>99</MaxSoldItems>";
-        $xml_data .= "<OrderDirection>1</OrderDirection>";
-        /*
-        $xml_data .= "<DataFilter>
-                        <Filter>
-                         <FilterName>DefaultFilter</FilterName>
-                         <FilterValues>
-                           <FilterValue>not_CompletedAuctions</FilterValue>
-                         </FilterValues>
-                        </Filter>
-                       </DataFilter>";
-*/
-        $xml_data .= $this->fcGetXmlFoot();
-        //var_dump($xml_data);
-
-        $aOutput = $this->fcRequestAPI($xml_data);
-        //var_dump($aOutput);
-        return $aOutput;
-    }
-
-    protected function fcGetArtAddXml($oArt) {
-        $sOaAbId = 'oxarticles__fcafterbuyid';
-        $sTitle = trim($oArt->oxarticles__oxtitle->value . ' ' . $oArt->oxarticles__oxvarselect->value);
-        $xml_data = $this->fcGetXmlHead('UpdateShopProducts', 0);
-        $xml_data .= '<Products>
+    /**
+     * Returns xml for requesting aftberbuy abi
+     *
+     * @param $oArt
+     * @param $sAbId
+     * @return string
+     */
+    protected function _fcGetUpdateArticleXml($oArt, $sAbId='') {
+        $sXmlData = $this->_fcGetXmlHead('UpdateShopProducts');
+        $sXmlData .= '<Products>
                         <Product>
                             <ProductIdent>';
-        if ($oArt->$sOaAbId->value == "" || $oArt->$sOaAbId->value == 0) {
-            $xml_data .= '<ProductInsert>1</ProductInsert>
+        if (!$sAbId) {
+            $sXmlData .= '<ProductInsert>1</ProductInsert>
                                 <BaseProductType>0</BaseProductType>
-                                <UserProductID><![CDATA[' . $oArt->oxarticles__oxid->value . ']]></UserProductID>
-                                <Anr>' . $oArt->oxarticles__oxean->value . '</Anr>
-                                <EAN>MI-' . $oArt->oxarticles__oxid->value . '</EAN>';
+                                <UserProductID><![CDATA[' . $oArt->UserProductID . ']]></UserProductID>
+                                <Anr>' . $oArt->Anr . '</Anr>
+                                <EAN>' . $oArt->EAN . '</EAN>';
         } else {
-            $xml_data .= '<ProductID>' . $oArt->$sOaAbId->value . '</ProductID>';
+            $sXmlData .= '<ProductID>' . $sAbId . '</ProductID>';
         }
-        $xml_data .= '      </ProductIdent>
-                            <UserProductID>' . $oArt->oxarticles__oxid->value . '</UserProductID>
-                            <Anr>' . $oArt->oxarticles__oxean->value . '</Anr>
-                            <EAN>MI-' . $oArt->oxarticles__oxid->value . '</EAN>
-                            <Name><![CDATA[' . $sTitle . ']]></Name>
-                            <ShortDescription><![CDATA[' . $oArt->oxarticles__oxshortdesc->value . ']]></ShortDescription>
-                            <Description><![CDATA[' . $oArt->getLongDesc() . ']]></Description>
-                            <Quantity>' . $oArt->oxarticles__oxstock->value . '</Quantity>
+        $sXmlData .= '      </ProductIdent>
+                            <UserProductID>' . $oArt->UserProductID . '</UserProductID>
+                            <Anr>' . $oArt->Anr . '</Anr>
+                            <EAN>' . $oArt->EAN . '</EAN>
+                            <Name><![CDATA[' . $oArt->Name . ']]></Name>
+                            <ShortDescription><![CDATA[' . $oArt->ShortDescription . ']]></ShortDescription>
+                            <Description><![CDATA[' . $oArt->Description . ']]></Description>
+                            <Quantity>' . $oArt->Quantity . '</Quantity>
                             <Stock>1</Stock>
                             <Discontinued>1</Discontinued>
                             <MergeStock>1</MergeStock>
-                            <SellingPrice>' . $oArt->oxarticles__oxprice->value . '</SellingPrice>
-                            <FreeValue2><![CDATA[Neu und unbenutzt, OVP kann geöffnet sein. Mit allem original Zubehör.]]></FreeValue2>
-                            <FreeValue5><![CDATA[' . $oArt->oxarticles__oxartnum->value . ']]></FreeValue5>
-                            <ImageSmallURL>'.$oArt->getThumbnailUrl().'</ImageSmallURL>
-                            <ImageLargeURL>'.$oArt->getPictureUrl().'</ImageLargeURL>
+                            <SellingPrice>' . $oArt->SellingPrice . '</SellingPrice>
+                            <ImageSmallURL>'.$oArt->ImageSmallURL.'</ImageSmallURL>
+                            <ImageLargeURL>'.$oArt->ImageLargeURL.'</ImageLargeURL>
 
         ';
-        if ($oArt->oxarticles__oxean->value != "") {
-            $xml_data .= '<ManufacturerStandardProductIDType><![CDATA[EAN]]></ManufacturerStandardProductIDType>
-                            <ManufacturerStandardProductIDValue><![CDATA[' . $oArt->oxarticles__oxean->value . ']]></ManufacturerStandardProductIDValue>';
+        if ($oArt->EAN != "") {
+            $sXmlData .= '<ManufacturerStandardProductIDType><![CDATA[EAN]]></ManufacturerStandardProductIDType>
+                            <ManufacturerStandardProductIDValue><![CDATA[' . $oArt->EAN . ']]></ManufacturerStandardProductIDValue>';
         }
-        $xml_data .= '<ProductPictures>
-                                <ProductPicture>
-                                    <Nr>1</Nr>
-                                    <Url>https://www.smarterphonestore.com/out/pictures/master/product/1/' . $oArt->oxarticles__oxpic1->value . '</Url>
-                                    <AltText><![CDATA[' . $sTitle . ']]></AltText>
-                                </ProductPicture>
-                            </ProductPictures>
-                        </Product>
-                    </Products>';
-        $xml_data .= $this->fcGetXmlFoot();
-        return $xml_data;
+        $sXmlData .= '<ProductPictures>';
+        for($iIndex=1;$iIndex<=12;$iIndex++) {
+            $sPictureAttribute = 'ProductPicture_Nr_'.$iIndex;
+            $sPictureUrl = $oArt->$sPictureAttribute;
+            if (!$sPictureUrl) continue;
+            $sXmlData .= '<ProductPicture>
+                            <Nr>'.$iIndex.'</Nr>
+                            <Url>' . $sPictureUrl . '</Url>
+                            <AltText><![CDATA[' . $oArt->Name . ']]></AltText>        
+                          </ProductPicture>';
+        }
+        $sXmlData .= '</ProductPictures>';
+        $sXmlData .= '</Product></Products>';
+        $sXmlData .= $this->_fcGetXmlFoot();
+        return $sXmlData;
     }
 
-    protected function fcGetXmlHead($sCallName, $iDetailLevel = 0) {
-        $sPartnerId = $this->sFcAfterbuyPartnerId;
-        $sPassword = $this->sFcAfterbuyPartnerPassword;
-        $sUserName = $this->sFcAfterbuyUsername;
-        $sUserPassword = $this->sFcAfterbuyUserPassword;
+    /**
+     * Returns head part of xml request including auth information
+     * 
+     * @param $sCallName
+     * @param int $iDetailLevel
+     * @return string
+     */
+    protected function _fcGetXmlHead($sCallName, $iDetailLevel = 0) {
         $sXml = '<?xml version="1.0" encoding="utf-8"?>
                 <Request>
                     <AfterbuyGlobal>
-                        <PartnerID>' . $sPartnerId . '</PartnerID>
-                        <PartnerPassword><![CDATA[' . $sPassword . ']]></PartnerPassword>
-                        <UserID><![CDATA[' . $sUserName . ']]></UserID>
-                        <UserPassword><![CDATA[' . $sUserPassword . ']]></UserPassword>
+                        <PartnerID>' . $this->sFcAfterbuyPartnerId . '</PartnerID>
+                        <PartnerPassword><![CDATA[' . $this->sFcAfterbuyPartnerPassword . ']]></PartnerPassword>
+                        <UserID><![CDATA[' . $this->sFcAfterbuyUsername . ']]></UserID>
+                        <UserPassword><![CDATA[' . $this->sFcAfterbuyUserPassword . ']]></UserPassword>
                         <CallName>' . $sCallName . '</CallName>
                         <DetailLevel>' . $iDetailLevel . '</DetailLevel>
                         <ErrorLanguage>DE</ErrorLanguage>
@@ -236,7 +271,13 @@ class fcafterbuyapi {
         return $sXml;
     }
 
-    protected function fcGetXmlFoot() {
+    /**
+     * Foot of xml request
+     * 
+     * @param void
+     * @return string
+     */
+    protected function _fcGetXmlFoot() {
         $sXml = '</Request>';
         return $sXml;
     }
