@@ -56,12 +56,13 @@ $aModule = array(
     'blocks' => array(
     ),
     'settings' => array(
-        array( 'group' => 'fcafterbuy_debug', 'name' => 'iFcAfterbuyLogLevel', 'type' => 'str',  'value' => '3' ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyShopInterfaceBaseUrl', 'type' => 'str',  'value' => "https://www.afterbuy.de/afterbuy/ShopInterface.aspx" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyAbiUrl', 'type' => 'str',  'value' => "" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyPartnerId', 'type' => 'str',  'value' => "" ),
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyPartnerPassword', 'type' => 'str',  'value' => "" ),
+        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyPartnerPassword', 'type' => 'password',  'value' => "" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyUsername', 'type' => 'str',  'value' => "" ),
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyUserPassword', 'type' => 'str',  'value' => "" ),
+        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyUserPassword', 'type' => 'password',  'value' => "" ),
+        array( 'group' => 'fcafterbuy_export', 'name' => 'sFcAfterbuy', 'type' => 'str',  'value' => "https://www.afterbuy.de/afterbuy/ShopInterface.aspx" ),
+        array( 'group' => 'fcafterbuy_debug', 'name' => 'iFcAfterbuyLogLevel', 'type' => 'select',  'value' => '0', 'constraints' => '0|1|2|3|4'),
     )
 );

@@ -1,5 +1,5 @@
 <?php
-class fco2aartexport extends oxI18n {
+class fco2aartexport extends fco2abase {
 
     /**
      * Dictionary of value translations
@@ -17,46 +17,7 @@ class fco2aartexport extends oxI18n {
         'AuctionQuantity' => 'oxarticles__oxstock|oxarticles__oxvarstock',
         'UnitOfQuantity' => 'oxarticles__oxunitname',
         'BuyingPrice' => 'oxarticles__oxbprice',
-        'ProductBrand' => null,
-        'Weight' => null,
-        'ItemSize' => null,
-        'CanonicalUrl' => null,
-        'ProductPicture_Nr_1' => null,
-        'ProductPicture_Nr_2' => null,
-        'ProductPicture_Nr_3' => null,
-        'ProductPicture_Nr_4' => null,
-        'ProductPicture_Nr_5' => null,
-        'ProductPicture_Nr_6' => null,
-        'ProductPicture_Nr_7' => null,
-        'ProductPicture_Nr_8' => null,
-        'ProductPicture_Nr_9' => null,
-        'ProductPicture_Nr_10' => null,
-        'ProductPicture_Nr_11' => null,
-        'ProductPicture_Nr_12' => null,
-        'ProductPicture_Url_1' => null,
-        'ProductPicture_Url_2' => null,
-        'ProductPicture_Url_3' => null,
-        'ProductPicture_Url_4' => null,
-        'ProductPicture_Url_5' => null,
-        'ProductPicture_Url_6' => null,
-        'ProductPicture_Url_7' => null,
-        'ProductPicture_Url_8' => null,
-        'ProductPicture_Url_9' => null,
-        'ProductPicture_Url_10' => null,
-        'ProductPicture_Url_11' => null,
-        'ProductPicture_Url_12' => null,
-        'ProductPicture_AltText_1' => null,
-        'ProductPicture_AltText_2' => null,
-        'ProductPicture_AltText_3' => null,
-        'ProductPicture_AltText_4' => null,
-        'ProductPicture_AltText_5' => null,
-        'ProductPicture_AltText_6' => null,
-        'ProductPicture_AltText_7' => null,
-        'ProductPicture_AltText_8' => null,
-        'ProductPicture_AltText_9' => null,
-        'ProductPicture_AltText_10' => null,
-        'ProductPicture_AltText_11' => null,
-        'ProductPicture_AltText_12' => null,
+        'Weight' => 'oxarticles__oxweight',
     );
 
     /**
@@ -80,6 +41,17 @@ class fco2aartexport extends oxI18n {
     }
 
     /**
+     * Adds afterbuy id to article dataset
+     *
+     * @param $sArticleOxid
+     * @param $sResponse
+     * @return void
+     */
+    protected function _fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse) {
+
+    }
+
+    /**
      * Takes an oxid of an article and creates an afterbuy article object of it
      *
      * @param $sArticleOxid
@@ -89,15 +61,38 @@ class fco2aartexport extends oxI18n {
         $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
         $oArticle = oxNew('oxarticle');
         $oArticle->load($sArticleOxid);
+        $oManufacturer = $oArticle->getManufacturer();
 
         $oAfterbuyArticle->Description = $oArticle->getLongDesc();
         $oAfterbuyArticle->SellingPrice = $oArticle->getPrice()->getBruttoPrice();
         $oAfterbuyArticle->TaxRate = $oArticle->getArticleVat();
+        $oAfterbuyArticle->ProductBrand = $oManufacturer->getTitle();
+        $oAfterbuyArticle->ItemSize = $oArticle->getSize();
+        $oAfterbuyArticle->CanonicalUrl = $oArticle->getMainLink();
 
         // standard values will be iterated through translation array
-        foreach ($this->_aAfterbuy2OxidDictionary as $sAfterbuyName=>$sOxidName) {
+        foreach ($this->_aAfterbuy2OxidDictionary as $sAfterbuyName=>$sOxidNamesString) {
+            $aOxidNames = explode('|', $sOxidNamesString);
+            foreach ($aOxidNames as $sCurrentOxidName) {
+                $sOxidName = $oArticle->$sCurrentOxidName->value;
+                // if variable filled breakout
+                if ($sOxidName) break;
+            }
             $oAfterbuyArticle->$sAfterbuyName = $oArticle->$sOxidName->value;
         }
+
+        // pictures
+        for($iIndex=1;$iIndex<=12;$iIndex++) {
+            $sVarName_PicNr = "ProductPicture_Nr_".$iIndex;
+            $sVarName_PicUrl = "ProductPicture_Url_".$iIndex;
+            $sVarName_PicAltText = "ProductPicture_AltText_".$iIndex;
+
+            $oAfterbuyArticle->$sVarName_PicNr = $iIndex;
+            $oAfterbuyArticle->$sVarName_PicUrl = $oArticle->getPictureUrl($iIndex);
+            $oAfterbuyArticle->$sVarName_PicAltText = $oArticle->oxarticles__oxtitle->value;
+        }
+
+        return $oAfterbuyArticle;
     }
 
     /**
@@ -167,6 +162,9 @@ class fco2aartexport extends oxI18n {
         $sPathToAfterbuyLib = $sPathToModule.'lib/fcaferbuyapi.php';
         include_once($sPathToAfterbuyLib);
         $oAfterbuyApi = new fcafterbuyapi($aConfig);
+
+        // directly set oxid logfilepath after instantiation
+        $oAfterbuyApi->fcSetLogFilePath(getShopBasePath()."/log/fco2a_api.log");
 
         return $oAfterbuyApi;
     }

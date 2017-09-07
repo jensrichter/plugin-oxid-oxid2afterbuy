@@ -15,51 +15,51 @@ class fcafterbuyapi {
      * Error log level 1=Only errors, 2= Errors and warnings, 3=Output all
      * @var int
      */
-    protected $iFcLogLevel;
+    protected $_iFcLogLevel;
 
     /**
      * Filename for logfile
      * @var string
      */
-    protected $sFcAfterbuyLogFilename = "fcafterbuyapi.log";
+    protected $_sFcAfterbuyLogFilepath = null;
 
     /**
      * ShopInterface Base URL of Afterbuy
      * https://www.afterbuy.de/afterbuy/ShopInterface.aspx
      * @var string
      */
-    protected $sFcAfterbuyShopInterfaceBaseUrl = "";
+    protected $_sFcAfterbuyShopInterfaceBaseUrl = "";
 
     /**
      * ABI Url of Afterbuy
      * http://api.afterbuy.de/afterbuy/ABInterface.aspx
      * @var string
      */
-    protected $sFcAfterbuyAbiUrl = "";
+    protected $_sFcAfterbuyAbiUrl = "";
 
     /**
      * Partner ID of Afterbuy
      * @var string
      */
-    protected $sFcAfterbuyPartnerId = "";
+    protected $_sFcAfterbuyPartnerId = "";
 
     /**
      * Partner Password for Afterbuy
      * @var string
      */
-    protected $sFcAfterbuyPartnerPassword = "";
+    protected $_sFcAfterbuyPartnerPassword = "";
 
     /**
      * Username for Afterbuy
      * @var string
      */
-    protected $sFcAfterbuyUsername = "";
+    protected $_sFcAfterbuyUsername = "";
 
     /**
      * User password for Afterbuy
      * @var string
      */
-    protected $sFcAfterbuyUserPassword = "";
+    protected $_sFcAfterbuyUserPassword = "";
 
 
     /**
@@ -88,8 +88,8 @@ class fcafterbuyapi {
     }
 
     /**
-     * Central logging method. Timestamp will be added automatically.
-     * Logs only if logging is set to true
+     * Central api logging method. Timestamp will be added automatically.
+     * Logs only if loglevel matches
      *
      * @param string $sMessage
      * @param int $iLogLevel
@@ -97,15 +97,25 @@ class fcafterbuyapi {
      * @access protected
      */
     public function fcWriteLog($sMessage, $iLogLevel = 1) {
+        // it is mandatory that a logfilepath has to be set
+        if ($this->_sFcAfterbuyLogFilepath === null) return;
+
         $sTime = date("Y-m-d H:i:s");
         $sFullMessage = "[" . $sTime . "] " . $sMessage . "\n";
-        if ($iLogLevel > 0) {
-            $sLogFile = $this->sFcAfterbuyLogFilename;
-            //file_put_contents($sLogFile, $sFullMessage, FILE_APPEND);
-            echo $sFullMessage;
+        if ($iLogLevel >= $this->_iFcLogLevel) {
+            file_put_contents($this->_sFcAfterbuyLogFilepath, $sFullMessage, FILE_APPEND);
         }
     }
 
+    /**
+     * Sets the path for api logs
+     *
+     * @param $sPath
+     * @return void
+     */
+    public function fcSetLogFilePath($sPath) {
+        $this->_sFcAfterbuyLogFilepath = $sPath;
+    }
 
     /**
      * Request Afterbuy API with given XML Request
@@ -115,6 +125,7 @@ class fcafterbuyapi {
      * @access protected
      */
     public function _fcRequestAPI($sXmlData) {
+        $this->fcWriteLog("DEBUG: Requesting Afterbuy API:\n".$sXmlData."\n",4);
         $ch = curl_init($this->sFcAfterbuyAbiUrl);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -124,7 +135,7 @@ class fcafterbuyapi {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $sOutput = curl_exec($ch);
         curl_close($ch);
-
+        $this->fcWriteLog("DEBUG: RESPONSE of Afterbuy API:\n".$sOutput."\n",4);
         return $sOutput;
     }
 
@@ -135,6 +146,7 @@ class fcafterbuyapi {
      * @return string
      */
     public function updateArticleToAfterbuy($oArt) {
+        $this->fcWriteLog("MESSAGE: Transfer article to afterbuy:".print_r($oArt,true));
         $sXmlData = $this->_fcGetUpdateArticleXml($oArt);
         $aOutput = $this->_fcRequestAPI($sXmlData);
 
@@ -234,7 +246,7 @@ class fcafterbuyapi {
         }
         $sXmlData .= '<ProductPictures>';
         for($iIndex=1;$iIndex<=12;$iIndex++) {
-            $sPictureAttribute = 'ProductPicture_Nr_'.$iIndex;
+            $sPictureAttribute = 'ProductPicture_Url_'.$iIndex;
             $sPictureUrl = $oArt->$sPictureAttribute;
             if (!$sPictureUrl) continue;
             $sXmlData .= '<ProductPicture>
@@ -246,6 +258,7 @@ class fcafterbuyapi {
         $sXmlData .= '</ProductPictures>';
         $sXmlData .= '</Product></Products>';
         $sXmlData .= $this->_fcGetXmlFoot();
+
         return $sXmlData;
     }
 

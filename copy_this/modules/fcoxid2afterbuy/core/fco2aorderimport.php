@@ -1,5 +1,5 @@
 <?php
-class fco2aorderimport extends oxI18n {
+class fco2aorderimport extends fco2abase {
     public function execute()
     {
         // load configuration
