@@ -30,7 +30,7 @@ $aModule = array(
         'de'=>'Schnittstelle zur Afterbuy API',
         'en'=>'Interface to Afterbuy API',
     ),
-    'thumbnail'    => '',
+    'thumbnail'    => 'oxid2afterbuy.jpg',
     'version'      => '%%VERSION%%',
     'author'       => 'Fatchip GmbH',
     'url'          => 'http://www.fatchip.de',

@@ -40,9 +40,6 @@ class fco2abase extends oxBase {
      * @access protected
      */
     public function fcWriteLog($sMessage, $iLogLevel = 1) {
-        // it is mandatory that a logfilepath has to be set
-        if ($this->_sFcAfterbuyLogFilepath === null) return;
-
         $sTime = date("Y-m-d H:i:s");
         $sFullMessage = "[" . $sTime . "] " . $sMessage . "\n";
         if ($iLogLevel >= $this->_iFcLogLevel) {
