@@ -30,7 +30,7 @@ $aModule = array(
         'de'=>'Schnittstelle zur Afterbuy API',
         'en'=>'Interface to Afterbuy API',
     ),
-    'thumbnail'    => 'oxid2afterbuy.jpg',
+    'thumbnail'    => 'oxid2afterbuy.png',
     'version'      => '%%VERSION%%',
     'author'       => 'Fatchip GmbH',
     'url'          => 'http://www.fatchip.de',
@@ -43,6 +43,7 @@ $aModule = array(
         'fcafterbuyapi'     => 'fcoxid2afterbuy/lib/fcafterbuyapi.php',
         'fcafterbuyart'     => 'fcoxid2afterbuy/lib/fcafterbuyart.php',
         'fcafterbuystatus'  => 'fcoxid2afterbuy/lib/fcafterbuystatus.php',
+        'fco2abase'         => 'fcoxid2afterbuy/core/fco2abase.php',
         'fco2aartexport'    => 'fcoxid2afterbuy/core/fco2aartexport.php',
         'fco2aorderimport'  => 'fcoxid2afterbuy/core/fco2aorderimport.php',
         'fco2astatusexport' => 'fcoxid2afterbuy/core/fco2astatusexport.php',
@@ -57,12 +58,12 @@ $aModule = array(
     ),
     'settings' => array(
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyShopInterfaceBaseUrl', 'type' => 'str',  'value' => "https://www.afterbuy.de/afterbuy/ShopInterface.aspx" ),
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyAbiUrl', 'type' => 'str',  'value' => "" ),
+        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyAbiUrl', 'type' => 'str',  'value' => "https://api.afterbuy.de/afterbuy/ABInterface.aspx" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyPartnerId', 'type' => 'str',  'value' => "" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyPartnerPassword', 'type' => 'password',  'value' => "" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyUsername', 'type' => 'str',  'value' => "" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyUserPassword', 'type' => 'password',  'value' => "" ),
-        array( 'group' => 'fcafterbuy_export', 'name' => 'sFcAfterbuy', 'type' => 'str',  'value' => "https://www.afterbuy.de/afterbuy/ShopInterface.aspx" ),
+        array( 'group' => 'fcafterbuy_export', 'name' => 'blFcAfterbuyExportAll', 'type' => 'bool',  'value' => false),
         array( 'group' => 'fcafterbuy_debug', 'name' => 'iFcAfterbuyLogLevel', 'type' => 'select',  'value' => '0', 'constraints' => '0|1|2|3|4'),
     )
 );

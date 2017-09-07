@@ -102,7 +102,7 @@ class fcafterbuyapi {
 
         $sTime = date("Y-m-d H:i:s");
         $sFullMessage = "[" . $sTime . "] " . $sMessage . "\n";
-        if ($iLogLevel >= $this->_iFcLogLevel) {
+        if ($iLogLevel <= $this->_iFcLogLevel) {
             file_put_contents($this->_sFcAfterbuyLogFilepath, $sFullMessage, FILE_APPEND);
         }
     }
@@ -126,7 +126,7 @@ class fcafterbuyapi {
      */
     public function _fcRequestAPI($sXmlData) {
         $this->fcWriteLog("DEBUG: Requesting Afterbuy API:\n".$sXmlData."\n",4);
-        $ch = curl_init($this->sFcAfterbuyAbiUrl);
+        $ch = curl_init($this->_sFcAfterbuyAbiUrl);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -171,9 +171,7 @@ class fcafterbuyapi {
      */
     protected function _fcSetConfig($aConfig) {
         foreach ($aConfig as $sConfigName=>$sConfigValue) {
-            if (isset($this->$sConfigName)) {
-                $this->$sConfigName = $sConfigValue;
-            }
+            $this->$sConfigName = $sConfigValue;
         }
     }
 
@@ -210,19 +208,19 @@ class fcafterbuyapi {
      * @param $sAbId
      * @return string
      */
-    protected function _fcGetUpdateArticleXml($oArt, $sAbId='') {
+    protected function _fcGetUpdateArticleXml($oArt) {
         $sXmlData = $this->_fcGetXmlHead('UpdateShopProducts');
         $sXmlData .= '<Products>
                         <Product>
                             <ProductIdent>';
-        if (!$sAbId) {
+        if (!$oArt->ProductID) {
             $sXmlData .= '<ProductInsert>1</ProductInsert>
                                 <BaseProductType>0</BaseProductType>
                                 <UserProductID><![CDATA[' . $oArt->UserProductID . ']]></UserProductID>
                                 <Anr>' . $oArt->Anr . '</Anr>
                                 <EAN>' . $oArt->EAN . '</EAN>';
         } else {
-            $sXmlData .= '<ProductID>' . $sAbId . '</ProductID>';
+            $sXmlData .= '<ProductID>' . $oArt->ProductID . '</ProductID>';
         }
         $sXmlData .= '      </ProductIdent>
                             <UserProductID>' . $oArt->UserProductID . '</UserProductID>
@@ -238,7 +236,14 @@ class fcafterbuyapi {
                             <SellingPrice>' . $oArt->SellingPrice . '</SellingPrice>
                             <ImageSmallURL>'.$oArt->ImageSmallURL.'</ImageSmallURL>
                             <ImageLargeURL>'.$oArt->ImageLargeURL.'</ImageLargeURL>
-
+                            <ProductBrand>'.$oArt->ProductBrand.'</ProductBrand>
+                            <TaxRate>'.$oArt->TaxRate.'</TaxRate>
+                            <ItemSize>'.$oArt->ItemSize.'</ItemSize>
+                            <CanonicalUrl>'.$oArt->CanonicalUrl.'</CanonicalUrl>
+                            <ManufacturerPartNumber>'.$oArt->ManufacturerPartNumber.'</ManufacturerPartNumber>
+                            <Keywords>'.$oArt->Keywords.'</Keywords>
+                            <BuyingPrice>'.$oArt->BuyingPrice.'</BuyingPrice>
+                            <Weight>'.$oArt->Weight.'</Weight>
         ';
         if ($oArt->EAN != "") {
             $sXmlData .= '<ManufacturerStandardProductIDType><![CDATA[EAN]]></ManufacturerStandardProductIDType>
@@ -273,10 +278,10 @@ class fcafterbuyapi {
         $sXml = '<?xml version="1.0" encoding="utf-8"?>
                 <Request>
                     <AfterbuyGlobal>
-                        <PartnerID>' . $this->sFcAfterbuyPartnerId . '</PartnerID>
-                        <PartnerPassword><![CDATA[' . $this->sFcAfterbuyPartnerPassword . ']]></PartnerPassword>
-                        <UserID><![CDATA[' . $this->sFcAfterbuyUsername . ']]></UserID>
-                        <UserPassword><![CDATA[' . $this->sFcAfterbuyUserPassword . ']]></UserPassword>
+                        <PartnerID>' . $this->_sFcAfterbuyPartnerId . '</PartnerID>
+                        <PartnerPassword><![CDATA[' . $this->_sFcAfterbuyPartnerPassword . ']]></PartnerPassword>
+                        <UserID><![CDATA[' . $this->_sFcAfterbuyUsername . ']]></UserID>
+                        <UserPassword><![CDATA[' . $this->_sFcAfterbuyUserPassword . ']]></UserPassword>
                         <CallName>' . $sCallName . '</CallName>
                         <DetailLevel>' . $iDetailLevel . '</DetailLevel>
                         <ErrorLanguage>DE</ErrorLanguage>

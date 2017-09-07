@@ -6,10 +6,10 @@ class fco2aartexport extends fco2abase {
      * @var array
      */
     protected $_aAfterbuy2OxidDictionary = array(
-        'UserProductID' => 'oxarticles__fcafterbuyid',
+        'UserProductID' => 'oxarticles__oxid',
         'Anr' => 'oxarticles__oxartnum',
         'EAN' => 'oxarticles__oxean',
-        'ProductID' => 'oxarticles__oxid',
+        'ProductID' => 'oxarticles__fcafterbuyid',
         'Name' => 'oxarticles__oxtitle',
         'ManufacturerPartNumber' => 'oxarticles__oxmpn',
         'Keywords' => 'oxarticles__oxkeywords',
@@ -18,6 +18,7 @@ class fco2aartexport extends fco2abase {
         'UnitOfQuantity' => 'oxarticles__oxunitname',
         'BuyingPrice' => 'oxarticles__oxbprice',
         'Weight' => 'oxarticles__oxweight',
+        'ShortDescription' => 'oxarticles__oxshortdesc',
     );
 
     /**
@@ -36,7 +37,20 @@ class fco2aartexport extends fco2abase {
         foreach ($aArticleIds as $sArticleOxid) {
             $oArt = $this->_fcGetAfterbuyArticleByOxid($sArticleOxid);
             $sResponse = $oAfterbuyApi->updateArticleToAfterbuy($oArt);
+            $this->_fcValidateCallStatus($sResponse);
             $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
+        }
+    }
+
+    protected function _fcValidateCallStatus($sResponse) {
+        $oXml = simplexml_load_string($sResponse);
+        $sCallStatus = (string) $oXml->CallStatus;
+        switch ($sCallStatus) {
+            case 'Warning':
+                $sMessage = "WARNING: ".(string)$oXml->Result->WarningList->WarningLongDescription;
+                echo $sMessage;
+                $this->fcWriteLog($sMessage,2);
+                break;
         }
     }
 
@@ -48,7 +62,16 @@ class fco2aartexport extends fco2abase {
      * @return void
      */
     protected function _fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse) {
+        $oXml = simplexml_load_string($sResponse);
+        $sProductId = (string) $oXml->Result->NewProducts->NewProduct->ProductID;
+        if ($sProductId) {
+            $oArticle = oxNew('oxarticle');
+            if ($oArticle->load($sArticleOxid)) {
+                $oArticle->oxarticles__fcafterbuyid = new oxField($sProductId);
+                $oArticle->save();
+            }
 
+        }
     }
 
     /**
@@ -74,10 +97,14 @@ class fco2aartexport extends fco2abase {
         foreach ($this->_aAfterbuy2OxidDictionary as $sAfterbuyName=>$sOxidNamesString) {
             $aOxidNames = explode('|', $sOxidNamesString);
             foreach ($aOxidNames as $sCurrentOxidName) {
-                $sOxidName = $oArticle->$sCurrentOxidName->value;
+                $sValue = $oArticle->$sCurrentOxidName->value;
+                $sOxidName = $sCurrentOxidName;
                 // if variable filled breakout
-                if ($sOxidName) break;
+                if ($sValue) {
+                    break;
+                }
             }
+
             $oAfterbuyArticle->$sAfterbuyName = $oArticle->$sOxidName->value;
         }
 
@@ -104,7 +131,7 @@ class fco2aartexport extends fco2abase {
     protected function _fcGetAfterbuyArticle() {
         $oViewConfig = oxRegistry::get('oxViewConfig');
         $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcaferbuyapi.php';
+        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyapi.php';
         include_once($sPathToAfterbuyLib);
         $oAfterbuyArticle = new fcafterbuyart();
 
@@ -119,8 +146,16 @@ class fco2aartexport extends fco2abase {
      */
     protected function _fcGetAffectedArticleIds() {
         $aArticleIds = array();
+        $oConfig = $this->getConfig();
+        $blFcAfterbuyExportAll = $oConfig->getConfigParam('blFcAfterbuyExportAll');
+        $sWhereConditions = "";
+
+        if (!$blFcAfterbuyExportAll) {
+            $sWhereConditions .= " AND FCAFTERBUYACTIVE='1' ";
+        }
+
         $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
-        $sQuery = "SELECT OXID FROM ".getViewName('oxarticles')." WHERE FCAFTERBUYACTIVE='1' AND OXPARENTID=''";
+        $sQuery = "SELECT OXID FROM ".getViewName('oxarticles')." WHERE OXPARENTID='' ".$sWhereConditions;
         $aRows = $oDb->getAll($sQuery);
         foreach ($aRows as $aRow) {
             $aArticleIds[] = $aRow['OXID'];
@@ -138,13 +173,13 @@ class fco2aartexport extends fco2abase {
     protected function _fcGetAfterbuyConfigArray() {
         $oConfig = $this->getConfig();
         $aConfig = array(
-            'sFcAfterbuyShopInterfaceBaseUrl' => $oConfig->getConfigParam('sFcAfterbuyShopInterfaceBaseUrl'),
-            'sFcAfterbuyAbiUrl' => $oConfig->getConfigParam('sFcAfterbuyAbiUrl'),
-            'sFcAfterbuyPartnerId' => $oConfig->getConfigParam('sFcAfterbuyPartnerId'),
-            'sFcAfterbuyPartnerPassword' => $oConfig->getConfigParam('sFcAfterbuyPartnerPassword'),
-            'sFcAfterbuyUsername' => $oConfig->getConfigParam('sFcAfterbuyUsername'),
-            'sFcAfterbuyUserPassword' => $oConfig->getConfigParam('sFcAfterbuyUserPassword'),
-            'iFcLogLevel' => $oConfig->getConfigParam('iFcLogLevel'),
+            '_sFcAfterbuyShopInterfaceBaseUrl' => $oConfig->getConfigParam('sFcAfterbuyShopInterfaceBaseUrl'),
+            '_sFcAfterbuyAbiUrl' => $oConfig->getConfigParam('sFcAfterbuyAbiUrl'),
+            '_sFcAfterbuyPartnerId' => $oConfig->getConfigParam('sFcAfterbuyPartnerId'),
+            '_sFcAfterbuyPartnerPassword' => $oConfig->getConfigParam('sFcAfterbuyPartnerPassword'),
+            '_sFcAfterbuyUsername' => $oConfig->getConfigParam('sFcAfterbuyUsername'),
+            '_sFcAfterbuyUserPassword' => $oConfig->getConfigParam('sFcAfterbuyUserPassword'),
+            '_iFcLogLevel' => $oConfig->getConfigParam('iFcAfterbuyLogLevel'),
         );
 
         return $aConfig;
@@ -159,7 +194,7 @@ class fco2aartexport extends fco2abase {
     protected function _fcGetAfterbuyApi($aConfig) {
         $oViewConfig = oxRegistry::get('oxViewConfig');
         $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcaferbuyapi.php';
+        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyapi.php';
         include_once($sPathToAfterbuyLib);
         $oAfterbuyApi = new fcafterbuyapi($aConfig);
 
