@@ -6,5 +6,10 @@
                 <TAB id="mxfcafterbuy_article_admin" cl="fcafterbuy_article_admin" />
             </SUBMENU>
         </MAINMENU>
+        <MAINMENU id="mxfcafterbuy">
+            <SUBMENU id="mxfcafterbuyorder" cl="fcafterbuy_admin" list="fcafterbuy_list" >
+                <TAB id="mxfcafterbuy_payments" cl="fcafterbuy_payments" />
+            </SUBMENU>
+        </MAINMENU>
 	</OXMENU>
 </OX>

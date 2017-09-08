@@ -36,6 +36,7 @@ class fco2aartexport extends fco2abase {
 
         foreach ($aArticleIds as $sArticleOxid) {
             $oArt = $this->_fcGetAfterbuyArticleByOxid($sArticleOxid);
+            if (!$oArt) continue;
             $sResponse = $oAfterbuyApi->updateArticleToAfterbuy($oArt);
             $this->_fcValidateCallStatus($sResponse);
             $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
@@ -47,8 +48,7 @@ class fco2aartexport extends fco2abase {
         $sCallStatus = (string) $oXml->CallStatus;
         switch ($sCallStatus) {
             case 'Warning':
-                $sMessage = "WARNING: ".(string)$oXml->Result->WarningList->WarningLongDescription;
-                echo $sMessage;
+                $sMessage = "WARNING: ".(string)$oXml->Result->WarningList->Warning->WarningLongDescription;
                 $this->fcWriteLog($sMessage,2);
                 break;
         }
@@ -78,20 +78,52 @@ class fco2aartexport extends fco2abase {
      * Takes an oxid of an article and creates an afterbuy article object of it
      *
      * @param $sArticleOxid
-     * @return object
+     * @return mixed object|bool
      */
     protected function _fcGetAfterbuyArticleByOxid($sArticleOxid) {
-        $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
         $oArticle = oxNew('oxarticle');
-        $oArticle->load($sArticleOxid);
-        $oManufacturer = $oArticle->getManufacturer();
+        if (!$oArticle->load($sArticleOxid))  {
+            $this->fcWriteLog("ERROR: Could not load article object with ID:".$sArticleOxid,1);
+            return false;
+        }
 
+        $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
+        $oAfterbuyArticle = $this->_fcAddArticleValues($oAfterbuyArticle, $oArticle);
+        $oAfterbuyArticle = $this->_fcAddManufacturerValues($oAfterbuyArticle, $oArticle);
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Adds manufacturer related values to article
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return object
+     */
+    protected function _fcAddManufacturerValues($oAfterbuyArticle, $oArticle) {
+        $oManufacturer = $oArticle->getManufacturer();
+        if ($oManufacturer) {
+            $oAfterbuyArticle->ProductBrand = $oManufacturer->getTitle();
+        }
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Adds common article values to afterbuy article
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return object
+     */
+    protected function _fcAddArticleValues($oAfterbuyArticle, $oArticle) {
         $oAfterbuyArticle->Description = $oArticle->getLongDesc();
         $oAfterbuyArticle->SellingPrice = $oArticle->getPrice()->getBruttoPrice();
         $oAfterbuyArticle->TaxRate = $oArticle->getArticleVat();
-        $oAfterbuyArticle->ProductBrand = $oManufacturer->getTitle();
         $oAfterbuyArticle->ItemSize = $oArticle->getSize();
         $oAfterbuyArticle->CanonicalUrl = $oArticle->getMainLink();
+
 
         // standard values will be iterated through translation array
         foreach ($this->_aAfterbuy2OxidDictionary as $sAfterbuyName=>$sOxidNamesString) {
@@ -162,45 +194,5 @@ class fco2aartexport extends fco2abase {
         }
 
         return $aArticleIds;
-    }
-
-    /**
-     * Returns needed configuration for instantiate afterbuy api object
-     *
-     * @param void
-     * @return array
-     */
-    protected function _fcGetAfterbuyConfigArray() {
-        $oConfig = $this->getConfig();
-        $aConfig = array(
-            '_sFcAfterbuyShopInterfaceBaseUrl' => $oConfig->getConfigParam('sFcAfterbuyShopInterfaceBaseUrl'),
-            '_sFcAfterbuyAbiUrl' => $oConfig->getConfigParam('sFcAfterbuyAbiUrl'),
-            '_sFcAfterbuyPartnerId' => $oConfig->getConfigParam('sFcAfterbuyPartnerId'),
-            '_sFcAfterbuyPartnerPassword' => $oConfig->getConfigParam('sFcAfterbuyPartnerPassword'),
-            '_sFcAfterbuyUsername' => $oConfig->getConfigParam('sFcAfterbuyUsername'),
-            '_sFcAfterbuyUserPassword' => $oConfig->getConfigParam('sFcAfterbuyUserPassword'),
-            '_iFcLogLevel' => $oConfig->getConfigParam('iFcAfterbuyLogLevel'),
-        );
-
-        return $aConfig;
-    }
-
-    /**
-     * Returns afterbuy api object
-     *
-     * @param $aConfig
-     * @return object
-     */
-    protected function _fcGetAfterbuyApi($aConfig) {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
-        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyapi.php';
-        include_once($sPathToAfterbuyLib);
-        $oAfterbuyApi = new fcafterbuyapi($aConfig);
-
-        // directly set oxid logfilepath after instantiation
-        $oAfterbuyApi->fcSetLogFilePath(getShopBasePath()."/log/fco2a_api.log");
-
-        return $oAfterbuyApi;
     }
 }

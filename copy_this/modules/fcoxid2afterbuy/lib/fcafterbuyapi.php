@@ -124,7 +124,7 @@ class fcafterbuyapi {
      * @return string API answer
      * @access protected
      */
-    public function _fcRequestAPI($sXmlData) {
+    public function fcRequestAPI($sXmlData) {
         $this->fcWriteLog("DEBUG: Requesting Afterbuy API:\n".$sXmlData."\n",4);
         $ch = curl_init($this->_sFcAfterbuyAbiUrl);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
@@ -148,7 +148,7 @@ class fcafterbuyapi {
     public function updateArticleToAfterbuy($oArt) {
         $this->fcWriteLog("MESSAGE: Transfer article to afterbuy:".print_r($oArt,true));
         $sXmlData = $this->_fcGetUpdateArticleXml($oArt);
-        $aOutput = $this->_fcRequestAPI($sXmlData);
+        $aOutput = $this->fcRequestAPI($sXmlData);
 
         return $aOutput;
     }
@@ -159,7 +159,7 @@ class fcafterbuyapi {
         $sXmlData .= "<OrderDirection>1</OrderDirection>";
         $sXmlData .= $this->_fcGetXmlFoot();
 
-        $aOutput = $this->_fcRequestAPI($sXmlData);
+        $aOutput = $this->fcRequestAPI($sXmlData);
         return $aOutput;
     }
 
@@ -180,16 +180,16 @@ class fcafterbuyapi {
      *
      * @param string $sRequest
      * @return string API answer
-     * @access protected
+     * @access public
      */
-    protected function fcRequestShopInterfaceAPI($sRequest) {
+    public function fcRequestShopInterfaceAPI($sRequest) {
         // prepare parameters for post call
         $aRequest = explode("?", $sRequest);
         $sParamString = $aRequest[1];
         $aParamsWithValues = explode("&", $sParamString);
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->sFcAfterbuyShopInterfaceBaseUrl);
+        curl_setopt($ch, CURLOPT_URL, $aRequest[0]);
         curl_setopt($ch, CURLOPT_POST, count($aParamsWithValues));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $sParamString);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);

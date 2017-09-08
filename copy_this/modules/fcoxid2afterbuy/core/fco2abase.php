@@ -47,4 +47,45 @@ class fco2abase extends oxBase {
             $oUtils->writeToLog($sFullMessage, $this->_sLogFile);
         }
     }
+
+    /**
+     * Returns needed configuration for instantiate afterbuy api object
+     *
+     * @param void
+     * @return array
+     */
+    protected function _fcGetAfterbuyConfigArray() {
+        $oConfig = $this->getConfig();
+        $aConfig = array(
+            '_sFcAfterbuyShopInterfaceBaseUrl' => $oConfig->getConfigParam('sFcAfterbuyShopInterfaceBaseUrl'),
+            '_sFcAfterbuyAbiUrl' => $oConfig->getConfigParam('sFcAfterbuyAbiUrl'),
+            '_sFcAfterbuyPartnerId' => $oConfig->getConfigParam('sFcAfterbuyPartnerId'),
+            '_sFcAfterbuyPartnerPassword' => $oConfig->getConfigParam('sFcAfterbuyPartnerPassword'),
+            '_sFcAfterbuyUsername' => $oConfig->getConfigParam('sFcAfterbuyUsername'),
+            '_sFcAfterbuyUserPassword' => $oConfig->getConfigParam('sFcAfterbuyUserPassword'),
+            '_iFcLogLevel' => $oConfig->getConfigParam('iFcAfterbuyLogLevel'),
+        );
+
+        return $aConfig;
+    }
+
+    /**
+     * Returns afterbuy api object
+     *
+     * @param $aConfig
+     * @return object
+     */
+    protected function _fcGetAfterbuyApi($aConfig) {
+        $oViewConfig = oxRegistry::get('oxViewConfig');
+        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
+        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyapi.php';
+        include_once($sPathToAfterbuyLib);
+        $oAfterbuyApi = new fcafterbuyapi($aConfig);
+
+        // directly set oxid logfilepath after instantiation
+        $oAfterbuyApi->fcSetLogFilePath(getShopBasePath()."/log/fco2a_api.log");
+
+        return $oAfterbuyApi;
+    }
+
 }
