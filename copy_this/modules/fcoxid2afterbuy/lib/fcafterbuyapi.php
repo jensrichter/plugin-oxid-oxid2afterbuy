@@ -148,19 +148,25 @@ class fcafterbuyapi {
     public function updateArticleToAfterbuy($oArt) {
         $this->fcWriteLog("MESSAGE: Transfer article to afterbuy:".print_r($oArt,true));
         $sXmlData = $this->_fcGetUpdateArticleXml($oArt);
-        $aOutput = $this->fcRequestAPI($sXmlData);
+        $sOutput = $this->fcRequestAPI($sXmlData);
 
-        return $aOutput;
+        return $sOutput;
     }
 
+    /**
+     * Requesting afterbuy api for sold products (orders)
+     *
+     * @param void
+     * @return string
+     */
     public function getSoldItemsFromAfterbuy() {
         $sXmlData = $this->_fcGetXmlHead('GetSoldItems', 0);
         $sXmlData .= "<MaxSoldItems>99</MaxSoldItems>";
         $sXmlData .= "<OrderDirection>1</OrderDirection>";
         $sXmlData .= $this->_fcGetXmlFoot();
 
-        $aOutput = $this->fcRequestAPI($sXmlData);
-        return $aOutput;
+        $sOutput = $this->fcRequestAPI($sXmlData);
+        return $sOutput;
     }
 
     /**
