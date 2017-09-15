@@ -75,5 +75,4 @@ class fcafterbuypayment
         $this->InvoiceDate = (string) $oPaymentInfo->InvoiceDate;
         $this->EFTID = (string) $oPaymentInfo->EFTID;
     }
-
 }
