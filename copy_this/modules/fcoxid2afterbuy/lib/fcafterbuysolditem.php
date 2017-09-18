@@ -17,7 +17,6 @@ class fcafterbuysolditem
         'ItemID' => null,
         'Anr' => null,
         'AmazonAccount' => null,
-        'Anr' => null,
         'IsAmazonPrime' => null,
         'FulfillmentServiceLevel' => null,
         'eBayTransactionID' => null,
