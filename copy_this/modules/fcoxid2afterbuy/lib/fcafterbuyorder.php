@@ -8,52 +8,27 @@
  */
 class fcafterbuyorder
 {
-    /**
-     * Representation of possible values of an afterbuy article
-     * @var array
-     */
-    protected $_aOrderAttributes = array(
-        'InvoiceNumber' => null,
-        'OrderID' => null,
-        'EbayAccount' => null,
-        'AmazonAccount' => null,
-        'Anr' => null,
-        'AlternativeItemNumber1' => null,
-        'FeedbackDate' => null,
-        'UserComment' => null,
-        'AdditionalInfo' => null,
-        'TrackingLink' => null,
-        'Memo' => null,
-        'InvoiceMemo' => null,
-        'FeedbackLink' => null,
-        'OrderDate' => null,
-        'OrderIDAlt' => null,
-        'PaymentInfo' => null,
-        'BuyerInfo' => null,
-        'SoldItems' => null,
-        'ShippingInfo' => null,
-    );
 
-    /**
-     * Magic setter
-     *
-     * @param string $sName
-     * @param mixed $mValue
-     * @return void
-     */
-    public function __set($sName, $mValue) {
-        $this->_aOrderAttributes[$sName] = $mValue;
-    }
+    public $InvoiceNumber = null;
+    public $OrderID = null;
+    public $EbayAccount = null;
+    public $AmazonAccount = null;
+    public $Anr = null;
+    public $AlternativeItemNumber1 = null;
+    public $FeedbackDate = null;
+    public $UserComment = null;
+    public $AdditionalInfo = null;
+    public $TrackingLink = null;
+    public $Memo = null;
+    public $InvoiceMemo = null;
+    public $FeedbackLink = null;
+    public $OrderDate = null;
+    public $OrderIDAlt = null;
+    public $PaymentInfo = null;
+    public $BuyerInfo = null;
+    public $SoldItems = null;
+    public $ShippingInfo = null;
 
-    /**
-     * Magic getter
-     *
-     * @param $sName
-     * @return mixed
-     */
-    public function __get($sName) {
-        return $this->_aOrderAttributes[$sName];
-    }
 
     /**
      * Method takes care of creating and returning an afterbuy order object
@@ -78,6 +53,7 @@ class fcafterbuyorder
      *
      * @param $oXmlOrder
      * @return bool
+     * @todo implementation
      */
     protected function _fcValidateResponse($oXmlOrder) {
         return true;

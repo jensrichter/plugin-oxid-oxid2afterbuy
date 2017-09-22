@@ -8,52 +8,25 @@
  */
 class fcafterbuyaddress
 {
-    /**
-     * Representation of possible values of an afterbuy article
-     * @var array
-     */
-    protected $_aAddressAttributes = array(
-        'AfterbuyUserID' => null,
-        'AfterbuyUserIDAlt' => null,
-        'UserIDPlattform' => null,
-        'FirstName' => null,
-        'LastName' => null,
-        'Title' => null,
-        'Company' => null,
-        'Street' => null,
-        'Street2' => null,
-        'PostalCode' => null,
-        'StateOrProvince' => null,
-        'City' => null,
-        'Country' => null,
-        'CountryISO' => null,
-        'Phone' => null,
-        'Fax' => null,
-        'Mail' => null,
-        'IsMerchant' => null,
-        'TaxIDNumber' => null,
-    );
-
-    /**
-     * Magic setter
-     *
-     * @param string $sName
-     * @param mixed $mValue
-     * @return void
-     */
-    public function __set($sName, $mValue) {
-        $this->_aAddressAttributes[$sName] = $mValue;
-    }
-
-    /**
-     * Magic getter
-     *
-     * @param $sName
-     * @return mixed
-     */
-    public function __get($sName) {
-        return $this->_aAddressAttributes[$sName];
-    }
+    public $AfterbuyUserID = null;
+    public $AfterbuyUserIDAlt = null;
+    public $UserIDPlattform = null;
+    public $FirstName = null;
+    public $LastName = null;
+    public $Title = null;
+    public $Company = null;
+    public $Street = null;
+    public $Street2 = null;
+    public $PostalCode = null;
+    public $StateOrProvince = null;
+    public $City = null;
+    public $Country = null;
+    public $CountryISO = null;
+    public $Phone = null;
+    public $Fax = null;
+    public $Mail = null;
+    public $IsMerchant = null;
+    public $TaxIDNumber = null;
 
     /**
      * Creates billing address from an getsolditems api call

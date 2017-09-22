@@ -8,59 +8,32 @@
  */
 class fcafterbuysolditem
 {
-    /**
-     * Representation of possible values of an afterbuy article
-     * @var array
-     */
-    protected $_aItemAttributes = array(
-        'ItemDetailsDone' => null,
-        'ItemID' => null,
-        'Anr' => null,
-        'AmazonAccount' => null,
-        'IsAmazonPrime' => null,
-        'FulfillmentServiceLevel' => null,
-        'eBayTransactionID' => null,
-        'AlternativeItemNumber1' => null,
-        'AlternativeItemNumber' => null,
-        'InternalItemType' => null,
-        'UserDefinedFlag' => null,
-        'ItemTitle' => null,
-        'ItemQuantity' => null,
-        'ItemPrice' => null,
-        'ItemEndDate' => null,
-        'TaxRate' => null,
-        'ItemWeight' => null,
-        'ItemXmlDate' => null,
-        'ItemModDate' => null,
-        'ItemPlatformName' => null,
-        'ItemLink' => null,
-        'eBayFeedbackCompleted' => null,
-        'eBayFeedbackReceived' => null,
-        'eBayFeedbackCommentType' => null,
-        'ShopProductDetails' => null,
-        'SoldItemAttributes' => null,
-    );
-
-    /**
-     * Magic setter
-     *
-     * @param string $sName
-     * @param mixed $mValue
-     * @return void
-     */
-    public function __set($sName, $mValue) {
-        $this->_aItemAttributes[$sName] = $mValue;
-    }
-
-    /**
-     * Magic getter
-     *
-     * @param $sName
-     * @return mixed
-     */
-    public function __get($sName) {
-        return $this->_aItemAttributes[$sName];
-    }
+    public $ItemDetailsDone = null;
+    public $ItemID = null;
+    public $Anr = null;
+    public $AmazonAccount = null;
+    public $IsAmazonPrime = null;
+    public $FulfillmentServiceLevel = null;
+    public $eBayTransactionID = null;
+    public $AlternativeItemNumber1 = null;
+    public $AlternativeItemNumber = null;
+    public $InternalItemType = null;
+    public $UserDefinedFlag = null;
+    public $ItemTitle = null;
+    public $ItemQuantity = null;
+    public $ItemPrice = null;
+    public $ItemEndDate = null;
+    public $TaxRate = null;
+    public $ItemWeight = null;
+    public $ItemXmlDate = null;
+    public $ItemModDate = null;
+    public $ItemPlatformName = null;
+    public $ItemLink = null;
+    public $eBayFeedbackCompleted = null;
+    public $eBayFeedbackReceived = null;
+    public $eBayFeedbackCommentType = null;
+    public $ShopProductDetails = null;
+    public $SoldItemAttributes = null;
 
     /**
      * Creates sold item

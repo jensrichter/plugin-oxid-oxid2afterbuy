@@ -6,7 +6,7 @@
  * Time: 23:03
  */
 
-class fcafterbuystatus
+class fcafterbuyorderstatus
 {
     public $OrderID = null;
     public $ItemID = null;

@@ -8,49 +8,22 @@
  */
 class fcafterbuypayment
 {
-    /**
-     * Representation of possible values of an afterbuy article
-     * @var array
-     */
-    protected $_aPaymentAttributes = array(
-        'PaymentID' => null,
-        'PaymentMethod' => null,
-        'PaymentFunction' => null,
-        'PaymentData' => array(),
-        'PaymentTransactionID' => null,
-        'PaymentStatus' => null,
-        'PaymentDate' => null,
-        'AlreadyPaid' => null,
-        'FullAmount' => null,
-        'PaymentInstruction' => null,
-        'InvoiceDate' => null,
-    );
-
-    /**
-     * Magic setter
-     *
-     * @param string $sName
-     * @param mixed $mValue
-     * @return void
-     */
-    public function __set($sName, $mValue) {
-        $this->_aPaymentAttributes[$sName] = $mValue;
-    }
-
-    /**
-     * Magic getter
-     *
-     * @param $sName
-     * @return mixed
-     */
-    public function __get($sName) {
-        return $this->_aPaymentAttributes[$sName];
-    }
+    public $PaymentID = null;
+    public $PaymentMethod = null;
+    public $PaymentFunction = null;
+    public $PaymentData = array();
+    public $PaymentTransactionID = null;
+    public $PaymentStatus = null;
+    public $PaymentDate = null;
+    public $AlreadyPaid = null;
+    public $FullAmount = null;
+    public $PaymentInstruction = null;
+    public $InvoiceDate = null;
 
     /**
      * Creates payment information node of an afterbuy order resultset
      *
-     * @param $sResponse
+     * @param $oXmlOrder
      * @return void
      */
     public function createPaymentFromOrderResponse($oXmlOrder) {

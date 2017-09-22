@@ -8,39 +8,12 @@
  */
 class fcafterbuyshipping
 {
-    /**
-     * Representation of possible values of an afterbuy article
-     * @var array
-     */
-    protected $_aShippingAttributes = array(
-        'ShippingMethod' => null,
-        'ShippingCost' => null,
-        'ShippingAdditionalCost' => null,
-        'ShippingTotalCost' => null,
-        'ShippingTaxRate' => null,
-        'DeliveryDate' => null,
-    );
-
-    /**
-     * Magic setter
-     *
-     * @param string $sName
-     * @param mixed $mValue
-     * @return void
-     */
-    public function __set($sName, $mValue) {
-        $this->_aShippingAttributes[$sName] = $mValue;
-    }
-
-    /**
-     * Magic getter
-     *
-     * @param $sName
-     * @return mixed
-     */
-    public function __get($sName) {
-        return $this->_aShippingAttributes[$sName];
-    }
+    public $ShippingMethod = null;
+    public $ShippingCost = null;
+    public $ShippingAdditionalCost = null;
+    public $ShippingTotalCost = null;
+    public $ShippingTaxRate = null;
+    public $DeliveryDate = null;
 
     /**
      * Creates shipping info part of order
