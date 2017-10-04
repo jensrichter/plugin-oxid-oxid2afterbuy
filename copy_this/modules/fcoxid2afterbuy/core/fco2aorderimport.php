@@ -10,8 +10,7 @@ class fco2aorderimport extends fco2abase {
         $sResponse = $oAfterbuyApi->getSoldItemsFromAfterbuy();
 
         $oXmlResponse = simplexml_load_string($sResponse);
-
-        foreach ($oXmlResponse->Result->Orders as $oXmlOrder) {
+        foreach ($oXmlResponse->Result->Orders->Order as $oXmlOrder) {
             $oAfterbuyOrder = $this->_fcGetAfterbuyOrder();
             $oAfterbuyOrder->createOrderByApiResponse($oXmlOrder);
             $this->_fcCreateOxidOrder($oAfterbuyOrder);
@@ -65,6 +64,7 @@ class fco2aorderimport extends fco2abase {
         // paymentinfo
         $oOrder = $this->_fcGetPaymentInfo($oOrder, $oAfterbuyOrder);
         $oOrder = $this->_fcGetPaymentData($oOrder, $oAfterbuyOrder);
+//dumpVar($oOrder);
 
         $oOrder->save();
 
@@ -84,7 +84,9 @@ class fco2aorderimport extends fco2abase {
         $sOrderId = $oOrder->getId();
         $aSoldItems = $oAfterbuyOrder->SoldItems;
         $oOrderArticleTemplate = oxNew('oxorderarticle');
+
         foreach ($aSoldItems as $oSoldItem) {
+dumpVar($oSoldItem);
             $oOrderArticle = clone $oOrderArticleTemplate;
             $oProductDetails = $oSoldItem->ShopProductDetails;
             $sArtNum = $oProductDetails->EAN;
@@ -98,7 +100,20 @@ class fco2aorderimport extends fco2abase {
             $oOrderArticle->oxorderarticles__oxprice = new oxField($oSoldItem->ItemPrice);
             $oOrderArticle->save();
         }
+    }
 
+    /**
+     * Returns product if of an article number
+     *
+     * @param $sArtNum
+     * @return string
+     */
+    protected function _fcGetProductIdByArtNum($sArtNum) {
+        $oDb = oxDb::getDb();
+        $sQuery = "SELECT OXID FROM oxarticles WHERE OXARTNUM=".$oDb->quote($sArtNum)." LIMIT 1";
+        $sOxid = $oDb->getOne($sQuery);
+
+        return (string) $sOxid;
     }
 
     /**
@@ -147,11 +162,38 @@ class fco2aorderimport extends fco2abase {
         $oOrder->oxorder__oxpaymenttype = new oxField($sPaymentType);
         $oOrder->oxorder__oxtransid = new oxField($oPaymentInfo->PaymentTransactionID);
         if ($oPaymentInfo->AlreadyPaid) {
-            $oOrder->oxorder__oxpaid = new oxField($oPaymentInfo->PaymentDate);
+            $sPaymentDate = $this->_fcFetchPaymentDate($oPaymentInfo->PaymentDate);
+            $oOrder->oxorder__oxpaid = new oxField($sPaymentDate);
         }
-        $oOrder->oxorder__oxordertotalsum = new oxField($oPaymentInfo->FullAmount);
+        $dTotalSum = $this->_fcFetchAmount($oPaymentInfo->FullAmount);
+        $oOrder->oxorder__oxordertotalsum = new oxField($dTotalSum);
 
         return $oOrder;
+    }
+
+    /**
+     * Returns a float value of incoming comma value
+     *
+     * @param $sAmount
+     * @return float
+     */
+    protected function _fcFetchAmount($sAmount) {
+        $dAmount = (double) str_replace(',', '.', $sAmount);
+
+        return $dAmount;
+    }
+
+    /**
+     * Returns date which matches the format of db
+     *
+     * @param $sPaymentDateIn
+     * @return string
+     */
+    protected function _fcFetchPaymentDate($sPaymentDateIn) {
+        $iTime = strtotime($sPaymentDateIn);
+        $sPaymentDateOut = date('Y-m-d',$iTime);
+
+        return $sPaymentDateOut;
     }
 
     /**
@@ -299,8 +341,9 @@ class fco2aorderimport extends fco2abase {
      */
     protected function _fcSetOxidUserByAfterbuyOrder($oAfterbuyOrder) {
         $oAfterbuyUser = $oAfterbuyOrder->BuyerInfo;
-        $oBillingAddress = $oAfterbuyUser->BillingAddress;
-        $oShippingAddress = $oAfterbuyUser->ShippingAddress;
+        $oBillingAddress = $oAfterbuyUser['BillingAddress'];
+        $oShippingAddress = $oAfterbuyUser['ShippingAddress'];
+
         $oUser = oxNew('oxuser');
 
         $sUserOxid = $this->_fcCheckUserExists($oBillingAddress->Mail);
@@ -330,7 +373,6 @@ class fco2aorderimport extends fco2abase {
         $sCompleteStreetInfo = $oBillingAddress->Street." ".$oBillingAddress->Street2;
         $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($sCompleteStreetInfo);
         $sCountryId = $this->_fcpoGetCountryIdByIso2($oBillingAddress->CountryISO);
-
 
         $oUser->oxuser__oxshopid = new oxField($oConfig->getShopId());
         $oUser->oxuser__oxusername = new oxField($oBillingAddress->Mail);
@@ -387,6 +429,22 @@ class fco2aorderimport extends fco2abase {
         }
 
         return $oAddress;
+    }
+
+    /**
+     * Checks if delivery address aleady exists
+     *
+     * @param $sEncodedDeliveryAddress
+     * @return bool
+     */
+    protected function _fcCheckAddressExists($sEncodedDeliveryAddress) {
+        $blReturn = false;
+        $oAddress = oxNew('oxaddress');
+        if ($oAddress->load($sEncodedDeliveryAddress)) {
+            $blReturn = true;
+        }
+
+        return $blReturn;
     }
 
     /**
