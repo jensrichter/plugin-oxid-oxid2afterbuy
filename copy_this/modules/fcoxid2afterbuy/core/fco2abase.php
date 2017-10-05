@@ -57,13 +57,14 @@ class fco2abase extends oxBase {
     protected function _fcGetAfterbuyConfigArray() {
         $oConfig = $this->getConfig();
         $aConfig = array(
-            '_sFcAfterbuyShopInterfaceBaseUrl' => $oConfig->getConfigParam('sFcAfterbuyShopInterfaceBaseUrl'),
-            '_sFcAfterbuyAbiUrl' => $oConfig->getConfigParam('sFcAfterbuyAbiUrl'),
-            '_sFcAfterbuyPartnerId' => $oConfig->getConfigParam('sFcAfterbuyPartnerId'),
-            '_sFcAfterbuyPartnerPassword' => $oConfig->getConfigParam('sFcAfterbuyPartnerPassword'),
-            '_sFcAfterbuyUsername' => $oConfig->getConfigParam('sFcAfterbuyUsername'),
-            '_sFcAfterbuyUserPassword' => $oConfig->getConfigParam('sFcAfterbuyUserPassword'),
-            '_iFcLogLevel' => $oConfig->getConfigParam('iFcAfterbuyLogLevel'),
+            'afterbuyShopInterfaceBaseUrl' => $oConfig->getConfigParam('sFcAfterbuyShopInterfaceBaseUrl'),
+            'afterbuyAbiUrl' => $oConfig->getConfigParam('sFcAfterbuyAbiUrl'),
+            'afterbuyPartnerId' => $oConfig->getConfigParam('sFcAfterbuyPartnerId'),
+            'afterbuyPartnerPassword' => $oConfig->getConfigParam('sFcAfterbuyPartnerPassword'),
+            'afterbuyUsername' => $oConfig->getConfigParam('sFcAfterbuyUsername'),
+            'afterbuyUserPassword' => $oConfig->getConfigParam('sFcAfterbuyUserPassword'),
+            'logLevel' => $oConfig->getConfigParam('iFcAfterbuyLogLevel'),
+            'lastOrderId' => $oConfig->getConfigParam('sFcLastOrderId'),
         );
 
         return $aConfig;
@@ -83,7 +84,7 @@ class fco2abase extends oxBase {
         $oAfterbuyApi = new fcafterbuyapi($aConfig);
 
         // directly set oxid logfilepath after instantiation
-        $oAfterbuyApi->fcSetLogFilePath(getShopBasePath()."/log/fco2a_api.log");
+        $oAfterbuyApi->setLogFilePath(getShopBasePath()."/log/fco2a_api.log");
 
         return $oAfterbuyApi;
     }

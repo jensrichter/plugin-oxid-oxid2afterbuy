@@ -1,6 +1,28 @@
 <?php
 class fco2aorderimport extends fco2abase {
 
+    /**
+     * Assignments to use payment matching
+     * @var array
+     */
+    protected $_aPaymentAssignments = array(
+        '1' => 'TRANSFER',
+        '2' => 'CASH_PAID',
+        '4' => 'CASH_ON_DELIVERY',
+        '5' => 'PAYPAL',
+        '6' => 'INVOICE_TRANSFER',
+        '7' => 'DIRECT_DEBIT',
+        '9' => 'CLICKANDBUY',
+        '11' => 'EXPRESS_CREDITWORTHINESS',
+        '12' => 'PAYNET',
+        '13' => 'COD_CREDITWORTHINESS',
+        '14' => 'EBAY_EXPRESS',
+        '15' => 'MONEYBOOKERS',
+        '16' => 'CREDIT_CARD_MB',
+        '17' => 'DIRECT_DEBIT_MB',
+        '18' => 'OTHERS',
+        '19' => 'CREDIT_CARD',
+    );
 
     public function execute()
     {
@@ -19,14 +41,18 @@ class fco2aorderimport extends fco2abase {
     }
 
     /**
-     * Notify to afterbuy that order has been exported
+     * Notify to afterbuy that order has been exported, save last orderid
      *
      * @param $oAfterbuyOrder
      * @param $oAfterbuyApi
      * @return void
+     * @todo missing notification for afterbuy
      */
     protected function _fcNotifyExported($oAfterbuyOrder, $oAfterbuyApi) {
-
+        // save last orderid
+        $oConfig = $this->getConfig();
+        $sLastOrderId = $oAfterbuyOrder->OrderID;
+        $oConfig->setConfigParam('sFcLastOrderId', $sLastOrderId);
     }
 
     /**
@@ -64,12 +90,25 @@ class fco2aorderimport extends fco2abase {
         // paymentinfo
         $oOrder = $this->_fcGetPaymentInfo($oOrder, $oAfterbuyOrder);
         $oOrder = $this->_fcGetPaymentData($oOrder, $oAfterbuyOrder);
-//dumpVar($oOrder);
-
+        // temporary save for getting an id
         $oOrder->save();
 
         // set orderarticles
-        $this->_fcSetOxidOrderarticlesByAfterbuyOrder($oAfterbuyOrder, $oOrder);
+        $oSumPrice = $this->_fcSetOxidOrderarticlesByAfterbuyOrder($oAfterbuyOrder, $oOrder);
+
+        // cumulate sums
+        $oOrder->oxorder__oxtotalbrutsum = new oxField($oSumPrice->getBruttoPrice(), oxField::T_RAW);
+        $oOrder->oxorder__oxtotalnetsum = new oxField($oSumPrice->getNettoPrice(), oxField::T_RAW);
+
+        // shipping costs
+        $oShippingPrice = oxNew('oxPrice');
+        $dShippingCostsTotal = $this->_fcFetchAmount($oAfterbuyOrder->ShippingInfo->ShippingTotalCost);
+        $dShippingVat = $this->_fcFetchAmount($oAfterbuyOrder->ShippingInfo->ShippingTaxRate);
+        $oShippingPrice->setPrice($dShippingCostsTotal, $dShippingVat);
+        $oOrder->oxorder__oxdelcost = new oxField($oShippingPrice->getBruttoPrice(), oxField::T_RAW);
+        $oOrder->oxorder__oxdelvat = new oxField($oShippingPrice->getVat(), oxField::T_RAW);
+
+        $oOrder->save();
     }
 
 
@@ -79,27 +118,44 @@ class fco2aorderimport extends fco2abase {
      * @todo implementing sets feature (ChildProduct)
      * @param $oAfterbuyOrder
      * @param $oOrder
+     * @return oxPrice
      */
     protected function _fcSetOxidOrderarticlesByAfterbuyOrder($oAfterbuyOrder, $oOrder) {
+        $oConfig = $this->getConfig();
+        $dDefaultVat = $oConfig->getConfigParam('dDefaultVat');
         $sOrderId = $oOrder->getId();
         $aSoldItems = $oAfterbuyOrder->SoldItems;
         $oOrderArticleTemplate = oxNew('oxorderarticle');
 
+        $oSumPrice = oxNew('oxPrice');
+        $oSumPrice->setVat($dDefaultVat);
+        $oSumPrice->setBruttoPriceMode();
+
         foreach ($aSoldItems as $oSoldItem) {
-dumpVar($oSoldItem);
             $oOrderArticle = clone $oOrderArticleTemplate;
             $oProductDetails = $oSoldItem->ShopProductDetails;
             $sArtNum = $oProductDetails->EAN;
             $sProductId = $this->_fcGetProductIdByArtNum($sArtNum);
+
+            $dPrice = $this->_fcFetchAmount($oSoldItem->ItemPrice);
+            $dVat = $this->_fcFetchAmount($oSoldItem->TaxRate);
+            $oOrderArticlePrice = oxNew('oxPrice');
+            $oOrderArticlePrice->setBruttoPriceMode();
+            $oOrderArticlePrice->setPrice($dPrice,$dVat);
+            $oSumPrice->addPrice($oOrderArticlePrice);
 
             $oOrderArticle->oxorderarticles__oxorderid = new oxField($sOrderId);
             $oOrderArticle->oxorderarticles__oxamount = new oxField($oSoldItem->ItemQuantity);
             $oOrderArticle->oxorderarticles__oxartid = new oxField($sProductId);
             $oOrderArticle->oxorderarticles__oxartnum = new oxField($sArtNum);
             $oOrderArticle->oxorderarticles__oxtitle = new oxField($oSoldItem->ItemTitle);
-            $oOrderArticle->oxorderarticles__oxprice = new oxField($oSoldItem->ItemPrice);
+            $oOrderArticle->oxorderarticles__oxprice = new oxField($dPrice);
+            $oOrderArticle->oxorderarticles__oxbrutprice = new oxField($oOrderArticlePrice->getBruttoPrice());
+            $oOrderArticle->oxorderarticles__oxnetprice = new oxField($oOrderArticlePrice->getNettoPrice());
             $oOrderArticle->save();
         }
+
+        return $oSumPrice;
     }
 
     /**
@@ -165,8 +221,9 @@ dumpVar($oSoldItem);
             $sPaymentDate = $this->_fcFetchPaymentDate($oPaymentInfo->PaymentDate);
             $oOrder->oxorder__oxpaid = new oxField($sPaymentDate);
         }
+
         $dTotalSum = $this->_fcFetchAmount($oPaymentInfo->FullAmount);
-        $oOrder->oxorder__oxordertotalsum = new oxField($dTotalSum);
+        $oOrder->oxorder__oxtotalordersum = new oxField($dTotalSum, oxField::T_RAW);
 
         return $oOrder;
     }
@@ -205,7 +262,7 @@ dumpVar($oSoldItem);
      */
     protected function _fcGetPaymentMethod($oPaymentInfo) {
         $sPaymentDescription = $oPaymentInfo->PaymentMethod;
-        $sPaymentId = $this->_fcGetOxidEncodedPaymentId($oPaymentInfo->PaymentID);
+        $sPaymentId = $this->_fcGetOxidPaymentId($oPaymentInfo);
 
         $blPaymentTypeExists = $this->_fcPaymentTypeExists($sPaymentId);
         if (!$blPaymentTypeExists) {
@@ -224,7 +281,7 @@ dumpVar($oSoldItem);
      */
     protected function _fcCreateAfterbuyPayment($sPaymentId, $sPaymentDescription) {
         $oPayment = oxNew('oxpayment');
-        $oPayment->oxpayments__oxid = new oxField($sPaymentId);
+        $oPayment->setId($sPaymentId);
         $oPayment->oxpayments__oxdesc = new oxField($sPaymentDescription);
         $oPayment->oxpayments__oxactive = new oxField(0);
         $oPayment->save();
@@ -244,13 +301,45 @@ dumpVar($oSoldItem);
     }
 
     /**
-     * Returns oxid paymentid by afterbuy payment id
+     * Returns oxid paymentid by trying to find an assignment first. On fail create a new id
+     * by payment name of afterbuy
      *
-     * @param $sAfterbuyPaymentId
+     * @param $oPaymentInfo
      * @return string
      */
-    protected function _fcGetOxidEncodedPaymentId($sAfterbuyPaymentId) {
-        $sOxidPaymentId = "fcab_".strtolower($sAfterbuyPaymentId);
+    protected function _fcGetOxidPaymentId($oPaymentInfo) {
+        $sOxidPaymentId = $this->_fcMatchPayment($oPaymentInfo);
+
+        if (!$sOxidPaymentId) {
+            $sAfterbuyPaymentName = str_replace(' ', '_',$oPaymentInfo->PaymentMethod);
+            $sAfterbuyPaymentName = str_replace('/', '',$sAfterbuyPaymentName);
+            $sOxidPaymentId = "fcab_".strtolower($sAfterbuyPaymentName);
+        }
+
+        return md5($sOxidPaymentId);
+    }
+
+    /**
+     * @param $oPaymentInfo
+     * @return mixed string|false
+     */
+    protected function _fcMatchPayment($oPaymentInfo) {
+        $sAfterbuyPaymentId = $oPaymentInfo->PaymentID;
+        $sAfterbuyPaymentFunction = $oPaymentInfo->PaymentFunction;
+        $aPaymentAssignmentKeys = array_keys($this->_aPaymentAssignments);
+        $sZFunktionID = $sOxidPaymentId = false;
+
+        if (in_array($sAfterbuyPaymentId, $this->_aPaymentAssignments)) {
+            $sZFunktionID = $aPaymentAssignmentKeys[$sAfterbuyPaymentId];
+        } else if (in_array($sAfterbuyPaymentFunction, $this->_aPaymentAssignments)) {
+            $sZFunktionID = $aPaymentAssignmentKeys[$sAfterbuyPaymentFunction];
+        }
+
+        if ($sZFunktionID) {
+            $oDb = oxDb::getDb();
+            $sQuery = "SELECT OXPAYMENTID FROM fcafterbuypayments WHERE FCAFTERBUYPAYMENTID=".$oDb->quote($sZFunktionID);
+            $sOxidPaymentId = $oDb->getOne($sQuery);
+        }
 
         return $sOxidPaymentId;
     }
@@ -261,7 +350,7 @@ dumpVar($oSoldItem);
      * @param $sOxidPaymentId
      * @return string
      */
-    protected function _fcGetOxidDecodedPaymentId($sOxidPaymentId) {
+    protected function _fcGetOxidDecodedPaymentId($oPaymentInfo) {
         $sAfterbuyPaymentId = strtoupper(substr($sOxidPaymentId,5));
 
         return $sAfterbuyPaymentId;
@@ -279,10 +368,10 @@ dumpVar($oSoldItem);
         $oCounter = oxNew('oxcounter');
 
         $oOrder->oxorder__fcafterbuy_uid = new oxField($oAfterbuyOrder->OrderID);
-        $oOrder->oxorder__oxshopid = $oUser->oxuser__oxshopid;
-        $oOrder->oxorder__oxuserid = $oUser->getId();
+        $oOrder->oxorder__oxshopid = new oxField($oUser->oxuser__oxshopid);
+        $oOrder->oxorder__oxuserid = new oxField($oUser->getId());
         $oOrder->oxorder__oxorderdate = new oxField($oAfterbuyOrder->OrderDate);
-        $oOrder->oxorder__oxordernr = $oCounter->getNext('oxorder');
+        $oOrder->oxorder__oxordernr = new oxField($oCounter->getNext('oxorder'));
         $oOrder->oxorder__oxremark = new oxField($oAfterbuyOrder->UserComment);
         $oOrder->oxorder__oxtrackcode = new oxField($oAfterbuyOrder->TrackingLink);
 

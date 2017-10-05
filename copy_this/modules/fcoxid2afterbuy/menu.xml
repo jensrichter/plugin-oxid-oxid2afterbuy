@@ -11,5 +11,11 @@
                 <TAB id="mxfcafterbuy_payments" cl="fcafterbuy_payments" />
             </SUBMENU>
         </MAINMENU>
+        <MAINMENU id="mxorders">
+            <SUBMENU id="mxdisplayorders" cl="admin_order" list="order_list">
+                <TAB id="tbclorder_orderinfo" cl="fcafterbuy_orderinfo" />
+            </SUBMENU>
+        </MAINMENU>
+
 	</OXMENU>
 </OX>

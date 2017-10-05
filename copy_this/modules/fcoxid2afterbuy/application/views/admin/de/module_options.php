@@ -23,7 +23,7 @@ $aLang = array(
     // module settings
     'SHOP_MODULE_GROUP_fcafterbuy_debug'                    => 'Logaufzeichnungen, Ausgaben und Betriebsmodus',
     'SHOP_MODULE_GROUP_fcafterbuy_connect'                  => 'Verbindungseinstellungen',
-    'SHOP_MODULE_GROUP_fcafterbuy_order'                    => 'Bestellungen Übertragen',
+    'SHOP_MODULE_GROUP_fcafterbuy_order'                    => 'Bestellungen übertragen',
     'SHOP_MODULE_GROUP_fcafterbuy_extended'                 => 'Weitere Einstellungen',
     'SHOP_MODULE_GROUP_fcafterbuy_export'                   => 'Artikelexporte',
     'SHOP_MODULE_iFcAfterbuyLogLevel'                       => 'Vorgangsprotokollierung',
@@ -39,9 +39,9 @@ $aLang = array(
     'SHOP_MODULE_sFcAfterbuyUsername'                       => 'Username',
     'SHOP_MODULE_sFcAfterbuyUserPassword'                   => 'Passwort',
     'SHOP_MODULE_blFcAfterbuyExportAll'                     => 'Alle Artikel an alle Kanäle exportieren',
-
     'SHOP_MODULE_blFcStockLimitAuction'                     => 'Bestandart vom Typ Auktion verwenden',
     'SHOP_MODULE_blFcSendOrdersOnTheFly'                    => 'Bestellungen direkt beim Bestellabschluss an Afterbuy übertragen',
+    'SHOP_MODULE_sFcLastOrderId'                            => 'Bestellimport ab dieser BestellID (Wird automatisch befüllt)',
     'SHOP_MODULE_aFcAfterbuyDebitPayments'                  => 'Liste der Zahlarten, die Bankdaten an Afterbuy übertragen sollen',
     'SHOP_MODULE_aFcAfterbuyDebitDynBankname'               => 'Liste der Feldnamen, die als Bankname identifiziert werden sollen',
     'SHOP_MODULE_aFcAfterbuyDebitDynBankzip'                => 'Liste der Feldnamen, die als BLZ identifiziert werden sollen',
@@ -78,10 +78,14 @@ $aLang = array(
     'mxfcafterbuy'                                          => 'oxid2afterbuy',
     'mxfcafterbuy_payments'                                 => 'Zahlarten zuweisen',
     'mxfcafterbuyorder'                                     => 'Bestellverwaltung',
+    'tbclorder_orderinfo'                                   => 'oxid2afterbuy',
 
     'FC_AFTERBUY_ARTICLE_ACTIVE'                            => 'Artikel zu Afterbuy übertragen',
     'SHOP_MODULE_AFTERBUY_SAVE_PAYMENTS'                    => 'Zuweisungen speichern',
     'SHOP_MODULE_AFTERBUY_PAYMENTS_SHOP'                    => 'Zahlarten Shop',
     'SHOP_MODULE_AFTERBUY_PAYMENTS_AFTERBUY'                => 'Zahlarten Afterbuy',
     'SHOP_MODULE_AFTERBUY_PAYMENTS_SAVED'                   => 'Zuweisungen erfolgreich gespeichert',
+    'SHOP_MODULE_AFTERBUYVALUE_NAME'                        => 'Afterbuy-Feld',
+    'SHOP_MODULE_AFTERBUYVALUE_VALUE'                       => 'Afterbuy-Feldwert',
+    'SHOP_MODULE_AFTERBUYVALUE_NOVALUE'                     => 'Keine Afterbuy-Werte zu dieser Bestellung vorhanden!',
 );
