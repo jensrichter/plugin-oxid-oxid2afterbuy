@@ -170,6 +170,27 @@ class fcafterbuyapi {
     }
 
     /**
+     * Calls API for updating orderstate (senddate, paymentdate)
+     *
+     * @param $oOrderState
+     * @return string
+     */
+    public function updateSoldItemsOrderState($oOrderState) {
+        $sXmlData = $this->getXmlHead('UpdateSoldItems', 0);
+        $sXmlData .= "<Orders>";
+        $sXmlData .= "<Order>";
+        $sXmlData .= "<OrderID>".$oOrderState->OrderID."</OrderID>";
+        $sXmlData .= "<PaymentInfo><PaymentDate>".$oOrderState->PaymentInfo->PaymentDate."</PaymentDate></PaymentInfo>";
+        $sXmlData .= "<ShippingInfo><DeliveryDate>".$oOrderState->ShippingInfo->DeliveryDate."</DeliveryDate></ShippingInfo>";
+        $sXmlData .= "</Order>";
+        $sXmlData .= "</Orders>";
+        $sXmlData .= $this->getXmlFoot();
+
+        $sOutput = $this->requestAPI($sXmlData);
+        return $sOutput;
+    }
+
+    /**
      * Requesting afterbuy api for sold products (orders)
      *
      * @param void

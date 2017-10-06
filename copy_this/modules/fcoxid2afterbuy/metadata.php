@@ -123,7 +123,7 @@ $aModule = array(
                 34=>'Billsafe Ratenkauf',
             )
         ),
-        array( 'group' => 'fcafterbuy_extended', 'name' => 'sFcAfterbuyArticleIdent', 'type' => 'select', 'value' => '3', 'constrains' => '0|1|2|3' ),
+        // array( 'group' => 'fcafterbuy_export', 'name' => 'sFcAfterbuyArticleIdent', 'type' => 'select', 'value' => '3', 'constrains' => '0|1|2|3' ),
         array( 'group' => 'fcafterbuy_debug', 'name' => 'iFcAfterbuyLogLevel', 'type' => 'select',  'value' => '0', 'constraints' => '0|1|2|3|4'),
     )
 );

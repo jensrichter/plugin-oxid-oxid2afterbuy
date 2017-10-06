@@ -43,6 +43,12 @@ class fco2aartexport extends fco2abase {
         }
     }
 
+    /**
+     * Validating call status
+     *
+     * @param $sResponse
+     * @return void
+     */
     protected function _fcValidateCallStatus($sResponse) {
         $oXml = simplexml_load_string($sResponse);
         $sCallStatus = (string) $oXml->CallStatus;
