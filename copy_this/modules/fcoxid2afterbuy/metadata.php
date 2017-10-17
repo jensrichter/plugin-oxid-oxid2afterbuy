@@ -37,7 +37,8 @@ $aModule = array(
     'email'        => 'support@fatchip.de',
     'extend'       => array(
         // models
-        'oxorder'                               => 'fcoxid2afterbuy/extend/application/models/fcafterbuy_oxorder',
+        'oxorder'           => 'fcoxid2afterbuy/extend/application/models/fcafterbuy_oxorder',
+        'oxcounter'         => 'fcoxid2afterbuy/extend/application/models/fcafterbuy_oxcounter',
     ),
     'files' => array(
         //core
@@ -77,7 +78,6 @@ $aModule = array(
 
         array( 'group' => 'fcafterbuy_export','name' => 'blFcAfterbuyExportAll', 'type' => 'bool',  'value' => false),
         array( 'group' => 'fcafterbuy_order', 'name' => 'blFcSendOrdersOnTheFly', 'type' => 'bool',  'value' => true ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'sFcLastOrderId', 'type' => 'str',  'value'=>'' ),
         array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitPayments', 'type' => 'aarr',  'value' => array() ),
         array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitDynBankname', 'type' => 'aarr',  'value' => array() ),
         array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitDynBankzip', 'type' => 'aarr',  'value' => array() ),

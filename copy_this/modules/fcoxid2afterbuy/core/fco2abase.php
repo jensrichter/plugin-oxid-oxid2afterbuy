@@ -21,6 +21,12 @@ class fco2abase extends oxBase {
     protected $_sLogFile = 'fco2a_default.log';
 
     /**
+     * Ident for oxid counter
+     * @var string
+     */
+    protected $_sCounterIdent = 'fcAfterbuyLastOrder';
+
+    /**
      * fco2abase constructor.
      * initialize loglevel
      */
@@ -42,7 +48,7 @@ class fco2abase extends oxBase {
     public function fcWriteLog($sMessage, $iLogLevel = 1) {
         $sTime = date("Y-m-d H:i:s");
         $sFullMessage = "[" . $sTime . "] " . $sMessage . "\n";
-        if ($iLogLevel >= $this->_iFcLogLevel) {
+        if ($iLogLevel <= $this->_iFcLogLevel) {
             $oUtils = oxRegistry::getUtils();
             $oUtils->writeToLog($sFullMessage, $this->_sLogFile);
         }
@@ -64,10 +70,23 @@ class fco2abase extends oxBase {
             'afterbuyUsername' => $oConfig->getConfigParam('sFcAfterbuyUsername'),
             'afterbuyUserPassword' => $oConfig->getConfigParam('sFcAfterbuyUserPassword'),
             'logLevel' => $oConfig->getConfigParam('iFcAfterbuyLogLevel'),
-            'lastOrderId' => $oConfig->getConfigParam('sFcLastOrderId'),
+            'lastOrderId' => $this->_fcGetLastOrderId(),
         );
 
         return $aConfig;
+    }
+
+    /**
+     * Returns current orderid from oxCounter
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcGetLastOrderId() {
+        $oCounter = oxNew('oxCounter');
+        $sLastOrderId = $oCounter-> fcGetCurrent($this->_sCounterIdent);
+
+        return (string) $sLastOrderId;
     }
 
     /**

@@ -24,20 +24,71 @@ class fco2aorderimport extends fco2abase {
         '19' => 'CREDIT_CARD',
     );
 
-    public function execute()
-    {
+    /**
+     * Central entry point for triggering order import
+     *
+     * @param void
+     * @return void
+     */
+    public function execute() {
         $aConfig = $this->_fcGetAfterbuyConfigArray();
         $oAfterbuyApi = $this->_fcGetAfterbuyApi($aConfig);
-
+        $this->_fcSetFilter($oAfterbuyApi);
         $sResponse = $oAfterbuyApi->getSoldItemsFromAfterbuy();
-
         $oXmlResponse = simplexml_load_string($sResponse);
+        $this->_fcParseApiResponse($oXmlResponse, $oAfterbuyApi);
+    }
+
+    /**
+     * Checks and parses API result
+     *
+     * @param $oXmlResponse
+     * @param $oAfterbuyApi
+     * @return void
+     */
+    protected function _fcParseApiResponse($oXmlResponse, $oAfterbuyApi) {
+        if (!isset($oXmlResponse->Result->Orders->Order)) {
+            $this->fcWriteLog('ERROR: No valid Response from API while trying to fetch new orders. Content of Response is'.print_r($oXmlResponse,true),1);
+            return;
+        }
+
         foreach ($oXmlResponse->Result->Orders->Order as $oXmlOrder) {
             $oAfterbuyOrder = $this->_fcGetAfterbuyOrder();
             $oAfterbuyOrder->createOrderByApiResponse($oXmlOrder);
             $this->_fcCreateOxidOrder($oAfterbuyOrder);
             $this->_fcNotifyExported($oAfterbuyOrder, $oAfterbuyApi);
         }
+    }
+
+
+    /**
+     * Sets different filters
+     *
+     * @param $oAfterbuyApi
+     * @return void
+     */
+    protected function _fcSetFilter(&$oAfterbuyApi) {
+        $iCurrentOrderId = $this->_fcGetCurrentOrderId();
+        if ($iCurrentOrderId) {
+            $oAfterbuyApi->setLastOrderId($iCurrentOrderId);
+        }
+    }
+
+    /**
+     * Returns last orderid that has been imported, if there is one
+     *
+     * @param void
+     * @return int
+     */
+    protected function _fcGetCurrentOrderId() {
+        $oCounter = oxNew('oxCounter');
+        $sLastOrderId = $oCounter->fcGetCurrent('fcAfterbuyLastOrder');
+        $iReturn = 0;
+        if ($sLastOrderId) {
+            $iReturn = (int) $sLastOrderId;
+        }
+
+        return $iReturn;
     }
 
     /**
@@ -50,9 +101,10 @@ class fco2aorderimport extends fco2abase {
      */
     protected function _fcNotifyExported($oAfterbuyOrder, $oAfterbuyApi) {
         // save last orderid
-        $oConfig = $this->getConfig();
-        $sLastOrderId = $oAfterbuyOrder->OrderID;
-        $oConfig->setConfigParam('sFcLastOrderId', $sLastOrderId);
+        $oCounter = oxNew('oxCounter');
+        $iLastOrderId = (int) $oAfterbuyOrder->OrderID;
+
+        $oCounter->update($this->_sCounterIdent, $iLastOrderId);
     }
 
     /**
@@ -184,6 +236,7 @@ class fco2aorderimport extends fco2abase {
         $sUserId = $oOrder->oxorder__oxuserid->value;
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         $oPaymentData = $oAfterbuyOrder->PaymentInfo->PaymentData;
+
         $aDynValues = array(
             'BankCode' => $oPaymentData->BankCode,
             'AccountHolder' => $oPaymentData->AccountHolder,
@@ -248,7 +301,11 @@ class fco2aorderimport extends fco2abase {
      */
     protected function _fcFetchPaymentDate($sPaymentDateIn) {
         $iTime = strtotime($sPaymentDateIn);
-        $sPaymentDateOut = date('Y-m-d',$iTime);
+        if (!$sPaymentDateIn) {
+            $sPaymentDateOut = '0000-00-00 00:00:00';
+        } else {
+            $sPaymentDateOut = date('Y-m-d',$iTime);
+        }
 
         return $sPaymentDateOut;
     }
@@ -430,9 +487,9 @@ class fco2aorderimport extends fco2abase {
      */
     protected function _fcSetOxidUserByAfterbuyOrder($oAfterbuyOrder) {
         $oAfterbuyUser = $oAfterbuyOrder->BuyerInfo;
+        $this->fcWriteLog("Receiving userdata from response:\n".print_r($oAfterbuyUser,true),4);
         $oBillingAddress = $oAfterbuyUser['BillingAddress'];
         $oShippingAddress = $oAfterbuyUser['ShippingAddress'];
-
         $oUser = oxNew('oxuser');
 
         $sUserOxid = $this->_fcCheckUserExists($oBillingAddress->Mail);
@@ -446,7 +503,7 @@ class fco2aorderimport extends fco2abase {
         $oAddress = $this->_fcSetUserAddressData($oShippingAddress, $oUser);
 
         $aReturn = array('oxuser'=>$oUser, 'oxaddress'=>$oAddress);
-
+        $this->fcWriteLog("Returning userdata:\n".print_r($aReturn,true),4);
         return $aReturn;
     }
 

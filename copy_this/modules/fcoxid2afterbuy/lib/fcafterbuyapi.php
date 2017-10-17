@@ -203,7 +203,6 @@ class fcafterbuyapi {
         $sXmlData .= "<RequestAllItems>1</RequestAllItems>";
         $sXmlData .= $this->getNewOrderFilter();
         $sXmlData .= $this->getXmlFoot();
-
         $sOutput = $this->requestAPI($sXmlData);
         return $sOutput;
     }
@@ -218,11 +217,13 @@ class fcafterbuyapi {
         $sXmlData = "";
 
         if ($this->lastOrderId) {
+
             $sXmlData .= "<DataFilter>";
             $sXmlData .= "<Filter>";
-            $sXmlData .= "<FilterName>OnlyNewOrders</FilterName>";
+            $sXmlData .= "<FilterName>RangeID</FilterName>";
             $sXmlData .= "<FilterValues>";
             $sXmlData .= "<ValueFrom>".$this->lastOrderId."</ValueFrom>";
+            $sXmlData .= "<ValueTo>9999999999</ValueTo>";
             $sXmlData .= "</FilterValues>";
             $sXmlData .= "</Filter>";
             $sXmlData .= "</DataFilter>";

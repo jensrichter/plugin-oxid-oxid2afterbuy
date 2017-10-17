@@ -9,24 +9,144 @@
 class fcafterbuyorder
 {
 
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $InvoiceNumber = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $OrderID = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $EbayAccount = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $AmazonAccount = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $Anr = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $AlternativeItemNumber1 = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $FeedbackDate = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $UserComment = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $AdditionalInfo = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $TrackingLink = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $Memo = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $InvoiceMemo = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $FeedbackLink = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $OrderDate = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $OrderIDAlt = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var fcafterbuypayment
+     */
     public $PaymentInfo = null;
-    public $BuyerInfo = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var fcafterbuyaddress
+     */
+    public $BuyerInfoBilling = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var fcafterbuyaddress
+     */
+    public $BuyerInfoShipping = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var string
+     */
     public $SoldItems = null;
+
+    /**
+     * Contains keine Ahnung
+     *
+     * @var fcafterbuyshipping
+     */
     public $ShippingInfo = null;
 
 
@@ -37,6 +157,7 @@ class fcafterbuyorder
      * @return void
      */
     public function createOrderByApiResponse($oXmlOrder) {
+print_r($oXmlOrder);
         $blValidResponse = $this->_fcValidateResponse($oXmlOrder);
         if (!$blValidResponse) return false;
 
@@ -86,12 +207,8 @@ class fcafterbuyorder
         $oBillingAddress->createBillingAddressFromOrderResponse($oXmlOrder);
         $oShippingAddress->createShippingAddressFromOrderResponse($oXmlOrder);
 
-        $aBuyerInfo = array(
-            'BillingAddress' => $oBillingAddress,
-            'ShippingAddress' => $oShippingAddress,
-        );
-
-        $this->BuyerInfo = $aBuyerInfo;
+        $this->BuyerInfoBilling = $oBillingAddress;
+        $this->BuyerInfoShipping = $oShippingAddress;
     }
 
     /**
@@ -107,7 +224,7 @@ class fcafterbuyorder
 
         foreach ($aSoldItems as $oXmlSoldItem) {
             $oSoldItem = new fcafterbuysolditem();
-            $oSoldItem->createSoldItemFromXmlSoldItem($oXmlSoldItem);
+            $oSoldItem->createSoldItemFromXml($oXmlSoldItem);
             $this->SoldItems[] = $oSoldItem;
         }
     }

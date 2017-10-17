@@ -92,8 +92,7 @@ class fco2aorder extends fco2abase {
      * @param string $sAction Optional
      * @return string Action part of REST request
      */
-    protected function _fcGetInterfaceAction($sAction = 'new')
-    {
+    protected function _fcGetInterfaceAction($sAction = 'new') {
         $sActionParameter = "?Action={$sAction}";
         return $sActionParameter;
     }
@@ -141,8 +140,7 @@ class fco2aorder extends fco2abase {
      *
      * @return string Encoded customer parameters
      */
-    protected function _fcGetCustomerInfoParameters($oOrder, $oUser)
-    {
+    protected function _fcGetCustomerInfoParameters($oOrder, $oUser) {
         // get information
         $sBillSal = $oOrder->oxorder__oxbillsal->value;
         $sBillSalutation = ( $sBillSal == "MR" || $sBillSal == "Herr" ) ? "Herr" : "Frau";
@@ -206,7 +204,6 @@ class fco2aorder extends fco2abase {
      * This method returns generic order parameters like orderdate etc.
      * 
      * @param object $oOrder
-     *
      * @return string Order Parameters
      */
     protected function _fcGetGenericOrderParameters($oOrder)
@@ -274,7 +271,6 @@ class fco2aorder extends fco2abase {
         $sOrderParameters .= "&Versandgruppe=shop";
         $sOrderParameters .= "&Artikelerkennung=2";
 
-
         return $sOrderParameters;
     }
 
@@ -313,7 +309,6 @@ class fco2aorder extends fco2abase {
      * Returns the assigned Afterbuy Payment Id for Shop payment type
      * 
      * @param string $sPaymentId Shop PaymentId
-     *
      * @return string AfterbuyPaymentId
      */
     protected function _fcGetAfterbuyPaymentId($sPaymentId)
@@ -349,7 +344,6 @@ class fco2aorder extends fco2abase {
      * 
      * @param string $sResult
      * @param oxOrder $oOrder
-     *
      * @return bool Success
      */
     protected function _fcHandleShopInterfaceAnswer($sResult, $oOrder)
@@ -370,7 +364,6 @@ class fco2aorder extends fco2abase {
      * Returns false, if xml has error or is invalid
      * 
      * @param string $sResult
-     *
      * @return mixed array/boolean
      */
     protected function _fcParseOrderRequestResult($sResult)
