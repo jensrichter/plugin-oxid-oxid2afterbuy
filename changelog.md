@@ -1,1 +1,0 @@
-- A brand new OXID plugin has fallen down from the stars to our planet.
