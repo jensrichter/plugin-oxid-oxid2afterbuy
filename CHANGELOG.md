@@ -1,4 +1,4 @@
-#Changelog - oxid 2 afterbuy plugin for OXID 5
+# Changelog - oxid 2 afterbuy plugin for OXID 5
 
 ##
 Released --.
