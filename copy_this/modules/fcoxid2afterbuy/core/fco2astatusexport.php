@@ -24,18 +24,33 @@ class fco2astatusexport extends fco2abase {
             $oOrder->load($sOrderOxid);
             $oAfterbuyOrderStatus = $this->_fcAssignOrderDataToOrderStatus($oOrder, $oAfterbuyOrderStatus);
             // update orderstatus via API
-            $oAfterbuyApi->updateSoldItemsOrderState($oAfterbuyOrderStatus);
+            $sResponse = $oAfterbuyApi->updateSoldItemsOrderState($oAfterbuyOrderStatus);
+            $blApiCallSuccess = $this->_fcCheckApiCallSuccess($sResponse);
 
             // mark orderstatus as fulfilled in OXID database if there is a remarkable event
             $blFulfilled = (
-                isset($oAfterbuyOrderStatus->ShippingInfo->DeliveryDate) &&
-                isset($oAfterbuyOrderStatus->PaymentInfo->PaymentDate)
+                $oOrder->oxorder__oxpaid->value != '0000-00-00 00:00:00' &&
+                $oOrder->oxorder__oxsenddate->value != '0000-00-00 00:00:00' &&
+                $blApiCallSuccess
             );
             if ($blFulfilled) {
                 $oOrder->oxorder__fcafterbuy_fulfilled = new oxField(1);
-                $oOrder->save();
             }
+            $oOrder->save();
+            $this->_fcSetLastCheckedDate($sOrderOxid);
         }
+    }
+
+    /**
+     * Sets last check date of this order to now
+     *
+     * @param $sOrderOxid
+     * @return void
+     */
+    protected function _fcSetLastCheckedDate($sOrderOxid) {
+        $oDb = oxDb::getDb();
+        $sQuery = "UPDATE oxorder SET FCAFTERBUY_LASTCHECKED=NOW() WHERE OXID=".$oDb->quote($sOrderOxid)." LIMIT 1";
+        $oDb->Execute($sQuery);
     }
 
     /**
@@ -49,11 +64,16 @@ class fco2astatusexport extends fco2abase {
         $oAfterbuyOrderStatus->OrderID = $oOrder->oxorder__fcafterbuy_uid->value;
         $sOrderSendDate = $oOrder->oxorder__oxsenddate->value;
         $sPaidDate = $oOrder->oxorder__oxpaid->value;
+
         if ($sOrderSendDate != '0000-00-00 00:00:00') {
-            $oAfterbuyOrderStatus->ShippingInfo->DeliveryDate = $this->_fcGetGermanDate($sOrderSendDate);
+            $oShippingInfo = new stdClass();
+            $oShippingInfo->DeliveryDate = $this->_fcGetGermanDate($sOrderSendDate);
+            $oAfterbuyOrderStatus->ShippingInfo = $oShippingInfo;
         }
         if ($sPaidDate != '0000-00-00 00:00:00') {
-            $oAfterbuyOrderStatus->PaymentInfo->PaymentDate = $this->_fcGetGermanDate($sPaidDate);
+            $oPaymentInfo = new stdClass();
+            $oPaymentInfo->PaymentDate = $this->_fcGetGermanDate($sPaidDate);
+            $oAfterbuyOrderStatus->PaymentInfo = $oPaymentInfo;
         }
 
         return $oAfterbuyOrderStatus;
@@ -71,10 +91,10 @@ class fco2astatusexport extends fco2abase {
 
         $sQuery = "
             SELECT OXID 
-            FROM oxorders 
-            WHERE FCAFTERBUY_UID!='' 
+            FROM oxorder 
+            WHERE FCAFTERBUY_UID != '' 
             AND OXTIMESTAMP>FCAFTERBUY_LASTCHECKED 
-            AND FCAFTERBUY_FULFILLED !='0'
+            AND FCAFTERBUY_FULFILLED != '1'
         ";
         $aRows = $oDb->getAll($sQuery);
 
@@ -83,22 +103,6 @@ class fco2astatusexport extends fco2abase {
         }
 
         return $aAffectedOrderIds;
-    }
-
-    /**
-     * Returns a new afterbuy order object
-     *
-     * @param void
-     * @return object
-     */
-    protected function _fcGetAfterbuyStatus() {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
-        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyorderstatus.php';
-        include_once($sPathToAfterbuyLib);
-        $oAfterbuyStatus = new fcafterbuystatus();
-
-        return $oAfterbuyStatus;
     }
 
 }

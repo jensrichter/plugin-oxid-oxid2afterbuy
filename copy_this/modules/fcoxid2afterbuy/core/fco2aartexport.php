@@ -161,22 +161,6 @@ class fco2aartexport extends fco2abase {
     }
 
     /**
-     * Returns an afterbuy article object
-     *
-     * @param void
-     * @return object fcafterbuyart
-     */
-    protected function _fcGetAfterbuyArticle() {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
-        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyapi.php';
-        include_once($sPathToAfterbuyLib);
-        $oAfterbuyArticle = new fcafterbuyart();
-
-        return $oAfterbuyArticle;
-    }
-
-    /**
      * Returns an array of article ids which have been flagged to be an afterbuy article
      *
      * @param void

@@ -97,14 +97,17 @@ class fco2aorderimport extends fco2abase {
      * @param $oAfterbuyOrder
      * @param $oAfterbuyApi
      * @return void
-     * @todo missing notification for afterbuy
      */
     protected function _fcNotifyExported($oAfterbuyOrder, $oAfterbuyApi) {
         // save last orderid
         $oCounter = oxNew('oxCounter');
         $iLastOrderId = (int) $oAfterbuyOrder->OrderID;
-
         $oCounter->update($this->_sCounterIdent, $iLastOrderId);
+
+        // just get an orderstatus object, pass it through api, so afterbuy will notice that order arrived
+        $oAfterbuyOrderStatus = $this->_fcGetAfterbuyStatus();
+        $oAfterbuyOrderStatus->OrderID = (int) $oAfterbuyOrder->OrderID;
+        $oAfterbuyApi->updateSoldItemsOrderState($oAfterbuyOrderStatus);
     }
 
     /**
@@ -402,18 +405,6 @@ class fco2aorderimport extends fco2abase {
     }
 
     /**
-     * Returns origin afterbuy payment id
-     *
-     * @param $sOxidPaymentId
-     * @return string
-     */
-    protected function _fcGetOxidDecodedPaymentId($oPaymentInfo) {
-        $sAfterbuyPaymentId = strtoupper(substr($sOxidPaymentId,5));
-
-        return $sAfterbuyPaymentId;
-    }
-
-    /**
      * Adds general data to order
      *
      * @param $oOrder
@@ -486,10 +477,9 @@ class fco2aorderimport extends fco2abase {
      * @return array
      */
     protected function _fcSetOxidUserByAfterbuyOrder($oAfterbuyOrder) {
-        $oAfterbuyUser = $oAfterbuyOrder->BuyerInfo;
-        $this->fcWriteLog("Receiving userdata from response:\n".print_r($oAfterbuyUser,true),4);
-        $oBillingAddress = $oAfterbuyUser['BillingAddress'];
-        $oShippingAddress = $oAfterbuyUser['ShippingAddress'];
+        $this->fcWriteLog("Receiving afterbuy orderdata from response:\n".print_r($oAfterbuyOrder,true),4);
+        $oBillingAddress = $oAfterbuyOrder->BuyerInfoBilling;
+        $oShippingAddress = $oAfterbuyOrder->BuyerInfoShipping;
         $oUser = oxNew('oxuser');
 
         $sUserOxid = $this->_fcCheckUserExists($oBillingAddress->Mail);
@@ -630,7 +620,6 @@ class fco2aorderimport extends fco2abase {
         return $aReturn;
     }
 
-
     /**
      * Checks if user exists
      *
@@ -643,21 +632,5 @@ class fco2aorderimport extends fco2abase {
         $mOxid = $oDb->getOne($sQuery);
 
         return $mOxid;
-    }
-
-    /**
-     * Returns a new afterbuy order object
-     *
-     * @param void
-     * @return object
-     */
-    protected function _fcGetAfterbuyOrder() {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
-        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyorder.php';
-        include_once($sPathToAfterbuyLib);
-        $oAfterbuyOrder = new fcafterbuyorder();
-
-        return $oAfterbuyOrder;
     }
 }

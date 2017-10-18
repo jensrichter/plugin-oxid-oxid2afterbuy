@@ -90,6 +90,22 @@ class fco2abase extends oxBase {
     }
 
     /**
+     * Returns german formatted date for offered different datetime format
+     *
+     * @param $sDateString
+     * @return string
+     */
+    protected function _fcGetGermanDate($sDateString) {
+        $iTime = strtotime($sDateString);
+        $sReturn = '';
+        if ($iTime) {
+            $sReturn = date('d.m.Y', $iTime);
+        }
+
+        return $sReturn;
+    }
+
+    /**
      * Returns afterbuy api object
      *
      * @param $aConfig
@@ -108,4 +124,66 @@ class fco2abase extends oxBase {
         return $oAfterbuyApi;
     }
 
+    /**
+     * Returns a new afterbuy order status object
+     *
+     * @param void
+     * @return object
+     */
+    protected function _fcGetAfterbuyStatus() {
+        $oViewConfig = oxRegistry::get('oxViewConfig');
+        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
+        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyorderstatus.php';
+        include_once($sPathToAfterbuyLib);
+        $oAfterbuyStatus = new fcafterbuystatus();
+
+        return $oAfterbuyStatus;
+    }
+
+    /**
+     * Returns a new afterbuy order object
+     *
+     * @param void
+     * @return object
+     */
+    protected function _fcGetAfterbuyOrder() {
+        $oViewConfig = oxRegistry::get('oxViewConfig');
+        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
+        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyorder.php';
+        include_once($sPathToAfterbuyLib);
+        $oAfterbuyOrder = new fcafterbuyorder();
+
+        return $oAfterbuyOrder;
+    }
+
+    /**
+     * Returns an afterbuy article object
+     *
+     * @param void
+     * @return object fcafterbuyart
+     */
+    protected function _fcGetAfterbuyArticle() {
+        $oViewConfig = oxRegistry::get('oxViewConfig');
+        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
+        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyapi.php';
+        include_once($sPathToAfterbuyLib);
+        $oAfterbuyArticle = new fcafterbuyart();
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Rerturns true/false depending on response of an API-Call
+     *
+     * @param $sResponse
+     * @return bool
+     */
+    protected function _fcCheckApiCallSuccess($sResponse) {
+        $blReturn = false;
+        if (strpos($sResponse, '<CallStatus>Success</CallStatus>') !== false) {
+            $blReturn = true;
+        }
+
+        return $blReturn;
+    }
 }

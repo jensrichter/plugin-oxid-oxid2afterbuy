@@ -157,7 +157,6 @@ class fcafterbuyorder
      * @return void
      */
     public function createOrderByApiResponse($oXmlOrder) {
-print_r($oXmlOrder);
         $blValidResponse = $this->_fcValidateResponse($oXmlOrder);
         if (!$blValidResponse) return false;
 
