@@ -67,7 +67,6 @@ $aModule = array(
     'blocks' => array(
     ),
     'settings' => array(
-        array( 'group' => 'fcafterbuy_order', 'name' => 'blFcSendOrdersOnTheFly', 'type' => 'bool',  'value' => true ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyShopInterfaceBaseUrl', 'type' => 'str',  'value' => "https://api.afterbuy.de/afterbuy/ShopInterface.aspx" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyAbiUrl', 'type' => 'str',  'value' => "https://api.afterbuy.de/afterbuy/ABInterface.aspx" ),
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyPartnerId', 'type' => 'str',  'value' => "" ),
@@ -76,7 +75,8 @@ $aModule = array(
         array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyUserPassword', 'type' => 'password',  'value' => "" ),
 
         array( 'group' => 'fcafterbuy_export','name' => 'blFcAfterbuyExportAll', 'type' => 'bool',  'value' => false),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'blFcSendOrdersOnTheFly', 'type' => 'bool',  'value' => true ),
+
+        array( 'group' => 'fcafterbuy_order', 'name' => 'blFcSendOrdersOnTheFly', 'type' => 'bool',  'value' => false ),
         array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitPayments', 'type' => 'aarr',  'value' => array() ),
         array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitDynBankname', 'type' => 'aarr',  'value' => array() ),
         array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitDynBankzip', 'type' => 'aarr',  'value' => array() ),

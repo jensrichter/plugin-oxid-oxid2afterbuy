@@ -49,4 +49,4 @@ The update-process is exactly the same!
 3. Delete the database columns added by the plugin-installer.
 
 ## How to contribute
-If you want to contribute to this plugin ask FATCHIP GmbH for access to the private repository, fork it and make a pull request with your changes.
+If you want to contribute to this plugin ask FATCHIP GmbH for access to the     private repository, fork it and make a pull request with your changes.
