@@ -29,10 +29,10 @@ The update-process is exactly the same!
 
 1. Extract the module-package.
 2. Copy the content of the folder `copy_this` into your shop root-folder (where `config.inc.php` is located).
-3. IF you use Enterprise-Edition: Add FCAFTERBUYACTIVE to $this->aMultishopArticleFields array in your config.inc.php
-4. Install database file corresponding to your shop edition:
-    - OXID CE/PE: Execute/Upload under Service->Tools install_ce.sql
-    - OXID EE: Execute/Upload under Service->Tools install_ee.sql
+3. If you use Enterprise-Edition: Add FCAFTERBUYACTIVE to $this->aMultishopArticleFields array in your config.inc.php
+4. Install database file in `modules/fcoxid2afterbuy/` corresponding to your shop edition:
+    - OXID CE/PE: Execute/Upload under Service->Tools `install_ce.sql`
+    - OXID EE: Execute/Upload under Service->Tools `install_ee.sql`
 5. Generate/Update database views in admin under Service->Tools    
 5. Go to Extensions->Modules, select the "FATCHIP OXID 2 Afterbuy Connector" extension and press the "Activate" button in the "Overview" tab.
 6. Empty "tmp" folder.
@@ -49,4 +49,4 @@ The update-process is exactly the same!
 3. Delete the database columns added by the plugin-installer.
 
 ## How to contribute
-If you want to contribute to this plugin ask FATCHIP GmbH for access to the     private repository, fork it and make a pull request with your changes.
+If you want to contribute to this plugin ask FATCHIP GmbH for access to the private repository, fork it and make a pull request with your changes.
