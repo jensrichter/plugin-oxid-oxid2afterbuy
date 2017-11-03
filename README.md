@@ -4,7 +4,7 @@ More on: https://www.fatchip.de/Plugins/OXID-eShop/OXID-2-Afterbuy.html
 
 ## Installation and documentation
 
-Visit our Wiki pages to read the plugin documentation.  
+Visit our Wiki pages to read the plugin documentation.    
 https://wiki.fatchip.de/public/faqoxid2afterbuy
 
 ## Author
