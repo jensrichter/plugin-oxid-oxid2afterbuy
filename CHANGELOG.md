@@ -2,7 +2,7 @@
 
 ## 1.0.2
 Released 2017-11-28
-* Build with external release
+* Build with external library
 * Fixed issue with sending orders
 
 ## 1.0.1
