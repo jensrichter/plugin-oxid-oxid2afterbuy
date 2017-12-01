@@ -58,7 +58,7 @@ class fco2aorder extends fco2abase {
             $sOrderarticleParameters .= "&ArtikelStammID_{$iSuffix}=" . $ArtikelStammID;
             $sOrderarticleParameters .= "&Artikelnr_{$iSuffix}=" . preg_replace("/[^0-9]/", "", $oOrderArticle->oxorderarticles__oxartnum->value); // we need to offer a numeric artnum so we replace non numeric characters
             $sOrderarticleParameters .= "&AlternArtikelNr1_{$iSuffix}=" . urlencode($oOrderArticle->oxorderarticles__oxartnum->value);
-            $sOrderarticleParameters .= "&Artikelname_{$iSuffix}=" . urlencode(utf8_encode($oArticle->oxarticles__oxtitle->value . " " . $oArticle->oxarticles__oxvarselect->value));
+            $sOrderarticleParameters .= "&Artikelname_{$iSuffix}=" . urlencode(utf8_encode($oOrderArticle->oxorderarticles__oxtitle->value . " " . $oOrderArticle->oxorderarticles__oxselvariant->value));
             $sOrderarticleParameters .= "&ArtikelEpreis_{$iSuffix}=" . str_replace(".", ",", $oOrderArticle->oxorderarticles__oxbprice->value);
             $sOrderarticleParameters .= "&ArtikelMwSt_{$iSuffix}=" . "0";
             $sOrderarticleParameters .= "&ArtikelMenge_{$iSuffix}=" . $oOrderArticle->oxorderarticles__oxamount->value;
