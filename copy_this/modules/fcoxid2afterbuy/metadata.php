@@ -41,14 +41,14 @@ $aModule = array(
     ),
     'files' => array(
         //core
-        'fcafterbuyapi'     => 'fcoxid2afterbuy/lib/fcafterbuyapi.php',
-        'fcafterbuyart'     => 'fcoxid2afterbuy/lib/fcafterbuyart.php',
-        'fcafterbuystatus'  => 'fcoxid2afterbuy/lib/fcafterbuystatus.php',
-        'fco2abase'         => 'fcoxid2afterbuy/core/fco2abase.php',
-        'fco2aorder'        => 'fcoxid2afterbuy/core/fco2aorder.php',
-        'fco2aartexport'    => 'fcoxid2afterbuy/core/fco2aartexport.php',
-        'fco2aorderimport'  => 'fcoxid2afterbuy/core/fco2aorderimport.php',
-        'fco2astatusexport' => 'fcoxid2afterbuy/core/fco2astatusexport.php',
+        'fcafterbuyapi'          => 'fcoxid2afterbuy/lib/fcafterbuyapi.php',
+        'fcafterbuyart'          => 'fcoxid2afterbuy/lib/fcafterbuyart.php',
+        'fcafterbuyorderstatus'  => 'fcoxid2afterbuy/lib/fcafterbuyorderstatus.php',
+        'fco2abase'              => 'fcoxid2afterbuy/core/fco2abase.php',
+        'fco2aorder'             => 'fcoxid2afterbuy/core/fco2aorder.php',
+        'fco2aartexport'         => 'fcoxid2afterbuy/core/fco2aartexport.php',
+        'fco2aorderimport'       => 'fcoxid2afterbuy/core/fco2aorderimport.php',
+        'fco2astatusexport'      => 'fcoxid2afterbuy/core/fco2astatusexport.php',
 
         //controllers->admin
         'fcafterbuy_article_admin'      => 'fcoxid2afterbuy/application/controllers/admin/fcafterbuy_article_admin.php',
