@@ -147,6 +147,10 @@ class fco2aartexport extends fco2abase {
         }
 
         // pictures
+        $oAfterbuyArticle->ImageSmallURL = $oArticle->getThumbnailUrl(true);
+        $oAfterbuyArticle->ImageLargeURL = $oArticle->getZoomPictureUrl(1);
+
+        // gallery
         for($iIndex=1;$iIndex<=12;$iIndex++) {
             $sVarName_PicNr = "ProductPicture_Nr_".$iIndex;
             $sVarName_PicUrl = "ProductPicture_Url_".$iIndex;
