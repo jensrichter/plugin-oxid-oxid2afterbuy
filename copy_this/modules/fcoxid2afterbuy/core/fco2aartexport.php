@@ -147,14 +147,22 @@ class fco2aartexport extends fco2abase {
         }
 
         // pictures
-        for($iIndex=1;$iIndex<=12;$iIndex++) {
-            $sVarName_PicNr = "ProductPicture_Nr_".$iIndex;
-            $sVarName_PicUrl = "ProductPicture_Url_".$iIndex;
-            $sVarName_PicAltText = "ProductPicture_AltText_".$iIndex;
+        $oAfterbuyArticle->ImageSmallURL = $oArticle->getThumbnailUrl(true);
+        $oAfterbuyArticle->ImageLargeURL = $oArticle->getZoomPictureUrl(1);
 
-            $oAfterbuyArticle->$sVarName_PicNr = $iIndex;
+        // gallery
+        $iPicNr = 1;
+        for($iIndex=1;$iIndex<=12;$iIndex++) {
+            if(!$oArticle->getFieldData("oxpic{$iIndex}")) continue; // no picture set, skip.
+            
+            $sVarName_PicNr = "ProductPicture_Nr_".$iPicNr;
+            $sVarName_PicUrl = "ProductPicture_Url_".$iPicNr;
+            $sVarName_PicAltText = "ProductPicture_AltText_".$iPicNr;
+
+            $oAfterbuyArticle->$sVarName_PicNr = $iPicNr;
             $oAfterbuyArticle->$sVarName_PicUrl = $oArticle->getPictureUrl($iIndex);
             $oAfterbuyArticle->$sVarName_PicAltText = $oArticle->oxarticles__oxtitle->value;
+            $iPicNr++;
         }
 
         return $oAfterbuyArticle;
