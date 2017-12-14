@@ -1,5 +1,10 @@
 # Changelog - oxid 2 afterbuy plugin for OXID 5
 
+## 1.0.3
+Released 2017-12-14
+* Improvements for picture-handling
+* Linked to newer api version
+
 ## 1.0.2
 Released 2017-11-28
 * Build with external library
