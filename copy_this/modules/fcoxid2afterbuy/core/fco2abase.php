@@ -112,8 +112,8 @@ class fco2abase extends oxBase {
      * @return object
      */
     protected function _fcGetAfterbuyApi($aConfig) {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
         $oAfterbuyApi = oxNew("fcafterbuyapi",$aConfig);
+        
         // directly set oxid logfilepath after instantiation
         $oAfterbuyApi->setLogFilePath(getShopBasePath()."/log/fco2a_api.log");
 
