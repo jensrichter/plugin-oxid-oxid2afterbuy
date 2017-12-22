@@ -43,6 +43,7 @@ $aModule = array(
         //core
         'fcafterbuyapi'          => 'fcoxid2afterbuy/lib/fcafterbuyapi.php',
         'fcafterbuyart'          => 'fcoxid2afterbuy/lib/fcafterbuyart.php',
+        'fcafterbuyorder'        => 'fcoxid2afterbuy/lib/fcafterbuyorder.php',
         'fcafterbuyorderstatus'  => 'fcoxid2afterbuy/lib/fcafterbuyorderstatus.php',
         'fco2abase'              => 'fcoxid2afterbuy/core/fco2abase.php',
         'fco2aorder'             => 'fcoxid2afterbuy/core/fco2aorder.php',
