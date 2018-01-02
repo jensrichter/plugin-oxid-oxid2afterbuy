@@ -313,9 +313,7 @@ class fco2aorder extends fco2abase {
      */
     protected function _fcGetAfterbuyPaymentId($sPaymentId)
     {
-        $sQuery = "
-            SELECT FCAFTERBUYPAYMENTID FROM fcafterbuypayments WHERE OXPAYMENTID='{$sPaymentId}'
-        ";
+        $sQuery = "SELECT FCAFTERBUYPAYMENTID FROM fcafterbuypayments WHERE OXPAYMENTID='{$sPaymentId}'";
         $sAfterbuyPaymentId = oxDb::getDb()->getOne($sQuery);
 
         return (string) $sAfterbuyPaymentId;
@@ -330,9 +328,7 @@ class fco2aorder extends fco2abase {
     protected function _fcGetCarPlateCountryTag($sCountryId)
     {
         $oDb = oxDb::getDb();
-        $sQuery = "
-            SELECT FCCARPLATE FROM fcafterbuycountry WHERE OXID='{$sCountryId}'
-        ";
+        $sQuery = "SELECT FCCARPLATE FROM fcafterbuycountry WHERE OXID='{$sCountryId}'";
 
         $sCarPlateTag = $oDb->getOne($sQuery);
 
