@@ -112,12 +112,8 @@ class fco2abase extends oxBase {
      * @return object
      */
     protected function _fcGetAfterbuyApi($aConfig) {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
-        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyapi.php';
-        include_once($sPathToAfterbuyLib);
-        $oAfterbuyApi = new fcafterbuyapi($aConfig);
-
+        $oAfterbuyApi = oxNew("fcafterbuyapi",$aConfig);
+        
         // directly set oxid logfilepath after instantiation
         $oAfterbuyApi->setLogFilePath(getShopBasePath()."/log/fco2a_api.log");
 
@@ -147,11 +143,7 @@ class fco2abase extends oxBase {
      * @return object
      */
     protected function _fcGetAfterbuyOrder() {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
-        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyorder.php';
-        include_once($sPathToAfterbuyLib);
-        $oAfterbuyOrder = new fcafterbuyorder();
+        $oAfterbuyOrder = oxNew("fcafterbuyorder");
 
         return $oAfterbuyOrder;
     }
@@ -163,11 +155,7 @@ class fco2abase extends oxBase {
      * @return object fcafterbuyart
      */
     protected function _fcGetAfterbuyArticle() {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
-        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyapi.php';
-        include_once($sPathToAfterbuyLib);
-        $oAfterbuyArticle = new fcafterbuyart();
+        $oAfterbuyArticle = oxNew("fcafterbuyart");
 
         return $oAfterbuyArticle;
     }
