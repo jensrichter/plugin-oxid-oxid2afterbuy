@@ -1,5 +1,10 @@
 # Changelog - oxid 2 afterbuy plugin for OXID 5
 
+## 1.0.4
+Released 2018-01-02
+* Added improvements for overloading possibilities
+* Some code cleanind
+
 ## 1.0.3
 Released 2017-12-14
 * Improvements for picture-handling
