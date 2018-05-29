@@ -60,7 +60,7 @@ class fco2aorder extends fco2abase {
             $sOrderarticleParameters .= "&AlternArtikelNr1_{$iSuffix}=" . urlencode($oOrderArticle->oxorderarticles__oxartnum->value);
             $sOrderarticleParameters .= "&Artikelname_{$iSuffix}=" . urlencode(utf8_encode($oOrderArticle->oxorderarticles__oxtitle->value . " " . $oOrderArticle->oxorderarticles__oxselvariant->value));
             $sOrderarticleParameters .= "&ArtikelEpreis_{$iSuffix}=" . str_replace(".", ",", $oOrderArticle->oxorderarticles__oxbprice->value);
-            $sOrderarticleParameters .= "&ArtikelMwSt_{$iSuffix}=" . "0";
+            $sOrderarticleParameters .= "&ArtikelMwSt_{$iSuffix}=" . str_replace(".", ",",$oOrderArticle->oxorderarticles__oxvat->value);
             $sOrderarticleParameters .= "&ArtikelMenge_{$iSuffix}=" . $oOrderArticle->oxorderarticles__oxamount->value;
             $sOrderarticleParameters .= "&ArtikelGewicht_{$iSuffix}=" . $oOrderArticle->oxorderarticles__oxweight->value;
             $sOrderarticleParameters .= "&ArtikelLink_{$iSuffix}=" . urlencode($oArticle->getLink());
