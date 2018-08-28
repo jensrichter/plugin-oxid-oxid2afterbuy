@@ -7,8 +7,8 @@ class fco2aartexport extends fco2abase {
      */
     protected $_aAfterbuy2OxidDictionary = array(
         'UserProductID' => 'oxarticles__oxid',
-        'Anr' => 'oxarticles__oxartnum',
-        'EAN' => 'oxarticles__oxean',
+        'Anr' => 'oxarticles__oxean',
+        'EAN' => 'oxarticles__oxartnum',
         'ProductID' => 'oxarticles__fcafterbuyid',
         'Name' => 'oxarticles__oxtitle',
         'ManufacturerPartNumber' => 'oxarticles__oxmpn',
@@ -40,7 +40,18 @@ class fco2aartexport extends fco2abase {
             $sResponse = $oAfterbuyApi->updateArticleToAfterbuy($oArt);
             $this->_fcValidateCallStatus($sResponse);
             $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
+            $this->_fcAddVariants($sArticleOxid);
         }
+    }
+
+    /**
+     * Fetching variants of product and send each to AB
+     *
+     * @param string $sArticleOxid
+     * @return voio
+     */
+    protected function _fcAddVariants($sArticleOxid) {
+
     }
 
     /**
