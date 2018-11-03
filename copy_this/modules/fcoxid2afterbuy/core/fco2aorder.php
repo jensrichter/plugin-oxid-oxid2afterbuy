@@ -30,8 +30,7 @@ class fco2aorder extends fco2abase {
         $sRequest .= $sActionParameter . $sDeliveryAddressFlagParameter . $sAfterbuyCredentialParameters;
         $sRequest .= $sCustomerInfoParameters . $sOrderArticleParameters . $sGenericOrderParameters . $sConfigParameters;
 
-        $aConfig = $this->_fcGetAfterbuyConfigArray();
-        $oAfterbuyApi = $this->_fcGetAfterbuyApi($aConfig);
+        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
         $sOutput = $oAfterbuyApi->requestShopInterfaceAPI($sRequest);
         $this->fcWriteLog("DEBUG: Requesting shopinterface for sending order:\n".$sRequest,4);

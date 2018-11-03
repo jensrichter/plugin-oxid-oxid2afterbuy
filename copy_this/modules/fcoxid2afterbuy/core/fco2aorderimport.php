@@ -31,8 +31,7 @@ class fco2aorderimport extends fco2abase {
      * @return void
      */
     public function execute() {
-        $aConfig = $this->_fcGetAfterbuyConfigArray();
-        $oAfterbuyApi = $this->_fcGetAfterbuyApi($aConfig);
+        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
         $this->_fcSetFilter($oAfterbuyApi);
         $sResponse = $oAfterbuyApi->getSoldItemsFromAfterbuy();
         $oXmlResponse = simplexml_load_string($sResponse);

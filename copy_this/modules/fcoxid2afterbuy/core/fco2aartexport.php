@@ -29,14 +29,14 @@ class fco2aartexport extends fco2abase {
      */
     public function execute()
     {
-        $aConfig = $this->_fcGetAfterbuyConfigArray();
-        $oAfterbuyApi = $this->_fcGetAfterbuyApi($aConfig);
+        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
         $aArticleIds = $this->_fcGetAffectedArticleIds();
 
         foreach ($aArticleIds as $sArticleOxid) {
             $oArt = $this->_fcGetAfterbuyArticleByOxid($sArticleOxid);
             if (!$oArt) continue;
+
             $sResponse = $oAfterbuyApi->updateArticleToAfterbuy($oArt);
             $this->_fcValidateCallStatus($sResponse);
             $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
@@ -51,7 +51,21 @@ class fco2aartexport extends fco2abase {
      * @return voio
      */
     protected function _fcAddVariants($sArticleOxid) {
+        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
+        $oArticle = $this->_fcGetOxidArticle($sArticleOxid);
+        if (!$oArticle) return;
+
+        $aVariantIds = $oArticle->getVariantIds();
+
+        foreach ($aVariantIds as $sVariantArticleOxid) {
+            $oArt = $this->_fcGetAfterbuyArticleByOxid($sVariantArticleOxid);
+            if (!$oArt) continue;
+
+            $sResponse = $oAfterbuyApi->updateArticleToAfterbuy($oArt);
+            $this->_fcValidateCallStatus($sResponse);
+            $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
+        }
     }
 
     /**
@@ -92,21 +106,137 @@ class fco2aartexport extends fco2abase {
     }
 
     /**
-     * Takes an oxid of an article and creates an afterbuy article object of it
+     * Returns oxArticle object or false
      *
      * @param $sArticleOxid
      * @return mixed object|bool
      */
-    protected function _fcGetAfterbuyArticleByOxid($sArticleOxid) {
+    protected function _fcGetOxidArticle($sArticleOxid)
+    {
         $oArticle = oxNew('oxarticle');
         if (!$oArticle->load($sArticleOxid))  {
             $this->fcWriteLog("ERROR: Could not load article object with ID:".$sArticleOxid,1);
             return false;
         }
 
+        return $oArticle;
+    }
+
+    /**
+     * Takes an oxid of an article and creates an afterbuy article object of it
+     *
+     * @param $sArticleOxid
+     * @return mixed object|bool
+     */
+    protected function _fcGetAfterbuyArticleByOxid($sArticleOxid) {
+        $oArticle = $this->_fcGetOxidArticle($sArticleOxid);
+        if (!$oArticle) return false;
+
         $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
+        $oAfterbuyArticle = $this->_fcAddVariantValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddArticleValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddManufacturerValues($oAfterbuyArticle, $oArticle);
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Add all informations relevant for variation set assignments
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return object
+     */
+    protected function _fcAddVariantValues($oAfterbuyArticle, $oArticle)
+    {
+        $oAfterbuyArticle =
+            $this->_fcAddVariantBaseValues($oAfterbuyArticle, $oArticle);
+
+        $aVariantIds = $oArticle->getVariantIds();
+        $blHasVariants = (
+            is_array($aVariantIds) &&
+            count($aVariantIds) > 0
+        );
+
+        if (!$blHasVariants)  return $oAfterbuyArticle;
+
+        $iPos = 1;
+        foreach ($aVariantIds as $sVariantOxid) {
+            $oOxidVariantArticle = $this->_fcGetOxidArticle($sVariantOxid);
+            $oAfterbuyAddBaseProduct = $this->_fcGetAddBaseProduct();
+            $oAfterbuyAddBaseProduct =
+                $this->_fcAssignVariantValues(
+                    $oAfterbuyAddBaseProduct,
+                    $oOxidVariantArticle,
+                    $iPos
+                );
+
+            $oAfterbuyArticle->AddBaseProducts[] =
+                $oAfterbuyAddBaseProduct;
+
+            $iPos++;
+        }
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Assign variant values to addbase-product
+     *
+     * @param $oAfterbuyAddBaseProduct
+     * @param $oOxidVariantArticle
+     * @return object
+     */
+    protected function _fcAssignVariantValues($oAfterbuyAddBaseProduct, $oOxidVariantArticle, $iPos) {
+        $sVariantLabel =
+            $oOxidVariantArticle->oxarticles__oxtitle->value.
+            "".
+            $oOxidVariantArticle->oxarticles__oxvarselect->value;
+
+        $iStock = $oOxidVariantArticle->oxarticles__oxstock->value;
+
+        $oAfterbuyAddBaseProduct->ProductID = $oOxidVariantArticle->getId();
+        $oAfterbuyAddBaseProduct->ProductLabel = $sVariantLabel;
+        $oAfterbuyAddBaseProduct->ProductPos = (string) $iPos;
+        $oAfterbuyAddBaseProduct->ProductQuantity = (string) $iStock;
+
+        return $oAfterbuyAddBaseProduct;
+    }
+
+    /**
+     * Returns fresh instance of AdddBaseProduct
+     *
+     * @param void
+     * @return mixed
+     */
+    protected function _fcGetAddBaseProduct()
+    {
+        $oAddBaseProduct = oxNew('fcafterbuyaddbaseproduct');
+
+        return $oAddBaseProduct;
+    }
+
+    /**
+     * Adds nessessary flag for identification of article
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return object
+     */
+    protected function _fcAddVariantBaseValues($oAfterbuyArticle, $oArticle)
+    {
+        $blIsVariant = $oArticle->isVariant();
+        if ($blIsVariant) {
+            $oAfterbuyArticle->BaseProductType = 3;
+            return $oAfterbuyArticle;
+        }
+
+        $aVariantIds = $oArticle->getVariantIds();
+        $blIsParent = (bool) count($aVariantIds);
+
+        if ($blIsParent) {
+            $oAfterbuyArticle->BaseProductType = 1;
+        }
 
         return $oAfterbuyArticle;
     }
@@ -141,21 +271,22 @@ class fco2aartexport extends fco2abase {
         $oAfterbuyArticle->ItemSize = $oArticle->getSize();
         $oAfterbuyArticle->CanonicalUrl = $oArticle->getMainLink();
 
+        $oAfterbuyArticle = $this->_fcAddTranslatedValues($oAfterbuyArticle, $oArticle);
+        $oAfterbuyArticle = $this->_fcAddPictures($oAfterbuyArticle, $oArticle);
 
-        // standard values will be iterated through translation array
-        foreach ($this->_aAfterbuy2OxidDictionary as $sAfterbuyName=>$sOxidNamesString) {
-            $aOxidNames = explode('|', $sOxidNamesString);
-            foreach ($aOxidNames as $sCurrentOxidName) {
-                $sValue = $oArticle->$sCurrentOxidName->value;
-                $sOxidName = $sCurrentOxidName;
-                // if variable filled breakout
-                if ($sValue) {
-                    break;
-                }
-            }
+        return $oAfterbuyArticle;
+    }
 
-            $oAfterbuyArticle->$sAfterbuyName = $oArticle->$sOxidName->value;
-        }
+    /**
+     * Adding picture information
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return object
+     */
+    protected function _fcAddPictures($oAfterbuyArticle, $oArticle) {
+        // alt tag
+        $sArticleTitle = $oArticle->oxarticles__oxtitle->value;
 
         // pictures
         $oAfterbuyArticle->ImageSmallURL = $oArticle->getThumbnailUrl(true);
@@ -164,20 +295,69 @@ class fco2aartexport extends fco2abase {
         // gallery
         $iPicNr = 1;
         for($iIndex=1;$iIndex<=12;$iIndex++) {
-            if(!$oArticle->getFieldData("oxpic{$iIndex}")) continue; // no picture set, skip.
-            
+            $sFieldValue = $oArticle->getFieldData("oxpic{$iIndex}");
+            if(!$sFieldValue) continue;
+
             $sVarName_PicNr = "ProductPicture_Nr_".$iPicNr;
             $sVarName_PicUrl = "ProductPicture_Url_".$iPicNr;
             $sVarName_PicAltText = "ProductPicture_AltText_".$iPicNr;
 
+            $sPictureUrl = $oArticle->getPictureUrl($iIndex);
+
             $oAfterbuyArticle->$sVarName_PicNr = $iPicNr;
-            $oAfterbuyArticle->$sVarName_PicUrl = $oArticle->getPictureUrl($iIndex);
-            $oAfterbuyArticle->$sVarName_PicAltText = $oArticle->oxarticles__oxtitle->value;
+            $oAfterbuyArticle->$sVarName_PicUrl = $sPictureUrl;
+            $oAfterbuyArticle->$sVarName_PicAltText = $sArticleTitle;
             $iPicNr++;
         }
 
         return $oAfterbuyArticle;
     }
+
+    /**
+     * Translated
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return mixed
+     */
+    protected function _fcAddTranslatedValues($oAfterbuyArticle, $oArticle)
+    {
+        // standard values will be iterated through translation array
+        foreach ($this->_aAfterbuy2OxidDictionary as $sAfterbuyName=>$sOxidNamesString) {
+            $sOxidName = $this->_fcFetchOxidName($oArticle, $sOxidNamesString);
+
+            $oAfterbuyArticle->$sAfterbuyName = $oArticle->$sOxidName->value;
+        }
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Fetching oxid name of articlce fields which containing
+     * a value
+     *
+     * @param $oArticle
+     * @param $sOxidNamesString
+     * @return string
+     */
+    protected function _fcFetchOxidName($oArticle, $sOxidNamesString)
+    {
+        $aOxidNames = explode('|', $sOxidNamesString);
+        $sOxidName = (string) $aOxidNames[0];
+
+        foreach ($aOxidNames as $sCurrentOxidName) {
+            $sOxidName = (string) $sCurrentOxidName;
+
+            $blValueExists =
+                (isset($oArticle->$sCurrentOxidName->value)) ?
+                    (bool) $oArticle->$sCurrentOxidName->value :
+                    false;
+            if ($blValueExists) break;
+        }
+
+        return $sOxidName;
+    }
+
 
     /**
      * Returns an array of article ids which have been flagged to be an afterbuy article
@@ -188,15 +368,21 @@ class fco2aartexport extends fco2abase {
     protected function _fcGetAffectedArticleIds() {
         $aArticleIds = array();
         $oConfig = $this->getConfig();
-        $blFcAfterbuyExportAll = $oConfig->getConfigParam('blFcAfterbuyExportAll');
-        $sWhereConditions = "";
+        $blFcAfterbuyExportAll =
+            $oConfig->getConfigParam('blFcAfterbuyExportAll');
 
+        $sWhereConditions = "";
         if (!$blFcAfterbuyExportAll) {
             $sWhereConditions .= " AND FCAFTERBUYACTIVE='1' ";
         }
 
         $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
-        $sQuery = "SELECT OXID FROM ".getViewName('oxarticles')." WHERE OXPARENTID='' ".$sWhereConditions;
+        $sQuery = "
+            SELECT OXID 
+            FROM ".getViewName('oxarticles')." 
+            WHERE OXPARENTID='' ".
+            $sWhereConditions;
+
         $aRows = $oDb->getAll($sQuery);
         foreach ($aRows as $aRow) {
             $aArticleIds[] = $aRow['OXID'];

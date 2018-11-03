@@ -9,9 +9,7 @@ class fco2astatusexport extends fco2abase {
      */
     public function execute()
     {
-        // load configuration and instanciate fcafterbuyapi class
-        $aConfig = $this->_fcGetAfterbuyConfigArray();
-        $oAfterbuyApi = $this->_fcGetAfterbuyApi($aConfig);
+        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
         // load order IDs of changed afterbuy orders to export from oxorder/oxorderarticles
         $aUpdateOrderIds = $this->_fcGetUpdatedAfterbuyOrders();
@@ -22,10 +20,12 @@ class fco2astatusexport extends fco2abase {
             $oAfterbuyOrderStatus = $this->_fcGetAfterbuyStatus();
             $oOrder = oxNew('oxorder');
             $oOrder->load($sOrderOxid);
-            $oAfterbuyOrderStatus = $this->_fcAssignOrderDataToOrderStatus($oOrder, $oAfterbuyOrderStatus);
-            // update orderstatus via API
-            $sResponse = $oAfterbuyApi->updateSoldItemsOrderState($oAfterbuyOrderStatus);
-            $blApiCallSuccess = $this->_fcCheckApiCallSuccess($sResponse);
+            $oAfterbuyOrderStatus =
+                $this->_fcAssignOrderDataToOrderStatus($oOrder, $oAfterbuyOrderStatus);
+            $sResponse =
+                $oAfterbuyApi->updateSoldItemsOrderState($oAfterbuyOrderStatus);
+            $blApiCallSuccess =
+                $this->_fcCheckApiCallSuccess($sResponse);
 
             // mark orderstatus as fulfilled in OXID database if there is a remarkable event
             $blFulfilled = (
