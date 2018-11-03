@@ -14,10 +14,8 @@
 /**
  * Metadata version
  */
-$sMetadataVersion = '1.0';
-$oViewConf = oxNew("oxViewConfig");
-$sImgUrl = $oViewConf->getModuleUrl('fcoxid2afterbuy', 'fatchip.png');
-
+$sMetadataVersion = '1.1';
+$sImgUrl = "https://www.fatchip.de/out/flow/img/favicons/favicon_16x16.png";
 
 /**
  * Module information
@@ -41,11 +39,15 @@ $aModule = array(
     ),
     'files' => array(
         //core
-        'fcafterbuyapi'             => 'fcoxid2afterbuy/lib/fcafterbuyapi.php',
-        'fcafterbuyart'             => 'fcoxid2afterbuy/lib/fcafterbuyart.php',
-        'fcafterbuyaddbaseproduct'  => 'fcoxid2afterbuy/lib/fcafterbuyaddbaseproduct.php',
-        'fcafterbuyorder'           => 'fcoxid2afterbuy/lib/fcafterbuyorder.php',
-        'fcafterbuyorderstatus'     => 'fcoxid2afterbuy/lib/fcafterbuyorderstatus.php',
+        'fcafterbuyaddbaseproduct'  => 'fcoxid2afterbuy/core/afterbuy/fcafterbuyaddbaseproduct.php',
+        'fcafterbuyaddress'         => 'fcoxid2afterbuy/core/afterbuy/fcafterbuyaddress.php',
+        'fcafterbuyapi'             => 'fcoxid2afterbuy/core/afterbuy/fcafterbuyapi.php',
+        'fcafterbuyart'             => 'fcoxid2afterbuy/core/afterbuy/fcafterbuyart.php',
+        'fcafterbuyorder'           => 'fcoxid2afterbuy/core/afterbuy/fcafterbuyorder.php',
+        'fcafterbuyorderstatus'     => 'fcoxid2afterbuy/core/afterbuy/fcafterbuyorderstatus.php',
+        'fcafterbuypayment'         => 'fcoxid2afterbuy/core/afterbuy/fcafterbuypayment.php',
+        'fcafterbuyshipping'        => 'fcoxid2afterbuy/core/afterbuy/fcafterbuyshipping.php',
+        'fcafterbuysolditem'        => 'fcoxid2afterbuy/core/afterbuy/fcafterbuysolditem.php',
         'fco2abase'                 => 'fcoxid2afterbuy/core/fco2abase.php',
         'fco2aorder'                => 'fcoxid2afterbuy/core/fco2aorder.php',
         'fco2aartexport'            => 'fcoxid2afterbuy/core/fco2aartexport.php',
