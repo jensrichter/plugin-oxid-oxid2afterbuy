@@ -10,7 +10,6 @@ class fco2aartexport extends fco2abase {
         'Anr' => 'oxarticles__oxean',
         'EAN' => 'oxarticles__oxartnum',
         'ProductID' => 'oxarticles__fcafterbuyid',
-        'Name' => 'oxarticles__oxtitle',
         'ManufacturerPartNumber' => 'oxarticles__oxmpn',
         'Keywords' => 'oxarticles__oxkeywords',
         'Quantity' => 'oxarticles__oxstock|oxarticles__oxvarstock',
@@ -34,13 +33,13 @@ class fco2aartexport extends fco2abase {
         $aArticleIds = $this->_fcGetAffectedArticleIds();
 
         foreach ($aArticleIds as $sArticleOxid) {
+            $this->_fcAddVariants($sArticleOxid);
             $oArt = $this->_fcGetAfterbuyArticleByOxid($sArticleOxid);
             if (!$oArt) continue;
 
             $sResponse = $oAfterbuyApi->updateArticleToAfterbuy($oArt);
             $this->_fcValidateCallStatus($sResponse);
             $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
-            $this->_fcAddVariants($sArticleOxid);
         }
     }
 
@@ -190,12 +189,14 @@ class fco2aartexport extends fco2abase {
     protected function _fcAssignVariantValues($oAfterbuyAddBaseProduct, $oOxidVariantArticle, $iPos) {
         $sVariantLabel =
             $oOxidVariantArticle->oxarticles__oxtitle->value.
-            "".
+            " ".
             $oOxidVariantArticle->oxarticles__oxvarselect->value;
 
         $iStock = $oOxidVariantArticle->oxarticles__oxstock->value;
+        $sAfterbuyProductId =
+            $oOxidVariantArticle->oxarticles__fcafterbuyid->value;
 
-        $oAfterbuyAddBaseProduct->ProductID = $oOxidVariantArticle->getId();
+        $oAfterbuyAddBaseProduct->ProductID = $sAfterbuyProductId;
         $oAfterbuyAddBaseProduct->ProductLabel = $sVariantLabel;
         $oAfterbuyAddBaseProduct->ProductPos = (string) $iPos;
         $oAfterbuyAddBaseProduct->ProductQuantity = (string) $iStock;
@@ -204,7 +205,7 @@ class fco2aartexport extends fco2abase {
     }
 
     /**
-     * Returns fresh instance of AdddBaseProduct
+     * Returns fresh instance of AddBaseProduct
      *
      * @param void
      * @return mixed
@@ -227,7 +228,7 @@ class fco2aartexport extends fco2abase {
     {
         $blIsVariant = $oArticle->isVariant();
         if ($blIsVariant) {
-            $oAfterbuyArticle->BaseProductType = 3;
+            $oAfterbuyArticle->BaseProductType = 0;
             return $oAfterbuyArticle;
         }
 
@@ -265,6 +266,7 @@ class fco2aartexport extends fco2abase {
      * @return object
      */
     protected function _fcAddArticleValues($oAfterbuyArticle, $oArticle) {
+        $oAfterbuyArticle->Name = $this->_fcGetArticleName($oArticle);
         $oAfterbuyArticle->Description = $oArticle->getLongDesc();
         $oAfterbuyArticle->SellingPrice = $oArticle->getPrice()->getBruttoPrice();
         $oAfterbuyArticle->TaxRate = $oArticle->getArticleVat();
@@ -275,6 +277,24 @@ class fco2aartexport extends fco2abase {
         $oAfterbuyArticle = $this->_fcAddPictures($oAfterbuyArticle, $oArticle);
 
         return $oAfterbuyArticle;
+    }
+
+    /**
+     * Returns article title plus varselect
+     *
+     * @param $oArticle
+     * @return string
+     */
+    protected function _fcGetArticleName($oArticle)
+    {
+        $sName = $oArticle->oxarticles__oxtitle->value;
+        $sVarselect = $oArticle->oxarticles__oxvarselect->value;
+
+        if ($sVarselect) {
+            $sName = $sName." ".$sVarselect;
+        }
+
+        return $sName;
     }
 
     /**

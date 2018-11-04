@@ -17,7 +17,15 @@ class fcafterbuy_oxcounter extends fcafterbuy_oxcounter_parent {
     public function fcGetCurrent($sIdent) {
         $oDb = oxDb::getDb();
         $oDb->startTransaction();
-        $sQ = "SELECT `oxcount` FROM `oxcounters` WHERE `oxident` = " . $oDb->quote($sIdent);
+
+        $sQ = "
+            SELECT 
+                `oxcount` 
+            FROM 
+                `oxcounters` 
+            WHERE 
+                `oxident` = " . $oDb->quote($sIdent);
+
         $iCnt = $oDb->getOne($sQ);
         $oDb->commitTransaction();
 

@@ -25,16 +25,27 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
     protected function _sendOrderByEmail($oUser = null, $oBasket = null, $oPayment = null) {
         $iRet = parent::_sendOrderByEmail($oUser, $oBasket, $oPayment);
         $oConfig = $this->getConfig();
-        $oFcAfterbuyOrder = oxNew('fco2aorder');
         $blSendOrdersOnTheFly = (bool) $oConfig->getConfigParam('blFcSendOrdersOnTheFly');
-        if ($blSendOrdersOnTheFly) {
-            try {
-                $oFcAfterbuyOrder->fcWriteLog('MESSAGE: Attempting to send order: '.$this->oxorder__oxordernr->value.' to Afterbuy...', 3);
-                $this->_fcMarkOrderPaid($oBasket);
-                $oFcAfterbuyOrder->fcSendOrderToAfterbuy($this, $oUser);
-            } catch(Exception $e) {
-                $oFcAfterbuyOrder->fcWriteLog('ERROR: Could not send order with ordernr:'.$this->oxorder__oxordernr->value.'. Error that was catched:'.$e->getMessage(), 1);
-            }
+
+        if (!$blSendOrdersOnTheFly) return $iRet;
+
+        try {
+            $oFcAfterbuyOrder = oxNew('fco2aorder');
+            $sMessage =
+                'MESSAGE: Attempting to send order: '.
+                $this->oxorder__oxordernr->value.
+                ' to Afterbuy...';
+
+            $oFcAfterbuyOrder->fcWriteLog($sMessage, 3);
+            $this->_fcMarkOrderPaid($oBasket);
+            $oFcAfterbuyOrder->fcSendOrderToAfterbuy($this, $oUser);
+        } catch(Exception $e) {
+            $sMessage =
+                'ERROR: Could not send order with ordernr:'.
+                $this->oxorder__oxordernr->value.
+                '. Error that was catched:'.
+                $e->getMessage();
+            $oFcAfterbuyOrder->fcWriteLog($sMessage, 1);
         }
 
         return $iRet;
@@ -48,16 +59,19 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
      */
     protected function _fcMarkOrderPaid($oBasket) {
         $blSetPaid = $this->_fcCheckPaid($oBasket);
-        if ($blSetPaid) {
-            $oDb = oxDb::getDb();
-            $sDate = date('Y-m-d H:i:s', oxRegistry::get("oxUtilsDate")->getTime());
 
-            $sQ = 'update oxorder set oxpaid=? where oxid=?';
-            $oDb->execute($sQ, array($sDate, $this->getId()));
+        if (!$blSetPaid) return;
 
-            //updating order object
-            $this->oxorder__oxpaid = new oxField($sDate);
-        }
+        $oUtilsDate = oxRegistry::get("oxUtilsDate");
+
+        $oDb = oxDb::getDb();
+        $sDate = date('Y-m-d H:i:s', $oUtilsDate->getTime());
+
+        $sQ = 'UPDATE oxorder SET oxpaid=? WHERE oxid=?';
+        $oDb->execute($sQ, array($sDate, $this->getId()));
+
+        //updating order object
+        $this->oxorder__oxpaid = new oxField($sDate);
     }
 
     /**
@@ -68,12 +82,16 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
      */
     protected function _fcCheckPaid($oBasket) {
         $this->_fcSetPaidPayments();
-        $blReturn = false;
-        $sPaymentId = ($oBasket === null) ? 'nopayment' : $oBasket->getPaymentId();
 
-        if (in_array($sPaymentId, $this->_aPaymentsDirectlyPaid)) {
-            $blReturn = true;
-        }
+        $blNoBasketObject = ($oBasket === null);
+        if ($blNoBasketObject) return false;
+
+        $sPaymentId = $oBasket->getPaymentId();
+
+        $blReturn = in_array(
+            $sPaymentId,
+            $this->_aPaymentsDirectlyPaid
+        );
 
         return $blReturn;
     }
@@ -86,7 +104,8 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
      */
     protected function _fcSetPaidPayments() {
         $oConfig = $this->getConfig();
-        $this->_aPaymentsDirectlyPaid = $oConfig->getConfigParam('aFcAfterbuyPaymentsSetPaid');
+        $this->_aPaymentsDirectlyPaid =
+            $oConfig->getConfigParam('aFcAfterbuyPaymentsSetPaid');
     }
 
 }
