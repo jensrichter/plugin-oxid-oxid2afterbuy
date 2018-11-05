@@ -44,7 +44,7 @@
             </fileset>
         </copy>
 
-        <replace dir="${build}">
+        <replace dir="${build}" encoding="UTF-8">
             <replacefilter token="%%VERSION%%" value="${version}"/>
             <replacefilter token="%%TODAY%%" value="${TODAY}"/>
             <include name="copy_this/modules/${pluginname}/metadata.php"/>
