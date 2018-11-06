@@ -134,45 +134,71 @@ class fco2aartexport extends fco2abase {
      * @param $sArticleOxid
      * @return mixed object|bool
      */
-    protected function _fcGetAfterbuyArticleByOxid($sArticleOxid) {
+    protected function _fcGetAfterbuyArticleByOxid($sArticleOxid)
+    {
         $oArticle = $this->_fcGetOxidArticle($sArticleOxid);
         if (!$oArticle) return false;
 
         $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
         $oAfterbuyArticle = $this->_fcAddArticleValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddVariantValues($oAfterbuyArticle, $oArticle);
-        // $oAfterbuyArticle = $this->_fcAddParentValues($oAfterbuyArticle, $oArticle);
+        $oAfterbuyArticle = $this->_fcAddAttributeValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddManufacturerValues($oAfterbuyArticle, $oArticle);
 
         return $oAfterbuyArticle;
     }
 
-
     /**
-     * Add all informations relevant for variation set assignments
+     * Add attributes of product to afterbuy article
      *
      * @param $oAfterbuyArticle
      * @param $oArticle
      * @return object
      */
-    protected function _fcAddParentValues($oAfterbuyArticle, $oArticle) {
-        $sParentId = $oArticle->oxarticles__oxparentid->value;
-        $blIsVariant = ($sParentId != '');
+    protected function _fcAddAttributeValues($oAfterbuyArticle, $oArticle)
+    {
+        $blValid = ($oArticle->oxarticles__oxparentid == '');
+        if (!$blValid) return $oAfterbuyArticle;
 
-        if (!$blIsVariant) return $oAfterbuyArticle;
+        $aAttributes = $oArticle->getAttributes();
+        $this->fcWriteLog(
+            "DEBUG: Loaded Attributes of article object with ID:".
+            $oArticle->getId(),
+            4
+        );
+        $this->fcWriteLog(
+            "DEBUG: Fetched attributes:".
+            print_r($aAttributes,true),
+            4
+        );
 
-        $oOxidParentArticle = $this->_fcGetOxidArticle($sParentId);
+        $iPos = 1;
+        foreach ($aAttributes as $oAttribute) {
+            $sAttributeName = $oAttribute->oxattribute__oxtitle->value;
+            $sAttributeValue = $oAttribute->oxattribute__oxvalue->value;
 
-        $oAfterbuyAddBaseProduct =
-            $this->_fcAssignVariantValues(
-                $oAfterbuyArticle,
-                $oOxidParentArticle,
-                1
-            );
-        $oAfterbuyArticle->AddBaseProducts[] =
-            $oAfterbuyAddBaseProduct;
+            $oAfterbuyAddAttribute = $this->_fcGetAddAttribute();
+            $oAfterbuyAddAttribute->AttributName = $sAttributeName;
+            $oAfterbuyAddAttribute->AttributValue = $sAttributeValue;
+            $oAfterbuyAddAttribute->AttributPosition = (string) $iPos;
+            $oAfterbuyArticle->AddAttributes[] = $oAfterbuyAddAttribute;
+            $iPos++;
+        }
 
         return $oAfterbuyArticle;
+    }
+
+    /**
+     * Returns a fresh instance of AddAttribute object
+     *
+     * @param void
+     * @return object
+     */
+    protected function _fcGetAddAttribute()
+    {
+        $oAddBaseProduct = oxNew('fcafterbuyaddattribute');
+
+        return $oAddBaseProduct;
     }
 
     /**

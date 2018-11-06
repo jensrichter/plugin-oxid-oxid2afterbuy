@@ -39,7 +39,6 @@ $aModule = array(
     ),
     'files' => array(
         //core
-        'fcafterbuyaddbaseproduct'  => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddbaseproduct.php',
         'fcafterbuyaddress'         => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddress.php',
         'fcafterbuyapi'             => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyapi.php',
         'fcafterbuyart'             => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyart.php',
@@ -48,6 +47,8 @@ $aModule = array(
         'fcafterbuypayment'         => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuypayment.php',
         'fcafterbuyshipping'        => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyshipping.php',
         'fcafterbuysolditem'        => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuysolditem.php',
+        'fcafterbuyaddattribute'    => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddattribute.php',
+        'fcafterbuyaddbaseproduct'  => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddbaseproduct.php',
         'fco2abase'                 => 'fc/fcoxid2afterbuy/core/fco2abase.php',
         'fco2aorder'                => 'fc/fcoxid2afterbuy/core/fco2aorder.php',
         'fco2aartexport'            => 'fc/fcoxid2afterbuy/core/fco2aartexport.php',

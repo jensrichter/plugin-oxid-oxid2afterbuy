@@ -284,9 +284,112 @@ class fcafterbuyapi {
      */
     protected function getUpdateArticleXml($oArt) {
         $sXmlData = $this->getXmlHead('UpdateShopProducts');
-        $sXmlData .= '<Products>
-                        <Product>
-                            <ProductIdent>';
+        $sXmlData .= '<Products><Product>';
+
+        $sXmlData = $this->_fcAddProductIdent($oArt, $sXmlData);
+        $sXmlData = $this->_fcAddProductBaseValues($oArt, $sXmlData);
+        $sXmlData = $this->_fcAddManufacturer($oArt, $sXmlData);
+        $sXmlData = $this->_fcAddBaseProducts($oArt, $sXmlData);
+        $sXmlData = $this->_fcAddAttributes($oArt, $sXmlData);
+        $sXmlData = $this->_fcAddPictures($oArt, $sXmlData);
+
+        $sXmlData .= '</Product></Products>';
+        $sXmlData .= $this->getXmlFoot();
+
+        return $sXmlData;
+    }
+
+    /**
+     * Adding pictures to xml
+     *
+     * @param $oArt
+     * @param $sXmlData
+     * @return string
+     */
+    protected function _fcAddPictures($oArt, $sXmlData)
+    {
+        $sXmlData .= '<ProductPictures>';
+        for($iIndex=1;$iIndex<=12;$iIndex++) {
+            $sPictureAttribute = 'ProductPicture_Url_'.$iIndex;
+            $sPictureUrl = $oArt->$sPictureAttribute;
+            if (!$sPictureUrl) continue;
+
+            $sXmlData .= '
+                <ProductPicture>
+                    <Nr>'.$iIndex.'</Nr>
+                    <Url>' . $sPictureUrl . '</Url>
+                    <AltText><![CDATA[' . $oArt->Name . ']]></AltText>        
+                </ProductPicture>
+            ';
+        }
+        $sXmlData .= '</ProductPictures>';
+
+        return $sXmlData;
+    }
+
+    /**
+     * Adds manufacturer related values to xml
+     *
+     * @param $oArt
+     * @param $sXmlData
+     * @return string
+     */
+    protected function _fcAddManufacturer($oArt, $sXmlData) {
+        if ($oArt->EAN != "") {
+            $sXmlData .= '
+                <ManufacturerStandardProductIDType><![CDATA[EAN]]></ManufacturerStandardProductIDType>
+                <ManufacturerStandardProductIDValue><![CDATA[' . $oArt->EAN . ']]></ManufacturerStandardProductIDValue>
+            ';
+        }
+
+        return $sXmlData;
+    }
+
+    /**
+     * Adding xml base values of product
+     *
+     * @param $oArt
+     * @param $sXmlData
+     * @return string
+     */
+    protected function _fcAddProductBaseValues($oArt, $sXmlData)
+    {
+        $sXmlData .= '
+            <UserProductID>' . $oArt->UserProductID . '</UserProductID>
+            <Anr>' . $oArt->Anr . '</Anr>
+            <EAN>' . $oArt->EAN . '</EAN>
+            <Name><![CDATA[' . $oArt->Name . ']]></Name>
+            <ShortDescription><![CDATA[' . $oArt->ShortDescription . ']]></ShortDescription>
+            <Description><![CDATA[' . $oArt->Description . ']]></Description>
+            <Quantity>' . $oArt->Quantity . '</Quantity>
+            <Stock>1</Stock>
+            <Discontinued>1</Discontinued>
+            <MergeStock>1</MergeStock>
+            <SellingPrice>' . str_replace('.',',',$oArt->SellingPrice) . '</SellingPrice>
+            <ImageSmallURL>'.$oArt->ImageSmallURL.'</ImageSmallURL>
+            <ImageLargeURL>'.$oArt->ImageLargeURL.'</ImageLargeURL>
+            <ProductBrand>'.$oArt->ProductBrand.'</ProductBrand>
+            <TaxRate>'.$oArt->TaxRate.'</TaxRate>
+            <ItemSize>'.$oArt->ItemSize.'</ItemSize>
+            <CanonicalUrl>'.$oArt->CanonicalUrl.'</CanonicalUrl>
+            <ManufacturerPartNumber>'.$oArt->ManufacturerPartNumber.'</ManufacturerPartNumber>
+            <Keywords>'.$oArt->Keywords.'</Keywords>
+            <BuyingPrice>'.str_replace('.',',',$oArt->BuyingPrice).'</BuyingPrice>
+            <Weight>'.$oArt->Weight.'</Weight>
+        ';
+
+        return $sXmlData;
+    }
+
+    /**
+     * Adds xml part for product identification
+     *
+     * @param $oArt
+     * @param $sXmlData
+     * @return string
+     */
+    protected function _fcAddProductIdent($oArt, $sXmlData) {
+        $sXmlData .= '<ProductIdent>';
         if (!$oArt->ProductID) {
             $sXmlData .= '<ProductInsert>1</ProductInsert>
                                 <BaseProductType>' . $oArt->BaseProductType . '</BaseProductType>
@@ -296,50 +399,36 @@ class fcafterbuyapi {
         } else {
             $sXmlData .= '<ProductID>' . $oArt->ProductID . '</ProductID>';
         }
-        $sXmlData .= '      </ProductIdent>
-                            <UserProductID>' . $oArt->UserProductID . '</UserProductID>
-                            <Anr>' . $oArt->Anr . '</Anr>
-                            <EAN>' . $oArt->EAN . '</EAN>
-                            <Name><![CDATA[' . $oArt->Name . ']]></Name>
-                            <ShortDescription><![CDATA[' . $oArt->ShortDescription . ']]></ShortDescription>
-                            <Description><![CDATA[' . $oArt->Description . ']]></Description>
-                            <Quantity>' . $oArt->Quantity . '</Quantity>
-                            <Stock>1</Stock>
-                            <Discontinued>1</Discontinued>
-                            <MergeStock>1</MergeStock>
-                            <SellingPrice>' . str_replace('.',',',$oArt->SellingPrice) . '</SellingPrice>
-                            <ImageSmallURL>'.$oArt->ImageSmallURL.'</ImageSmallURL>
-                            <ImageLargeURL>'.$oArt->ImageLargeURL.'</ImageLargeURL>
-                            <ProductBrand>'.$oArt->ProductBrand.'</ProductBrand>
-                            <TaxRate>'.$oArt->TaxRate.'</TaxRate>
-                            <ItemSize>'.$oArt->ItemSize.'</ItemSize>
-                            <CanonicalUrl>'.$oArt->CanonicalUrl.'</CanonicalUrl>
-                            <ManufacturerPartNumber>'.$oArt->ManufacturerPartNumber.'</ManufacturerPartNumber>
-                            <Keywords>'.$oArt->Keywords.'</Keywords>
-                            <BuyingPrice>'.str_replace('.',',',$oArt->BuyingPrice).'</BuyingPrice>
-                            <Weight>'.$oArt->Weight.'</Weight>
-        ';
-        if ($oArt->EAN != "") {
-            $sXmlData .= '<ManufacturerStandardProductIDType><![CDATA[EAN]]></ManufacturerStandardProductIDType>
-                            <ManufacturerStandardProductIDValue><![CDATA[' . $oArt->EAN . ']]></ManufacturerStandardProductIDValue>';
-        }
+        $sXmlData .= '      </ProductIdent>';
 
-        $sXmlData = $this->_fcAddBaseProducts($oArt, $sXmlData);
+        return $sXmlData;
+    }
 
-        $sXmlData .= '<ProductPictures>';
-        for($iIndex=1;$iIndex<=12;$iIndex++) {
-            $sPictureAttribute = 'ProductPicture_Url_'.$iIndex;
-            $sPictureUrl = $oArt->$sPictureAttribute;
-            if (!$sPictureUrl) continue;
-            $sXmlData .= '<ProductPicture>
-                            <Nr>'.$iIndex.'</Nr>
-                            <Url>' . $sPictureUrl . '</Url>
-                            <AltText><![CDATA[' . $oArt->Name . ']]></AltText>        
-                          </ProductPicture>';
+    /**
+     * Adds product attributes
+     *
+     * @param $oArt
+     * @param $sXmlData
+     * @return string
+     */
+    protected function _fcAddAttributes($oArt, $sXmlData)
+    {
+        if (!is_array($oArt->AddAttributes)) return $sXmlData;
+
+        $sXmlData .= "<AddAttributes>";
+        $sXmlData .= "<UpdateAction>1</UpdateAction>";
+        foreach ($oArt->AddAttributes as $oAddAttribute) {
+            $sXmlData .= "
+                <AddAttribut>
+                  <AttributName><![CDATA[".$oAddAttribute->AttributName."]]></AttributName>
+                  <AttributValue><![CDATA[".$oAddAttribute->AttributValue."]]></AttributValue>
+                  <AttributTyp>".$oAddAttribute->AttributTyp."</AttributTyp>
+                  <AttributPosition>".$oAddAttribute->AttributPosition."</AttributPosition>
+                  <AttributRequired>".$oAddAttribute->AttributRequired."</AttributRequired>
+                </AddAttribut>                
+            ";
         }
-        $sXmlData .= '</ProductPictures>';
-        $sXmlData .= '</Product></Products>';
-        $sXmlData .= $this->getXmlFoot();
+        $sXmlData .= "</AddAttributes>";
 
         return $sXmlData;
     }
