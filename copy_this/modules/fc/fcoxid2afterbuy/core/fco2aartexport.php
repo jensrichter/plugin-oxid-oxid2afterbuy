@@ -29,7 +29,6 @@ class fco2aartexport extends fco2abase {
     public function execute()
     {
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
-
         $aArticleIds = $this->_fcGetAffectedArticleIds();
 
         foreach ($aArticleIds as $sArticleOxid) {
@@ -47,7 +46,7 @@ class fco2aartexport extends fco2abase {
      * Fetching variants of product and send each to AB
      *
      * @param string $sArticleOxid
-     * @return voio
+     * @return void
      */
     protected function _fcAddVariants($sArticleOxid) {
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
@@ -63,7 +62,7 @@ class fco2aartexport extends fco2abase {
 
             $sResponse = $oAfterbuyApi->updateArticleToAfterbuy($oArt);
             $this->_fcValidateCallStatus($sResponse);
-            $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
+            $this->_fcAddAfterbuyIdToArticle($sVariantArticleOxid, $sResponse);
         }
     }
 
@@ -78,7 +77,9 @@ class fco2aartexport extends fco2abase {
         $sCallStatus = (string) $oXml->CallStatus;
         switch ($sCallStatus) {
             case 'Warning':
-                $sMessage = "WARNING: ".(string)$oXml->Result->WarningList->Warning->WarningLongDescription;
+                $sMessage =
+                    "WARNING: ".
+                    (string)$oXml->Result->WarningList->Warning->WarningLongDescription;
                 $this->fcWriteLog($sMessage,2);
                 break;
         }
@@ -100,7 +101,6 @@ class fco2aartexport extends fco2abase {
                 $oArticle->oxarticles__fcafterbuyid = new oxField($sProductId);
                 $oArticle->save();
             }
-
         }
     }
 
@@ -114,9 +114,16 @@ class fco2aartexport extends fco2abase {
     {
         $oArticle = oxNew('oxarticle');
         if (!$oArticle->load($sArticleOxid))  {
-            $this->fcWriteLog("ERROR: Could not load article object with ID:".$sArticleOxid,1);
+            $this->fcWriteLog("ERROR: Could not load article object with ID:".$sArticleOxid, 1);
             return false;
         }
+
+        $this->fcWriteLog("DEBUG: Loaded OXID article object with ID:".$sArticleOxid, 4);
+        $this->fcWriteLog(
+            "DEBUG: Existing AfterbuyID is:".
+            $oArticle->oxarticles__fcafterbuyid->value,
+            4
+        );
 
         return $oArticle;
     }
@@ -132,9 +139,38 @@ class fco2aartexport extends fco2abase {
         if (!$oArticle) return false;
 
         $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
-        $oAfterbuyArticle = $this->_fcAddVariantValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddArticleValues($oAfterbuyArticle, $oArticle);
+        $oAfterbuyArticle = $this->_fcAddVariantValues($oAfterbuyArticle, $oArticle);
+        // $oAfterbuyArticle = $this->_fcAddParentValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddManufacturerValues($oAfterbuyArticle, $oArticle);
+
+        return $oAfterbuyArticle;
+    }
+
+
+    /**
+     * Add all informations relevant for variation set assignments
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return object
+     */
+    protected function _fcAddParentValues($oAfterbuyArticle, $oArticle) {
+        $sParentId = $oArticle->oxarticles__oxparentid->value;
+        $blIsVariant = ($sParentId != '');
+
+        if (!$blIsVariant) return $oAfterbuyArticle;
+
+        $oOxidParentArticle = $this->_fcGetOxidArticle($sParentId);
+
+        $oAfterbuyAddBaseProduct =
+            $this->_fcAssignVariantValues(
+                $oAfterbuyArticle,
+                $oOxidParentArticle,
+                1
+            );
+        $oAfterbuyArticle->AddBaseProducts[] =
+            $oAfterbuyAddBaseProduct;
 
         return $oAfterbuyArticle;
     }
@@ -226,18 +262,10 @@ class fco2aartexport extends fco2abase {
      */
     protected function _fcAddVariantBaseValues($oAfterbuyArticle, $oArticle)
     {
-        $blIsVariant = $oArticle->isVariant();
-        if ($blIsVariant) {
-            $oAfterbuyArticle->BaseProductType = 0;
-            return $oAfterbuyArticle;
-        }
-
         $aVariantIds = $oArticle->getVariantIds();
         $blIsParent = (bool) count($aVariantIds);
 
-        if ($blIsParent) {
-            $oAfterbuyArticle->BaseProductType = 1;
-        }
+        $oAfterbuyArticle->BaseProductType = ($blIsParent) ? 1 : 0;
 
         return $oAfterbuyArticle;
     }
@@ -334,7 +362,7 @@ class fco2aartexport extends fco2abase {
     }
 
     /**
-     * Translated
+     * Translates demanded Nodes to source in shop
      *
      * @param $oAfterbuyArticle
      * @param $oArticle

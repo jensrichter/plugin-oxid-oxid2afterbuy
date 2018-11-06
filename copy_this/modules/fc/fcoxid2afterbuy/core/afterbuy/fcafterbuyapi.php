@@ -289,7 +289,7 @@ class fcafterbuyapi {
                             <ProductIdent>';
         if (!$oArt->ProductID) {
             $sXmlData .= '<ProductInsert>1</ProductInsert>
-                                <BaseProductType>0</BaseProductType>
+                                <BaseProductType>' . $oArt->BaseProductType . '</BaseProductType>
                                 <UserProductID><![CDATA[' . $oArt->UserProductID . ']]></UserProductID>
                                 <Anr>' . $oArt->Anr . '</Anr>
                                 <EAN>' . $oArt->EAN . '</EAN>';

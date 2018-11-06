@@ -185,6 +185,12 @@ class fco2abase extends oxBase {
     protected function _fcGetAfterbuyArticle() {
         $oAfterbuyArticle = oxNew("fcafterbuyart");
 
+        $this->fcWriteLog(
+            "DEBUG: Created Afterbuy Object:".
+            print_r($oAfterbuyArticle,true),
+            4
+        );
+
         return $oAfterbuyArticle;
     }
 
