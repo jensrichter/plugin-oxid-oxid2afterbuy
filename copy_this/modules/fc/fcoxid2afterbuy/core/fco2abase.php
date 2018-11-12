@@ -155,12 +155,7 @@ class fco2abase extends oxBase {
      * @return object
      */
     protected function _fcGetAfterbuyStatus() {
-        $oViewConfig = oxRegistry::get('oxViewConfig');
-        $sPathToModule = $oViewConfig->getModulePath('fcoxid2afterbuy');
-        $sPathToAfterbuyLib = $sPathToModule.'lib/fcafterbuyorderstatus.php';
-        include_once($sPathToAfterbuyLib);
-        $oAfterbuyStatus = new fcafterbuyorderstatus();
-
+        $oAfterbuyStatus = oxNew('fcafterbuyorderstatus');
         return $oAfterbuyStatus;
     }
 

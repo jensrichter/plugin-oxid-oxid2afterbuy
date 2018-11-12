@@ -81,6 +81,7 @@ class fcafterbuyart
     public $EnergyClassPictureUrl = null;
     public $Gender = null;
     public $AddBaseProducts = null;
+    public $AddCatalogs = null;
     public $AddAttributes = null;
     public $AgeGroup = null;
     public $ProductPicture_Nr_1 = null;

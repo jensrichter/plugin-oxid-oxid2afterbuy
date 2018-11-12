@@ -25,8 +25,8 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
     protected function _sendOrderByEmail($oUser = null, $oBasket = null, $oPayment = null) {
         $iRet = parent::_sendOrderByEmail($oUser, $oBasket, $oPayment);
         $oConfig = $this->getConfig();
-        $blSendOrdersOnTheFly = (bool) $oConfig->getConfigParam('blFcSendOrdersOnTheFly');
-
+        $blSendOrdersOnTheFly =
+            (bool) $oConfig->getConfigParam('blFcSendOrdersOnTheFly');
         if (!$blSendOrdersOnTheFly) return $iRet;
 
         try {

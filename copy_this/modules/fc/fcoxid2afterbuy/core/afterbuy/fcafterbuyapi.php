@@ -290,6 +290,7 @@ class fcafterbuyapi {
         $sXmlData = $this->_fcAddProductBaseValues($oArt, $sXmlData);
         $sXmlData = $this->_fcAddManufacturer($oArt, $sXmlData);
         $sXmlData = $this->_fcAddBaseProducts($oArt, $sXmlData);
+        $sXmlData = $this->_fcAddCatalogs($oArt, $sXmlData);
         $sXmlData = $this->_fcAddAttributes($oArt, $sXmlData);
         $sXmlData = $this->_fcAddPictures($oArt, $sXmlData);
 
@@ -403,6 +404,34 @@ class fcafterbuyapi {
 
         return $sXmlData;
     }
+
+    /**
+     * Adds product catalogs
+     *
+     * @param $oArt
+     * @param $sXmlData
+     * @return string
+     */
+    protected function _fcAddCatalogs($oArt, $sXmlData)
+    {
+        if (!is_array($oArt->AddAttributes)) return $sXmlData;
+
+        $sXmlData .= "<AddCatalogs>";
+        $sXmlData .= "<UpdateAction>1</UpdateAction>";
+        foreach ($oArt->AddCatalogs as $oAddCatalog) {
+            $sXmlData .= "
+                <AddCatalog>
+                  <CatalogID><![CDATA[".$oAddCatalog->CatalogID."]]></CatalogID>
+                  <CatalogName><![CDATA[".$oAddCatalog->CatalogName."]]></CatalogName>
+                  <CatalogLevel>".$oAddCatalog->CatalogLevel."</CatalogLevel>
+                </AddCatalog>                
+            ";
+        }
+        $sXmlData .= "</AddCatalogs>";
+
+        return $sXmlData;
+    }
+
 
     /**
      * Adds product attributes

@@ -47,6 +47,7 @@ $aModule = array(
         'fcafterbuypayment'         => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuypayment.php',
         'fcafterbuyshipping'        => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyshipping.php',
         'fcafterbuysolditem'        => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuysolditem.php',
+        'fcafterbuyaddcatalog'      => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddcatalog.php',
         'fcafterbuyaddattribute'    => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddattribute.php',
         'fcafterbuyaddbaseproduct'  => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddbaseproduct.php',
         'fco2abase'                 => 'fc/fcoxid2afterbuy/core/fco2abase.php',
@@ -72,30 +73,154 @@ $aModule = array(
     'blocks' => array(
     ),
     'settings' => array(
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyShopInterfaceBaseUrl', 'type' => 'str',  'value' => "https://api.afterbuy.de/afterbuy/ShopInterface.aspx" ),
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyAbiUrl', 'type' => 'str',  'value' => "https://api.afterbuy.de/afterbuy/ABInterface.aspx" ),
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyPartnerId', 'type' => 'str',  'value' => "" ),
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyPartnerPassword', 'type' => 'password',  'value' => "" ),
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyUsername', 'type' => 'str',  'value' => "" ),
-        array( 'group' => 'fcafterbuy_connect', 'name' => 'sFcAfterbuyUserPassword', 'type' => 'password',  'value' => "" ),
+        array(
+            'group' => 'fcafterbuy_connect',
+            'name' => 'sFcAfterbuyShopInterfaceBaseUrl',
+            'type' => 'str',
+            'value' => "https://api.afterbuy.de/afterbuy/ShopInterface.aspx"
+        ),
+        array(
+            'group' => 'fcafterbuy_connect',
+            'name' => 'sFcAfterbuyAbiUrl',
+            'type' => 'str',
+            'value' => "https://api.afterbuy.de/afterbuy/ABInterface.aspx"
+        ),
+        array(
+            'group' => 'fcafterbuy_connect',
+            'name' => 'sFcAfterbuyPartnerId',
+            'type' => 'str',
+            'value' => ""
+        ),
+        array(
+            'group' => 'fcafterbuy_connect',
+            'name' => 'sFcAfterbuyPartnerPassword',
+            'type' => 'password',
+            'value' => ""
+        ),
+        array(
+            'group' => 'fcafterbuy_connect',
+            'name' => 'sFcAfterbuyUsername',
+            'type' => 'str',
+            'value' => ""
+        ),
+        array(
+            'group' => 'fcafterbuy_connect',
+            'name' => 'sFcAfterbuyUserPassword',
+            'type' => 'password',
+            'value' => ""
+        ),
 
-        array( 'group' => 'fcafterbuy_export','name' => 'blFcAfterbuyExportAll', 'type' => 'bool',  'value' => false),
+        array(
+            'group' => 'fcafterbuy_export',
+            'name' => 'blFcAfterbuyExportAll',
+            'type' => 'bool',
+            'value' => false
+        ),
+        // array('group' => 'fcafterbuy_export', 'name' => 'sFcAfterbuyArticleIdent', 'type' => 'select', 'value' => '3', 'constrains' => '0|1|2|3' ),
 
-        array( 'group' => 'fcafterbuy_order', 'name' => 'blFcSendOrdersOnTheFly', 'type' => 'bool',  'value' => false ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitPayments', 'type' => 'aarr',  'value' => array() ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitDynBankname', 'type' => 'aarr',  'value' => array() ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitDynBankzip', 'type' => 'aarr',  'value' => array() ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitDynAccountNr', 'type' => 'aarr',  'value' => array() ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyDebitDynAccountOwner', 'type' => 'aarr',  'value' => array() ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'sFcAfterbuyFeedbackType', 'type' => 'select', 'value' => '0', 'constrains' => '0|1|2' ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'sFcAfterbuyDeliveryCalculation', 'type' => 'select', 'value' => '1', 'constrains' => '0|1' ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'sFcAfterbuySendVat', 'type' => 'select', 'value' => '0', 'constrains' => '0|1' ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'blFcAfterbuyUseOwnCustNr', 'type' => 'bool', 'value' => false ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'sFcAfterbuyCustIdent', 'type' => 'select', 'value' => '1', 'constrains' => '0|1|2' ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'sFcAfterbuyOverwriteEbayName', 'type' => 'select', 'value' => '1', 'constrains' => '0|1' ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyPaymentsSetPaid', 'type' => 'arr',  'value' => array() ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'sFcAfterbuyMarkId', 'type' => 'str', 'value' => '' ),
-        array( 'group' => 'fcafterbuy_order', 'name' => 'aFcAfterbuyPayments', 'type' => 'aarr',
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'blFcSendOrdersOnTheFly',
+            'type' => 'bool',
+            'value' => false
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'aFcAfterbuyDebitPayments',
+            'type' => 'arr',
+            'value' => array(
+                'oxiddebitnote'
+            )
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'aFcAfterbuyDebitDynBankname',
+            'type' => 'aarr',
+            'value' => array(
+                'oxiddebitnote'=>'lsbankname'
+            )
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'aFcAfterbuyDebitDynBankzip',
+            'type' => 'aarr',
+            'value' => array(
+                'oxiddebitnote'=>'lsbankblz'
+            )
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'aFcAfterbuyDebitDynAccountNr',
+            'type' => 'aarr',
+            'value' => array(
+                'oxiddebitnote'=>'lsktonr'
+            )
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'aFcAfterbuyDebitDynAccountOwner',
+            'type' => 'aarr',
+            'value' => array(
+                'oxiddebitnote'=>'lsktoinhaber'
+            )
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'sFcAfterbuyFeedbackType',
+            'type' => 'select',
+            'value' => '0',
+            'constrains' => '0|1|2'
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'sFcAfterbuyDeliveryCalculation',
+            'type' => 'select',
+            'value' => '1',
+            'constrains' => '0|1'
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'sFcAfterbuySendVat',
+            'type' => 'select',
+            'value' => '0',
+            'constrains' => '0|1'
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'blFcAfterbuyUseOwnCustNr',
+            'type' => 'bool',
+            'value' => false
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'sFcAfterbuyCustIdent',
+            'type' => 'select',
+            'value' => '1',
+            'constrains' => '0|1|2'
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'sFcAfterbuyOverwriteEbayName',
+            'type' => 'select',
+            'value' => '1',
+            'constrains' => '0|1'
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'aFcAfterbuyPaymentsSetPaid',
+            'type' => 'arr',
+            'value' => array()
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'sFcAfterbuyMarkId',
+            'type' => 'str',
+            'value' => ''
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'aFcAfterbuyPayments',
+            'type' => 'aarr',
             'value' => array(
                 1=>'Überweisung',
                 2=>'Bar/Abholung',
@@ -127,7 +252,12 @@ $aModule = array(
                 34=>'Billsafe Ratenkauf',
             )
         ),
-        // array( 'group' => 'fcafterbuy_export', 'name' => 'sFcAfterbuyArticleIdent', 'type' => 'select', 'value' => '3', 'constrains' => '0|1|2|3' ),
-        array( 'group' => 'fcafterbuy_debug', 'name' => 'iFcAfterbuyLogLevel', 'type' => 'select',  'value' => '0', 'constraints' => '0|1|2|3|4'),
+        array(
+            'group' => 'fcafterbuy_debug',
+            'name' => 'iFcAfterbuyLogLevel',
+            'type' => 'select',
+            'value' => '0',
+            'constraints' => '0|1|2|3|4'
+        ),
     )
 );

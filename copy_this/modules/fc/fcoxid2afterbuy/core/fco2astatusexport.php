@@ -61,7 +61,7 @@ class fco2astatusexport extends fco2abase {
      * @return object
      */
     protected function _fcAssignOrderDataToOrderStatus($oOrder, $oAfterbuyOrderStatus) {
-        $oAfterbuyOrderStatus->OrderID = $oOrder->oxorder__fcafterbuy_uid->value;
+        $oAfterbuyOrderStatus->OrderID = $oOrder->oxorder__fcafterbuy_aid->value;
         $sOrderSendDate = $oOrder->oxorder__oxsenddate->value;
         $sPaidDate = $oOrder->oxorder__oxpaid->value;
 

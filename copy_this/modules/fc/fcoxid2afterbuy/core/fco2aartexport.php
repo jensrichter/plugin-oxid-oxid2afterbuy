@@ -141,11 +141,70 @@ class fco2aartexport extends fco2abase {
 
         $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
         $oAfterbuyArticle = $this->_fcAddArticleValues($oAfterbuyArticle, $oArticle);
+        $oAfterbuyArticle = $this->_fcAddCatalogValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddVariantValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddAttributeValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddManufacturerValues($oAfterbuyArticle, $oArticle);
 
         return $oAfterbuyArticle;
+    }
+
+    /**
+     * Adding catalog nodes of this product
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return object
+     */
+    protected function _fcAddCatalogValues($oAfterbuyArticle, $oArticle)
+    {
+        $oCategory = $oArticle->getCategory();
+        if (!$oCategory) return $oAfterbuyArticle;
+
+        $aCategories = $this->_fcFetchArticleCategoryValues($oCategory);
+
+        foreach ($aCategories as $aCategory) {
+            $oAddCatalog = $this->_fcGetAddCatalog();
+            $oAddCatalog->CatalogID = $aCategory['CatalogID'];
+            $oAddCatalog->CatalogName = $aCategory['CatalogName'];
+            $oAddCatalog->CatalogLevel = $aCategory['CatalogLevel'];
+            $oAfterbuyArticle->AddCatalogs[] = $oAddCatalog;
+        }
+
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Gets depth in catgory tree and returns array with needed node
+     * information
+     *
+     * @param $oCategory
+     * @return array
+     */
+    protected function _fcFetchArticleCategoryValues($oCategory)
+    {
+        $iLevel = 1;
+        $aTmpCategories = $aCategories = [];
+
+
+        while ($oCategory->getParentCategory()) {
+            $iLevel++;
+            $aTmpCategories[] = $oCategory;
+            $oCategory = $oCategory->getParentCategory();
+        }
+
+        foreach ($aTmpCategories as $oCategory) {
+            $aCategories[] = array(
+                'CatalogID' => $oCategory->getId(),
+                'CatalogName' => $oCategory->getTitle(),
+                'CatalogLevel' => $iLevel,
+            );
+
+            $iLevel--;
+        }
+
+        return $aCategories;
     }
 
     /**
@@ -157,9 +216,6 @@ class fco2aartexport extends fco2abase {
      */
     protected function _fcAddAttributeValues($oAfterbuyArticle, $oArticle)
     {
-        $blValid = ($oArticle->oxarticles__oxparentid == '');
-        if (!$blValid) return $oAfterbuyArticle;
-
         $aAttributes = $oArticle->getAttributes();
         $this->fcWriteLog(
             "DEBUG: Loaded Attributes of article object with ID:".
@@ -196,9 +252,22 @@ class fco2aartexport extends fco2abase {
      */
     protected function _fcGetAddAttribute()
     {
-        $oAddBaseProduct = oxNew('fcafterbuyaddattribute');
+        $oAddAttribute = oxNew('fcafterbuyaddattribute');
 
-        return $oAddBaseProduct;
+        return $oAddAttribute;
+    }
+
+    /**
+     * Returns a fresh instance of AddCatalog object
+     *
+     * @param void
+     * @return object
+     */
+    protected function _fcGetAddCatalog()
+    {
+        $oAddCatalog = oxNew('fcafterbuyaddcatalog');
+
+        return $oAddCatalog;
     }
 
     /**
