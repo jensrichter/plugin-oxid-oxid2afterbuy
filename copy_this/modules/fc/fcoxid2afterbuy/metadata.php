@@ -34,11 +34,13 @@ $aModule = array(
     'email'        => 'support@fatchip.de',
     'extend'       => array(
         // models
+        'oxarticle'         => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxarticle',
+        'oxuser'            => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxuser',
         'oxorder'           => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxorder',
         'oxcounter'         => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxcounter',
     ),
     'files' => array(
-        //core
+        // core
         'fcafterbuyaddress'         => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddress.php',
         'fcafterbuyapi'             => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyapi.php',
         'fcafterbuyart'             => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyart.php',
@@ -50,13 +52,14 @@ $aModule = array(
         'fcafterbuyaddcatalog'      => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddcatalog.php',
         'fcafterbuyaddattribute'    => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddattribute.php',
         'fcafterbuyaddbaseproduct'  => 'fc/fcoxid2afterbuy/core/afterbuy/fcafterbuyaddbaseproduct.php',
+        'fco2a_events'              => 'fc/fcoxid2afterbuy/core/fco2a_events.php',
+        'fco2adatabase'             => 'fc/fcoxid2afterbuy/core/fco2adatabase.php',
         'fco2abase'                 => 'fc/fcoxid2afterbuy/core/fco2abase.php',
         'fco2aorder'                => 'fc/fcoxid2afterbuy/core/fco2aorder.php',
         'fco2aartexport'            => 'fc/fcoxid2afterbuy/core/fco2aartexport.php',
         'fco2aorderimport'          => 'fc/fcoxid2afterbuy/core/fco2aorderimport.php',
         'fco2astatusexport'         => 'fc/fcoxid2afterbuy/core/fco2astatusexport.php',
-
-        //controllers->admin
+        // controllers->admin
         'fcafterbuy_article_admin'      => 'fc/fcoxid2afterbuy/application/controllers/admin/fcafterbuy_article_admin.php',
         'fcafterbuy_admin'              => 'fc/fcoxid2afterbuy/application/controllers/admin/fcafterbuy_admin.php',
         'fcafterbuy_list'               => 'fc/fcoxid2afterbuy/application/controllers/admin/fcafterbuy_list.php',
@@ -71,6 +74,10 @@ $aModule = array(
         'fcafterbuy_orderinfo.tpl'      => 'fc/fcoxid2afterbuy/application/views/admin/tpl/fcafterbuy_orderinfo.tpl',
     ),
     'blocks' => array(
+    ),
+    'events'        => array(
+        'onActivate' => 'fco2a_events::onActivate',
+        'onDeactivate' => 'fco2a_events::onDeactivate',
     ),
     'settings' => array(
         array(

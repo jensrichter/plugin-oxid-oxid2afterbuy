@@ -36,14 +36,14 @@
 [{*
 $oxid needs to be from oxarticles
 *}]
-<form name="transfer" id="transfer" action="[{ $oViewConf->getSelfLink() }]" method="post">
+<form name="transfer" id="transfer" action="[{$oViewConf->getSelfLink()}]" method="post">
     [{$oViewConf->getHiddenSid()}]
     <input type="hidden" name="oxid" value="[{ $oxid }]">
     <input type="hidden" name="oxidCopy" value="[{ $oxid }]">
     <input type="hidden" name="cl" value="fcafterbuy_article_admin">
     <input type="hidden" name="editlanguage" value="[{ $editlanguage }]">
 </form>
-<form name="myedit" id="myedit" action="[{ $oViewConf->getSelfLink() }]" method="post" style="padding: 0px;margin: 0px;height:0px;">
+<form name="myedit" id="myedit" action="[{$oViewConf->getSelfLink()}]" method="post" style="padding: 0px;margin: 0px;height:0px;">
     [{$oViewConf->getHiddenSid()}]
     <input type="hidden" name="cl" value="fcafterbuy_article_admin">
     <input type="hidden" name="fnc" value="">
@@ -55,16 +55,16 @@ $oxid needs to be from oxarticles
             <td valign="top" class="edittext">
                 <table cellspacing="0" cellpadding="0" border="0">
                     [{oxhasrights object=$edit field='fcafterbuyactive' readonly=$readonly}]
-                    <tr>
-                        <td class="edittext" width="120">
-                            [{ oxmultilang ident="FC_AFTERBUY_ARTICLE_ACTIVE" }]
-                        </td>
-                        <td class="edittext">
-                            <input type="hidden" name="editval[oxarticles__fcafterbuyactive]" value="0">
-                            <input class="edittext" type="checkbox" name="editval[oxarticles__fcafterbuyactive]" value='1' [{if $edit->oxarticles__fcafterbuyactive->value == 1}]checked[{/if}]>
-                            [{ oxinputhelp ident="FC_AFTERBUY_ARTICLE_ACTIVE_HELP" }]
-                        </td>
-                    </tr>
+                        <tr>
+                            <td class="edittext" width="120">
+                                [{ oxmultilang ident="FC_AFTERBUY_ARTICLE_ACTIVE" }]
+                            </td>
+                            <td class="edittext">
+                                <input type="hidden" name="editvalafterbuy[oxarticles__fcafterbuyactive]" value="0">
+                                <input class="edittext" type="checkbox" name="editvalafterbuy[oxarticles__fcafterbuyactive]" value='1' [{if $edit->oxarticles__fcafterbuyactive->value == 1}]checked[{/if}]>
+                                [{ oxinputhelp ident="FC_AFTERBUY_ARTICLE_ACTIVE_HELP" }]
+                            </td>
+                        </tr>
                     [{/oxhasrights}]
                     <tr>
                         <td class="edittext" colspan="2"><br><br>

@@ -516,14 +516,16 @@ class fco2aartexport extends fco2abase {
 
         $sWhereConditions = "";
         if (!$blFcAfterbuyExportAll) {
-            $sWhereConditions .= " AND FCAFTERBUYACTIVE='1' ";
+            $sWhereConditions .= " AND oaab.FCAFTERBUYACTIVE='1' ";
         }
 
         $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
         $sQuery = "
-            SELECT OXID 
-            FROM ".getViewName('oxarticles')." 
-            WHERE OXPARENTID='' ".
+            SELECT oa.OXID 
+            FROM ".getViewName('oxarticles')." oa
+            LEFT JOIN 
+                oxarticles_afterbuy as oaab ON (oa.OXID=oaab.OXID)
+            WHERE oa.OXPARENTID='' ".
             $sWhereConditions;
 
         $aRows = $oDb->getAll($sQuery);

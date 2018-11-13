@@ -91,6 +91,9 @@ class FcAfterbuy_Article_Admin extends oxAdminDetails
 
         }
         $this->setEditObjectId($oArticle->getId());
+
+        $oAfterbuyDb = oxNew('fco2adatabase');
+        $oAfterbuyDb->fcSaveAfterbuyParams('oxarticles_afterbuy', 'oxarticles');
     }
 
     /**

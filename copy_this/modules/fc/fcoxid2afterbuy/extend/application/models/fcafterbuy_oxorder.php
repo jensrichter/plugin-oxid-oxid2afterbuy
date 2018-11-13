@@ -14,6 +14,55 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
     protected $_aPaymentsDirectlyPaid = array();
 
     /**
+     * Overloading load method for appending additional table
+     *
+     * @param $oxID
+     * @return mixed
+     */
+    public function load($oxID) {
+        $mReturn = parent::load($oxID);
+
+        if ($mReturn) {
+            $this->_fcAddCustomFieldsToObject($oxID);
+        }
+
+        return $mReturn;
+    }
+
+    /**
+     * Adds fields of custom table too current object
+     *
+     * @param string $sOxid
+     * @return void
+     */
+    protected function _fcAddCustomFieldsToObject($sOxid) {
+        $oDb = oxDb::getDb(oxDB::FETCH_MODE_ASSOC);
+        $sQuery = "
+            SELECT
+              `FCAFTERBUY_AID`,
+              `FCAFTERBUY_VID`,
+              `FCAFTERBUY_UID`,
+              `FCAFTERBUY_CUSTOMNR`,
+              `FCAFTERBUY_ECUSTOMNR`,
+              `FCAFTERBUY_LASTCHECKED`,
+              `FCAFTERBUY_FULFILLED`
+            FROM
+                oxorder_afterbuy
+            WHERE OXID = '{$sOxid}'
+        ";
+
+        $aRow = $oDb->getRow($sQuery);
+        if (is_array($aRow) && count($aRow)>0) {
+            foreach ($aRow as $sDbField=>$sValue) {
+                $sDbField = strtolower($sDbField);
+                $sField = "oxorder__".$sDbField;
+                $this->$sField = new oxField($sValue);
+            }
+        }
+    }
+
+
+    /**
      * Adds triggering to send order to afterbuy if configured
      *
      * @param oxUser $oUser
