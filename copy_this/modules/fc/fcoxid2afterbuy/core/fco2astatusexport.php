@@ -90,11 +90,18 @@ class fco2astatusexport extends fco2abase {
         $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
 
         $sQuery = "
-            SELECT OXID 
-            FROM oxorder 
-            WHERE FCAFTERBUY_UID != '' 
-            AND OXTIMESTAMP>FCAFTERBUY_LASTCHECKED 
-            AND FCAFTERBUY_FULFILLED != '1'
+            SELECT 
+                oo.OXID 
+            FROM 
+                oxorder oo
+            LEFT JOIN 
+                oxorder_afterbuy ooab ON (oo.OXID=ooab.OXID)
+            WHERE 
+                ooab.FCAFTERBUY_UID != '' 
+            AND 
+                oo.OXTIMESTAMP > ooab.FCAFTERBUY_LASTCHECKED 
+            AND
+                ooab.FCAFTERBUY_FULFILLED != '1'
         ";
         $aRows = $oDb->getAll($sQuery);
 
