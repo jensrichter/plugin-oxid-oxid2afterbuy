@@ -1,5 +1,12 @@
 # Changelog - oxid 2 afterbuy plugin for OXID 5
 
+## 1.1.0
+Released 2018-11-14
+* Changed database structure for not extending existing tables
+* Integrated API interface
+* Added automatic installer after activation
+* Improved code quality
+
 ## 1.0.4
 Released 2018-01-02
 * Added improvements for overloading possibilities

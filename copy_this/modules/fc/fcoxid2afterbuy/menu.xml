@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<OX>
+    <OXMENU id="NAVIGATION_ESHOPADMIN">
+        <MAINMENU id="mxmanageprod">
+            <SUBMENU id="mxarticles" cl="article" list="article_list">
+                <TAB id="mxfcafterbuy_article_admin" cl="fcafterbuy_article_admin" />
+            </SUBMENU>
+        </MAINMENU>
+        <MAINMENU id="mxfcafterbuy">
+            <SUBMENU id="mxfcafterbuyorder" cl="fcafterbuy_admin" list="fcafterbuy_list" >
+                <TAB id="mxfcafterbuy_payments" cl="fcafterbuy_payments" />
+            </SUBMENU>
+        </MAINMENU>
+        <MAINMENU id="mxorders">
+            <SUBMENU id="mxdisplayorders" cl="admin_order" list="order_list">
+                <TAB id="tbclorder_orderinfo" cl="fcafterbuy_orderinfo" />
+            </SUBMENU>
+        </MAINMENU>
+	</OXMENU>
+</OX>
