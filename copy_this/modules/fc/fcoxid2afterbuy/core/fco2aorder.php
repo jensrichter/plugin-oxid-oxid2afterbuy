@@ -472,7 +472,6 @@ class fco2aorder extends fco2abase {
      * 
      * @param array $aResponse
      * @param oxOrder $oOrder
-     *
      * @return void
      */
     protected function _fcAssignAfterbuyParametersToOrder($aResponse, $oOrder)

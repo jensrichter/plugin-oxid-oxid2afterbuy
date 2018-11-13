@@ -30,6 +30,49 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
     }
 
     /**
+     * Overloading save method for saving afterbuy values
+     *
+     * @param void
+     * @return mixed
+     */
+    public function save() {
+        $blRet = parent::save();
+        $this->fcSaveAfterbuyParams();
+
+        return $blRet;
+    }
+
+    /**
+     * Save afterbuy params
+     *
+     * @param void
+     * @return void
+     */
+    public function fcSaveAfterbuyParams() {
+        $oAfterbuyDb = oxNew('fco2adatabase');
+        $sOxid = $this->getId();
+
+
+        $aAfterbuyParams = array(
+            'FCAFTERBUY_AID'=>$this->oxorder__fcafterbuy_aid->value,
+            'FCAFTERBUY_VID'=>$this->oxorder__fcafterbuy_vid->value,
+            'FCAFTERBUY_VID'=>$this->oxorder__fcafterbuy_vid->value,
+            'FCAFTERBUY_UID'=>$this->oxorder__fcafterbuy_uid->value,
+            'FCAFTERBUY_CUSTOMNR'=>$this->oxorder__fcafterbuy_customnr->value,
+            'FCAFTERBUY_ECUSTOMNR'=>$this->oxorder__fcafterbuy_ecustomnr->value,
+            'FCAFTERBUY_LASTCHECKED'=>$this->oxorder__fcafterbuy_lastchecked->value,
+            'FCAFTERBUY_FULFILLED'=>$this->oxorder__fcafterbuy_fulfilled->value,
+        );
+
+        $oAfterbuyDb->fcSaveAfterbuyParams(
+            'oxorder_afterbuy',
+            'oxorder',
+            $sOxid,
+            $aAfterbuyParams
+        );
+    }
+
+    /**
      * Adds fields of custom table too current object
      *
      * @param string $sOxid

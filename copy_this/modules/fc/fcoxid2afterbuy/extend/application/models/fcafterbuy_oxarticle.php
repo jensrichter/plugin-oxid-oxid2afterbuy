@@ -24,6 +24,42 @@ class fcafterbuy_oxarticle extends fcafterbuy_oxarticle_parent
     }
 
     /**
+     * Overloading save method to assign afterbuy values to subtable
+     *
+     * @return mixed
+     */
+    public function save() {
+        $blRet = parent::save();
+        $this->fcSaveAfterbuyParams();
+
+        return $blRet;
+    }
+
+    /**
+     * Save afterbuy params
+     *
+     * @param void
+     * @return void
+     */
+    public function fcSaveAfterbuyParams() {
+        $oAfterbuyDb = oxNew('fco2adatabase');
+        $sOxid = $this->getId();
+        $sAfterbuyId = trim($this->oxarticles__fcafterbuyid->value);
+        if (!$sAfterbuyId) return;
+
+        $aAfterbuyParams = array(
+            'FCAFTERBUYID'=>$sAfterbuyId,
+        );
+
+        $oAfterbuyDb->fcSaveAfterbuyParams(
+            'oxarticles_afterbuy',
+            'oxarticles',
+            $sOxid,
+            $aAfterbuyParams
+        );
+    }
+
+    /**
      * Adds fields of custom table too current object
      *
      * @param string $sOxid

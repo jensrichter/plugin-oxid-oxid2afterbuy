@@ -10,15 +10,28 @@ class fco2adatabase extends oxBase
     /**
      * Saving afterbuy params into own subtable
      *
-     * @param void
+     * @param string $sTable
+     * @param string $sTablePrefix
+     * @param string $sOxid
+     * @param array $aAfterbuyParams
      * @return void
      * @throws
      */
-    public function fcSaveAfterbuyParams($sTable, $sTablePrefix) {
-        $this->fcCreateAfterbuyDataRow($sTable);
-        $oConfig = $this->getConfig();
-        $sOxid = $oConfig->getRequestParameter('oxid');
-        $aAfterbuyParams = $oConfig->getRequestParameter('editvalafterbuy');
+    public function fcSaveAfterbuyParams($sTable, $sTablePrefix, $sOxid=null, $aAfterbuyParams=null)
+    {
+        $this->fcCreateAfterbuyDataRow($sTable, $sOxid);
+
+        $blUseRequestValues = (
+            $sOxid===null &&
+            $aAfterbuyParams === null
+        );
+
+        if ($blUseRequestValues) {
+            $oConfig = $this->getConfig();
+            $sOxid = $oConfig->getRequestParameter('oxid');
+            $aAfterbuyParams = $oConfig->getRequestParameter('editvalafterbuy');
+        }
+
         if (!is_array($aAfterbuyParams)) return;
 
         $sTablePrefix = $sTablePrefix."__";
@@ -84,15 +97,18 @@ class fco2adatabase extends oxBase
      * Creating a database row entry of this id
      *
      * @param string $sTable
+     * @param mixed string|null
      * @return void
      * @throws
      */
-    public function fcCreateAfterbuyDataRow($sTable) {
-        $blExists = $this->fcAfterbuyDataRowExists($sTable);
+    public function fcCreateAfterbuyDataRow($sTable, $sOxid) {
+        $blExists = $this->fcAfterbuyDataRowExists($sTable, $sOxid);
         if ($blExists) return;
 
-        $oConfig = $this->getConfig();
-        $sOxid   = $oConfig->getRequestParameter("oxid");
+        if ($sOxid === null) {
+            $oConfig = $this->getConfig();
+            $sOxid   = $oConfig->getRequestParameter("oxid");
+        }
 
         $this->fcInsertRow($sTable, $sOxid);
     }
@@ -101,12 +117,15 @@ class fco2adatabase extends oxBase
      * Returns row of request oxattribute external 1:1 Table
      *
      * @param string $sTable
+     * @param mixed string|null
      * @return bool
      * @throws
      */
-    public function fcAfterbuyDataRowExists($sTable) {
-        $oConfig = $this->getConfig();
-        $sOxid = $oConfig->getRequestParameter("oxid");
+    public function fcAfterbuyDataRowExists($sTable, $sOxid) {
+        if ($sOxid === null) {
+            $oConfig = $this->getConfig();
+            $sOxid = $oConfig->getRequestParameter("oxid");
+        }
         $blExists = $this->fcRowExists($sTable, $sOxid);
 
         return $blExists;
