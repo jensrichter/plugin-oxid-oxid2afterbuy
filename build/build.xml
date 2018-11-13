@@ -47,7 +47,7 @@
         <replace dir="${build}">
             <replacefilter token="%%VERSION%%" value="${version}"/>
             <replacefilter token="%%TODAY%%" value="${TODAY}"/>
-            <include name="copy_this/modules/${pluginname}/metadata.php"/>
+            <include name="copy_this/modules/fc/${pluginname}/metadata.php"/>
             <include name="README.md"/>
         </replace>
 
