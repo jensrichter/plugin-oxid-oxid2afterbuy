@@ -152,7 +152,7 @@ $aModule = array(
             'name' => 'aFcAfterbuyDebitDynBankzip',
             'type' => 'aarr',
             'value' => array(
-                'oxiddebitnote'=>'lsbankblz'
+                'oxiddebitnote'=>'lsblz'
             )
         ),
         array(
