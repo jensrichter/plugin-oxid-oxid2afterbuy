@@ -52,13 +52,14 @@ class fco2aorderimport extends fco2abase {
         }
 
         foreach ($oXmlResponse->Result->Orders->Order as $oXmlOrder) {
+            $this->fcWriteLog("DEBUG: oXmlOrder:\n".print_r($oXmlOrder,true), 4);
             $oAfterbuyOrder = $this->_fcGetAfterbuyOrder();
             $oAfterbuyOrder->createOrderByApiResponse($oXmlOrder);
+            $this->fcWriteLog("DEBUG: Created result in oAfterbuyOrder:\n".print_r($oAfterbuyOrder,true), 4);
             $this->_fcCreateOxidOrder($oAfterbuyOrder);
             $this->_fcNotifyExported($oAfterbuyOrder, $oAfterbuyApi);
         }
     }
-
 
     /**
      * Sets different filters
@@ -185,6 +186,8 @@ class fco2aorderimport extends fco2abase {
         $oSumPrice->setVat($dDefaultVat);
         $oSumPrice->setBruttoPriceMode();
 
+        $this->fcWriteLog('Importing orderarticles of order with id '.$sOrderId.': '.print_r($aSoldItems,true), 4);
+
         foreach ($aSoldItems as $oSoldItem) {
             $oOrderArticle = clone $oOrderArticleTemplate;
             $oProductDetails = $oSoldItem->ShopProductDetails;
@@ -195,7 +198,7 @@ class fco2aorderimport extends fco2abase {
             $dVat = $this->_fcFetchAmount($oSoldItem->TaxRate);
             $oOrderArticlePrice = oxNew('oxPrice');
             $oOrderArticlePrice->setBruttoPriceMode();
-            $oOrderArticlePrice->setPrice($dPrice,$dVat);
+            $oOrderArticlePrice->setPrice($dPrice, $dVat);
             $oSumPrice->addPrice($oOrderArticlePrice);
 
             $oOrderArticle->oxorderarticles__oxorderid = new oxField($sOrderId);

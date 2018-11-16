@@ -100,7 +100,7 @@ class fcafterbuyorder
     protected function _fcSetSoldItems($oXmlOrder) {
         include_once(__DIR__ . "/fcafterbuysolditem.php");
 
-        $aSoldItems = $oXmlOrder->SoldItems;
+        $aSoldItems = $oXmlOrder->SoldItems->SoldItem;
 
         foreach ($aSoldItems as $oXmlSoldItem) {
             $oSoldItem = new fcafterbuysolditem();

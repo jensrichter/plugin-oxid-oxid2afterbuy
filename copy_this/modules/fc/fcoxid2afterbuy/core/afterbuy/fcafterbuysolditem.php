@@ -42,7 +42,6 @@ class fcafterbuysolditem
      * @return void
      */
     public function createSoldItemFromXml($oXmlSoldItem) {
-        $oXmlSoldItem = $oXmlSoldItem->SoldItem;
         $this->ItemDetailsDone = (string) $oXmlSoldItem->ItemDetailsDone;
         $this->ItemID = (string) $oXmlSoldItem->ItemID;
         $this->Anr = (string) $oXmlSoldItem->Anr;
