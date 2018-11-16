@@ -194,21 +194,25 @@ class fco2aorderimport extends fco2abase {
             $sArtNum = $oProductDetails->EAN;
             $sProductId = $this->_fcGetProductIdByArtNum($sArtNum);
 
-            $dPrice = $this->_fcFetchAmount($oSoldItem->ItemPrice);
+            $iAmount = $oSoldItem->ItemQuantity;
+            $dSinglePrice = $this->_fcFetchAmount($oSoldItem->ItemPrice);
+            $dCompletePrice = round(($dSinglePrice * (double)$iAmount),2);
             $dVat = $this->_fcFetchAmount($oSoldItem->TaxRate);
             $oOrderArticlePrice = oxNew('oxPrice');
             $oOrderArticlePrice->setBruttoPriceMode();
-            $oOrderArticlePrice->setPrice($dPrice, $dVat);
+            $oOrderArticlePrice->setPrice($dCompletePrice, $dVat);
             $oSumPrice->addPrice($oOrderArticlePrice);
 
             $oOrderArticle->oxorderarticles__oxorderid = new oxField($sOrderId);
-            $oOrderArticle->oxorderarticles__oxamount = new oxField($oSoldItem->ItemQuantity);
+            $oOrderArticle->oxorderarticles__oxamount = new oxField($iAmount);
             $oOrderArticle->oxorderarticles__oxartid = new oxField($sProductId);
             $oOrderArticle->oxorderarticles__oxartnum = new oxField($sArtNum);
             $oOrderArticle->oxorderarticles__oxtitle = new oxField($oSoldItem->ItemTitle);
-            $oOrderArticle->oxorderarticles__oxprice = new oxField($dPrice);
+            $oOrderArticle->oxorderarticles__oxprice = new oxField($dCompletePrice);
+            $oOrderArticle->oxorderarticles__oxbprice = new oxField($dSinglePrice);
             $oOrderArticle->oxorderarticles__oxbrutprice = new oxField($oOrderArticlePrice->getBruttoPrice());
             $oOrderArticle->oxorderarticles__oxnetprice = new oxField($oOrderArticlePrice->getNettoPrice());
+            $oOrderArticle->oxorderarticles__oxvat = new oxField($oOrderArticlePrice->getVat());
             $oOrderArticle->save();
         }
 
