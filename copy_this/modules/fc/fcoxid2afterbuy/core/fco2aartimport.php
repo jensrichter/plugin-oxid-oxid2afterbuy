@@ -76,6 +76,8 @@ class fco2aartimport extends  fco2abase
     }
 
     /**
+     * Added basic productdata like
+     *
      * @param object $oXmlProduct
      * @param object $oArticle
      * @param string $sType
@@ -85,6 +87,7 @@ class fco2aartimport extends  fco2abase
         $this->fcWriteLog(
             "DEBUG: Trying to add XML Product: \n".
             print_r($oXmlProduct ,true), 4);
+        die("Test is ending here");
     }
 
     /**
