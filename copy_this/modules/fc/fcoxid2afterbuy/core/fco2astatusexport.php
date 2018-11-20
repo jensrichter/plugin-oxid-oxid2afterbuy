@@ -42,18 +42,6 @@ class fco2astatusexport extends fco2abase {
     }
 
     /**
-     * Sets last check date of this order to now
-     *
-     * @param $sOrderOxid
-     * @return void
-     */
-    protected function _fcSetLastCheckedDate($sOrderOxid) {
-        $oDb = oxDb::getDb();
-        $sQuery = "UPDATE oxorder SET FCAFTERBUY_LASTCHECKED=NOW() WHERE OXID=".$oDb->quote($sOrderOxid)." LIMIT 1";
-        $oDb->Execute($sQuery);
-    }
-
-    /**
      * Assign current order data
      *
      * @param $oOrder

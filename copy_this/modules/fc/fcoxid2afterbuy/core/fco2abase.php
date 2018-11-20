@@ -122,13 +122,49 @@ class fco2abase extends oxBase {
      * @return string
      */
     protected function _fcGetGermanDate($sDateString) {
-        $iTime = strtotime($sDateString);
-        $sReturn = '';
-        if ($iTime) {
-            $sReturn = date('d.m.Y', $iTime);
-        }
+        $sReturn =
+            $this->_fcTransformDate($sDateString,'d.m.Y');
 
         return $sReturn;
+    }
+
+    /**
+     * Returns given input date(-time)string in mysql
+     * datetime format
+     *
+     * @param $sDateString
+     * @return string
+     */
+    protected function _fcGetDbDateTime($sDateString) {
+        $sReturn =
+            $this->_fcTransformDate($sDateString,'Y-m-d H:i:s');
+
+        return $sReturn;
+    }
+
+    /**
+     * Transformes date
+     *
+     * @param $sDateString
+     * @param $sPattern
+     * @return string
+     */
+    protected function _fcTransformDate($sDateString, $sPattern, $blKeepDateStringOnError=true)
+    {
+        $iTime = strtotime($sDateString);
+        $mReturn = '';
+        if ($iTime) {
+            $mReturn = date($sPattern, $iTime);
+        }
+
+        $blReturnIncoming = (
+            $mReturn === false &&
+            $blKeepDateStringOnError
+        );
+
+        $mReturn = ($blReturnIncoming) ? $sDateString: $mReturn;
+
+        return $mReturn;
     }
 
     /**
@@ -203,4 +239,18 @@ class fco2abase extends oxBase {
 
         return $blReturn;
     }
+
+    /**
+     * Sets last check date of this order to now
+     *
+     * @param $sOrderOxid
+     * @return void
+     */
+    protected function _fcSetLastCheckedDate($sOrderOxid) {
+        $oDb = oxDb::getDb();
+        $sQuery = "UPDATE oxorder SET FCAFTERBUY_LASTCHECKED=NOW() WHERE OXID=".$oDb->quote($sOrderOxid)." LIMIT 1";
+        $oDb->Execute($sQuery);
+    }
+
+
 }

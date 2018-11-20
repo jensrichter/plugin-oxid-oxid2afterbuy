@@ -18,6 +18,7 @@ class fco2a_events
           `FCAFTERBUY_ECUSTOMNR` VARCHAR(255) not null,
           `FCAFTERBUY_LASTCHECKED` DATETIME not null,
           `FCAFTERBUY_FULFILLED` TINYINT(1) not null DEFAULT 0,
+          `FCAFTERBUY_FULFILLEDEXT` TINYINT(1) not null DEFAULT 0,
           PRIMARY KEY (`OXID`)
         ) ENGINE=MyISAM COLLATE=latin1_general_ci;
     ";
@@ -237,6 +238,7 @@ class fco2a_events
           ADD COLUMN FCAFTERBUY_ECUSTOMNR VARCHAR(255) not null,
           ADD COLUMN FCAFTERBUY_LASTCHECKED DATETIME not null,
           ADD COLUMN FCAFTERBUY_FULFILLED TINYINT(1) not null DEFAULT 0,
+          ADD COLUMN FCAFTERBUY_FULFILLEDEXT TINYINT(1) not null DEFAULT 0,
           ADD COLUMN FCAFTERBUY_USERID VARCHAR(255) not null;
     ";
 

@@ -30,6 +30,12 @@ class fcafterbuyapi {
     protected $lastOrderId = null;
 
     /**
+     * Ident for order which will be searched for
+     * @var string
+     */
+    protected $searchOrderId = null;
+
+    /**
      * ShopInterface Base URL of Afterbuy
      * https://www.afterbuy.de/afterbuy/ShopInterface.aspx
      * @var string
@@ -134,6 +140,16 @@ class fcafterbuyapi {
     }
 
     /**
+     * Setter for orderid to be requested
+     *
+     * @param $sSearchOrderId
+     * @return void
+     */
+    public function setSearchOrderId($sSearchOrderId) {
+        $this->searchOrderId = $sSearchOrderId;
+    }
+
+    /**
      * Request Afterbuy API with given XML Request
      *
      * @param string $sXmlData
@@ -209,6 +225,27 @@ class fcafterbuyapi {
         $sXmlData .= $this->getNewOrderFilter();
         $sXmlData .= $this->getXmlFoot();
         $sOutput = $this->requestAPI($sXmlData);
+
+        return $sOutput;
+    }
+
+    /**
+     * Requesting afterbuy api for sold products (orders)
+     *
+     * @param string $sSearchOrderId
+     * @return string
+     */
+    public function getSoldItemsStatus($sSearchOrderId) {
+        $this->setSearchOrderId($sSearchOrderId);
+
+        $sXmlData = $this->getXmlHead('GetSoldItems', 30);
+        $sXmlData .= "<MaxSoldItems>1</MaxSoldItems>";
+        $sXmlData .= "<OrderDirection>1</OrderDirection>";
+        $sXmlData .= "<RequestAllItems>1</RequestAllItems>";
+        $sXmlData .= $this->getOrderByIdFilter();
+        $sXmlData .= $this->getXmlFoot();
+        $sOutput = $this->requestAPI($sXmlData);
+
         return $sOutput;
     }
 
@@ -229,6 +266,27 @@ class fcafterbuyapi {
             $sXmlData .= "<ValueFrom>".$this->lastOrderId."</ValueFrom>";
             $sXmlData .= "<ValueTo>9999999999</ValueTo>";
             $sXmlData .= "</FilterValues>";
+            $sXmlData .= "</Filter>";
+            $sXmlData .= "</DataFilter>";
+        }
+
+        return $sXmlData;
+    }
+
+    /**
+     * Returns xml filter for requesting certain
+     *
+     * @param void
+     * @return string
+     */
+    protected function getOrderByIdFilter() {
+        $sXmlData = "";
+
+        if ($this->searchOrderId) {
+            $sXmlData .= "<DataFilter>";
+            $sXmlData .= "<Filter>";
+            $sXmlData .= "<FilterName>OrderID</FilterName>";
+            $sXmlData .= "<FilterValue>".$this->searchOrderId."</FilterValue>";
             $sXmlData .= "</Filter>";
             $sXmlData .= "</DataFilter>";
         }
