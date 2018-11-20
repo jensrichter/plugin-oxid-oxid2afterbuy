@@ -28,6 +28,7 @@ class fco2a_events
             `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
             `FCAFTERBUYACTIVE` TINYINT(1) not null default 0,
             `FCAFTERBUYID` VARCHAR(255) not null,
+            `FCAFTERBUYBASEPRODUCTS` TEXT not null,
           PRIMARY KEY (`OXID`)
         ) ENGINE=MyISAM;
     ";
@@ -38,10 +39,6 @@ class fco2a_events
             `FCAFTERBUY_USERID` VARCHAR(255) not null,    
           PRIMARY KEY (`OXID`)
         ) ENGINE=MyISAM;
-    ";
-
-    public static $sQueryUpdateOrderTable = "
-        UPDATE oxorder SET FCAFTERBUY_FULFILLED='1';
     ";
 
     public static $sQueryCreateABPaymentAssignment = "
@@ -231,6 +228,7 @@ class fco2a_events
         ALTER TABLE oxfield2shop
           ADD COLUMN FCAFTERBUYACTIVE TINYINT(1) not null default 0,
           ADD COLUMN FCAFTERBUYID VARCHAR(255) not null,
+          ADD COLUMN FCAFTERBUYBASEPRODUCTS TEXT not null,
           ADD COLUMN FCAFTERBUY_AID VARCHAR(255) not null,
           ADD COLUMN FCAFTERBUY_VID VARCHAR(255) not null,
           ADD COLUMN FCAFTERBUY_UID VARCHAR(255) not null,

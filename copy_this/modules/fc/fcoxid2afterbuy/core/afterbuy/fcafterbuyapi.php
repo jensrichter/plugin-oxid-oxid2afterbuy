@@ -11,6 +11,10 @@
  */
 class fcafterbuyapi {
 
+    public static $ARTICLE_TYPE_VARIATIONSETS = 'variationsets';
+    public static $ARTICLE_TYPE_NONSETS = 'nonsets';
+    public static $ARTICLE_TYPE_SINGLES = 'singles';
+
     /**
      * Error log level 1=Only errors, 2= Errors and warnings, 3=Output all
      * @var int
@@ -230,6 +234,69 @@ class fcafterbuyapi {
     }
 
     /**
+     * Requesting afterbuy api for items. If no page is given
+     * first page will be used default
+     *
+     *
+     * @param int $iPage
+     * @param string $sType
+     * @return int
+     */
+    public function getShopProductsFromAfterbuy($iPage=1, $sType) {
+        $blValidType = $this->isValidProductRequestType($sType);
+        if (!$blValidType) return 0;
+
+        $sXmlData = $this->getXmlHead('GetShopProducts', 30);
+        $sXmlData .= "<MaxShopItems>250</MaxShopItems>";
+        $sXmlData .= $this->_fcGetSuppressBaseProductData($sType);
+        $sXmlData .= "<PaginationEnabled>1</PaginationEnabled>";
+        $sXmlData .= "<PageNumber>".$iPage."</PageNumber>";
+        $sXmlData .= $this->getShopProductsFilter($sType);
+        $sXmlData .= $this->getXmlFoot();
+        $sOutput = $this->requestAPI($sXmlData);
+
+        return $sOutput;
+    }
+
+    /**
+     * Checks if product request type is valid
+     *
+     * @param string $sType
+     * @return bool
+     */
+    protected function isValidProductRequestType($sType)
+    {
+        $blValidType = in_array(
+            $sType,
+            array(
+                self::$ARTICLE_TYPE_SINGLES,
+                self::$ARTICLE_TYPE_VARIATIONSETS,
+                self::$ARTICLE_TYPE_NONSETS,
+            )
+        );
+
+        return $blValidType;
+    }
+
+    /**
+     * Returns surpress base products value if call type is singles
+     *
+     * @param $sType
+     * @return string
+     */
+    protected function _fcGetSuppressBaseProductData($sType)
+    {
+        $iSuppress = (int) ($sType==='singles');
+        if (!$iSuppress) return '';
+
+        $sXmlData = "
+            <SuppressBaseProductRelatedData>".$iSuppress."</SuppressBaseProductRelatedData>
+        ";
+
+        return $sXmlData;
+    }
+
+    /**
      * Requesting afterbuy api for sold products (orders)
      *
      * @param string $sSearchOrderId
@@ -248,6 +315,32 @@ class fcafterbuyapi {
 
         return $sOutput;
     }
+
+
+    /**
+     * Returns filter for requesting only new orders
+     *
+     * @param void
+     * @return string
+     */
+    protected function getShopProductsFilter($sType) {
+        $blNoFilter = ($sType==='singles');
+        if ($blNoFilter) return '';
+
+        $sFilterMode =
+            ($sType=='variationsets') ? 'VariationsSets' : 'not_VariationsSets';
+
+        $sXmlData = "";
+        $sXmlData .= "<DataFilter>";
+        $sXmlData .= "<Filter>";
+        $sXmlData .= "<FilterName>DefaultFilter</FilterName>";
+        $sXmlData .= "<FilterValue>".$sFilterMode."</FilterValue>";
+        $sXmlData .= "</Filter>";
+        $sXmlData .= "</DataFilter>";
+
+        return $sXmlData;
+    }
+
 
     /**
      * Returns filter for requesting only new orders
