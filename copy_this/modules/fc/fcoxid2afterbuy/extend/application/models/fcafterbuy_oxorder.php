@@ -62,6 +62,7 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
             'FCAFTERBUY_ECUSTOMNR'=>$this->oxorder__fcafterbuy_ecustomnr->value,
             'FCAFTERBUY_LASTCHECKED'=>$this->oxorder__fcafterbuy_lastchecked->value,
             'FCAFTERBUY_FULFILLED'=>$this->oxorder__fcafterbuy_fulfilled->value,
+            'FCAFTERBUY_FULFILLEDEXT'=>$this->oxorder__fcafterbuy_fulfilledext->value,
         );
 
         $oAfterbuyDb->fcSaveAfterbuyParams(
@@ -88,7 +89,8 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
               `FCAFTERBUY_CUSTOMNR`,
               `FCAFTERBUY_ECUSTOMNR`,
               `FCAFTERBUY_LASTCHECKED`,
-              `FCAFTERBUY_FULFILLED`
+              `FCAFTERBUY_FULFILLED`,
+              `FCAFTERBUY_FULFILLEDEXT`
             FROM
                 oxorder_afterbuy
             WHERE OXID = '{$sOxid}'

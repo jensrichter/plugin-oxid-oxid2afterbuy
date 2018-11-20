@@ -21,6 +21,32 @@ class fco2astatusimport extends fco2abase {
     }
 
     /**
+     * Log possible state change
+     *
+     * @param $oAfterbuyOrder
+     * @param $oOrder
+     * @param $sStatetype
+     * @param $blFlag
+     */
+    protected function _fcLogStateTypeOfOrder($oAfterbuyOrder, $oOrder, $sStatetype, $blFlag)
+    {
+        $sOrderIdAfterbuy = (string) $oAfterbuyOrder->OrderID;
+        $sOrderIdOxid = $oOrder->oxorder__oxid->value;
+        $sMessage =
+            'MESSAGE: Order with ID (OXID:'.
+            $sOrderIdOxid.
+            '/AB:'.
+            $sOrderIdAfterbuy.
+            ') has updated '.
+            $sStatetype.
+            '?:'.
+            (string) $blFlag;
+
+        $this->fcWriteLog($sMessage, 3);
+
+    }
+
+    /**
      * Requests API for given order and sets changed
      * values
      *
@@ -31,7 +57,7 @@ class fco2astatusimport extends fco2abase {
     {
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
-        $sAfterbuyOrderId = $oOrder->oxorder__fcafterbuy_uid->value;
+        $sAfterbuyOrderId = $oOrder->oxorder__fcafterbuy_aid->value;
         $sResponse = $oAfterbuyApi->getSoldItemsStatus($sAfterbuyOrderId);
         $oXmlResponse = simplexml_load_string($sResponse);
         $this->_fcParseApiResponse($oXmlResponse, $oOrder);
@@ -56,7 +82,7 @@ class fco2astatusimport extends fco2abase {
             $oAfterbuyOrder = $this->_fcGetAfterbuyOrder();
             $oAfterbuyOrder->createOrderByApiResponse($oXmlOrder);
             $this->fcWriteLog("DEBUG: Created result in oAfterbuyOrder:\n".print_r($oAfterbuyOrder,true), 4);
-                $this->_fcUpdateOxidOrderStatus($oAfterbuyOrder, $oOrder);
+            $this->_fcUpdateOxidOrderStatus($oAfterbuyOrder, $oOrder);
         }
     }
 
@@ -76,11 +102,27 @@ class fco2astatusimport extends fco2abase {
         $blFulFilled = ($blPaid && $blShipped);
         $blValuesUpdated = ($blPaid || $blShipped);
 
+        $this->_fcLogStateTypeOfOrder(
+            $oAfterbuyOrder,
+            $oOrder,
+            'fulfilled',
+            $blFulFilled
+        );
+
+        $this->_fcLogStateTypeOfOrder(
+            $oAfterbuyOrder,
+            $oOrder,
+            'values updated',
+            $blValuesUpdated
+        );
+
+
         if ($blFulFilled) {
             $oOrder->oxorder__fcafterbuy_fulfilledext = new oxField('1');
         }
 
         if ($blValuesUpdated) {
+            $this->fcWriteLog('DEBUG: UpdateOxidOrderStatus:'.print_r($oOrder, true), 4);
             $oOrder->save();
         }
     }
@@ -108,6 +150,13 @@ class fco2astatusimport extends fco2abase {
             $oOrder->oxorder__oxpaid = new oxField($sOxidPaymentDate);
         }
 
+        $this->_fcLogStateTypeOfOrder(
+            $oAfterbuyOrder,
+            $oOrder,
+            'paid date',
+            $blPaid
+        );
+
         return $blPaid;
     }
 
@@ -132,6 +181,13 @@ class fco2astatusimport extends fco2abase {
         if ($blShipped) {
             $oOrder->oxorder__oxsenddate = new oxField($sOxidShippingDate);
         }
+
+        $this->_fcLogStateTypeOfOrder(
+            $oAfterbuyOrder,
+            $oOrder,
+            'shipping date',
+            $blShipped
+        );
 
         return $blShipped;
     }

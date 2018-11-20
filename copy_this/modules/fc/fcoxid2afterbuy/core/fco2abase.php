@@ -248,8 +248,14 @@ class fco2abase extends oxBase {
      */
     protected function _fcSetLastCheckedDate($sOrderOxid) {
         $oDb = oxDb::getDb();
-        $sQuery = "UPDATE oxorder SET FCAFTERBUY_LASTCHECKED=NOW() WHERE OXID=".$oDb->quote($sOrderOxid)." LIMIT 1";
-        $oDb->Execute($sQuery);
+        $sQuery = "
+            UPDATE 
+                oxorder_afterbuy 
+            SET 
+                FCAFTERBUY_LASTCHECKED=NOW() 
+            WHERE 
+                OXID=".$oDb->quote($sOrderOxid)." LIMIT 1";
+        $oDb->execute($sQuery);
     }
 
 
