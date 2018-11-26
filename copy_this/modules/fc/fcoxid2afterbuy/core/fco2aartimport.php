@@ -67,27 +67,201 @@ class fco2aartimport extends  fco2abase
     protected function _fcAddProductToOxid($oXmlProduct, $sType)
     {
         $oArticle = oxNew('oxarticle');
+        $oArticle->fcAddCustomFieldsToObject();
         $sOxid = $this->_fcProductExists($oXmlProduct);
         if ($sOxid) {
             $oArticle->load($sOxid);
         }
 
-        $this->_fcAddDefaultProductData($oXmlProduct, $oArticle, $sType);
+        $this->fcWriteLog(
+            "DEBUG: Trying to add/update XML Product: \n".
+            print_r($oXmlProduct ,true), 4);
+
+        $this->_fcAddProductBasicData($oXmlProduct, $oArticle, $sType);
+        $this->_fcAddProductPictures($oXmlProduct, $oArticle, $sType);
+        $this->_fcAddProductAttributes($oXmlProduct, $oArticle, $sType);
+        $this->_fcAddProductCategories($oXmlProduct, $oArticle, $sType);
     }
 
     /**
-     * Added basic productdata like
+     * Added basic productdata
      *
      * @param object $oXmlProduct
      * @param object $oArticle
      * @param string $sType
      */
-    protected function _fcAddDefaultProductData($oXmlProduct, &$oArticle, $sType)
+    protected function _fcAddProductBasicData($oXmlProduct, &$oArticle, $sType)
     {
-        $this->fcWriteLog(
-            "DEBUG: Trying to add XML Product: \n".
-            print_r($oXmlProduct ,true), 4);
-        die("Test is ending here");
+        // identification
+        $this->_fcAddIdentificationData($oXmlProduct, $oArticle, $sType);
+
+        // description
+        $this->_fcAddDescriptionData($oXmlProduct, $oArticle, $sType);
+
+        // productdata
+        $this->_fcAddProductAmounts($oXmlProduct, $oArticle, $sType);
+
+        // prices
+        $this->_fcAddProductPrices($oXmlProduct, $oArticle, $sType);
+    }
+
+    /**
+     * Adds identification data to oxid product
+     *
+     * @param object $oXmlProduct
+     * @param object $oArticle
+     * @param string $sType
+     */
+    protected function _fcAddProductPrices($oXmlProduct, &$oArticle, $sType)
+    {
+        $oArticle->oxarticles__oxprice =
+            new oxField((double) $oXmlProduct->SellingPrice);
+        $oArticle->oxarticles__oxbprice =
+            new oxField((double) $oXmlProduct->BuyingPrice);
+        $oArticle->oxarticles__oxpricea =
+            new oxField((double) $oXmlProduct->DealerPrice);
+        $oArticle->oxarticles__oxvat =
+            new oxField((int) $oXmlProduct->TaxRate);
+
+        $aScaledDiscounts = (array) $oXmlProduct->ScaledDiscounts;
+
+        foreach ($aScaledDiscounts as $aScaledDiscount) {
+            $this->_fcSetScaledDiscount($oArticle, $aScaledDiscount);
+        }
+    }
+
+    /**
+     * Add a scalediscount into oxid system
+     *
+     * @param $oArticle
+     * @param $aScaledDiscount
+     */
+    protected function _fcSetScaledDiscount($oArticle, $aScaledDiscount)
+    {
+        $oConfig = $this->getConfig();
+        $sShopId = $oConfig->getShopId();
+        $dListPrice = $oArticle->oxarticles__oxprice->value;
+        $dScaledPrice = (double) $aScaledDiscount['ScaledPrice'];
+
+        $dAbsDiscount = $dListPrice - $dScaledPrice;
+        $aParams = array();
+        $aParams['oxprice2article__oxshopid'] = $sShopId;
+        $aParams['oxprice2article__oxamount'] = $aScaledDiscount['ScaledQuantity'];
+        $aParams['oxprice2article__oxaddabs'] = $dAbsDiscount;
+
+        $oArticlePrice = oxNew("oxbase");
+        $oArticlePrice->init("oxprice2article");
+        $oArticlePrice->assign($aParams);
+    }
+
+    /**
+     * Adds identification data to oxid product
+     *
+     * @param object $oXmlProduct
+     * @param object $oArticle
+     * @param string $sType
+     */
+    protected function _fcAddProductAmounts($oXmlProduct, &$oArticle, $sType)
+    {
+        $oArticle->oxarticles__oxstock =
+            new oxField((int) $oXmlProduct->Quantity);
+        $oArticle->oxarticles__oxunitname =
+            new oxField((string) $oXmlProduct->UnitOfQuantity);
+        $oArticle->oxarticles__oxunitquantity =
+            new oxField((int) $oXmlProduct->BasepriceFactor);
+        $oArticle->oxarticles__oxweight =
+            new oxField((int) $oXmlProduct->Weight);
+
+    }
+
+    /**
+     * Adds identification data to oxid product
+     *
+     * @param object $oXmlProduct
+     * @param object $oArticle
+     * @param string $sType
+     */
+    protected function _fcAddDescriptionData($oXmlProduct, &$oArticle, $sType)
+    {
+        $oArticle->setId($oXmlProduct->ProductID);
+        $sArtNum = $oXmlProduct->EAN ?: $oXmlProduct->Anr;
+        $oArticle->oxarticles__fcafterbuyid = new oxField($oXmlProduct->ProductID);
+        $oArticle->oxarticles__oxartnum = new oxField($sArtNum);
+    }
+
+    /**
+     * Adds identification data to oxid product
+     *
+     * @param object $oXmlProduct
+     * @param object $oArticle
+     * @param string $sType
+     */
+    protected function _fcAddIdentificationData($oXmlProduct, &$oArticle, $sType)
+    {
+        $oArticle->oxarticles__oxtitle = new oxField($oXmlProduct->Name);
+        $oArticle->oxarticles__oxshortdesc = new oxField($oXmlProduct->ShortDescription);
+        $oArticle->setArticleLongDesc($oXmlProduct->Description);
+    }
+
+    /**
+     *
+     *
+     * @param $oXmlProduct
+     * @param $oArticle
+     * @param $sType
+     */
+    protected function _fcAddProductAttributes($oXmlProduct, &$oArticle, $sType)
+    {
+
+
+    }
+
+    protected function _fcAddProductCategories($oXmlProduct, &$oArticle, $sType)
+    {
+    }
+
+    /**
+     * Handles product picture handling
+     *
+     * @param $oXmlProduct
+     * @param $oArticle
+     * @param $sType
+     */
+    protected function _fcAddProductPictures($oXmlProduct, &$oArticle, $sType)
+    {
+        $aProductPictures = (array) $oXmlProduct->ProductPictures;
+
+        foreach ($aProductPictures as $iIndex=>$aProductPicture) {
+            $iPicNr = $iIndex + 1;
+            $sImageUrl = (string) $aProductPicture['Url'];
+            $sTargetFileName = basename($sImageUrl);
+            $this->_fcDownloadImage($sImageUrl, $sTargetFileName, $iPicNr);
+            $sField = "oxarticles__oxpic".$iPicNr;
+            $oArticle->$sField = new oxField($sTargetFileName);
+        }
+    }
+
+    /**
+     * Downloads and places image into master folder
+     *
+     * @param $sImageUrl
+     * @param $sTargetFileName
+     * @param $iPicNr
+     */
+    protected function _fcDownloadImage($sImageUrl, $sTargetFileName, $iPicNr)
+    {
+        $oConfig = $this->getConfig();
+        $sPicNrFolder = (string) $iPicNr;
+        $sMasterPictureFolder = $oConfig->getMasterPicturePath();
+        $sTargetFolder = "{$sMasterPictureFolder}/product/{$sPicNrFolder}";
+        $sTargetPath = "{$sTargetFolder}/{$sTargetFileName}";
+        $oCurl = curl_init($sImageUrl);
+        $oFile = fopen($sTargetPath, 'wb');
+        curl_setopt($oCurl, CURLOPT_FILE, $oFile);
+        curl_setopt($oCurl, CURLOPT_HEADER, 0);
+        curl_exec($oCurl);
+        curl_close($oCurl);
+        fclose($oFile);
     }
 
     /**
