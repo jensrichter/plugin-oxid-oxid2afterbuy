@@ -5,7 +5,7 @@
  * Date: 20.11.18
  */
 
-class fco2aartimport extends  fco2abase
+class fco2aartimport extends fco2abase
 {
     protected $_iMaxPages = 500;
 
@@ -36,7 +36,7 @@ class fco2aartimport extends  fco2abase
             $oXmlResponse =
                 simplexml_load_string($sResponse);
             $iPage =
-                $this->_fcParseApiResponse($oXmlResponse, $sType);
+                $this->_fcParseApiProductResponse($oXmlResponse, $sType);
         }
     }
 
@@ -48,7 +48,7 @@ class fco2aartimport extends  fco2abase
      * @param string $sType
      * @return int
      */
-    protected function _fcParseApiResponse($oXmlResponse, $sType)
+    protected function _fcParseApiProductResponse($oXmlResponse, $sType)
     {
         $iPage = $this->_fcGetNextPage($oXmlResponse);
 
@@ -181,7 +181,7 @@ class fco2aartimport extends  fco2abase
      * @param object $oArticle
      * @param string $sType
      */
-    protected function _fcAddDescriptionData($oXmlProduct, &$oArticle, $sType)
+    protected function _fcAddIdentificationData($oXmlProduct, &$oArticle, $sType)
     {
         $oArticle->setId($oXmlProduct->ProductID);
         $sArtNum = $oXmlProduct->EAN ?: $oXmlProduct->Anr;
@@ -196,7 +196,7 @@ class fco2aartimport extends  fco2abase
      * @param object $oArticle
      * @param string $sType
      */
-    protected function _fcAddIdentificationData($oXmlProduct, &$oArticle, $sType)
+    protected function _fcAddDescriptionData($oXmlProduct, &$oArticle, $sType)
     {
         $oArticle->oxarticles__oxtitle = new oxField($oXmlProduct->Name);
         $oArticle->oxarticles__oxshortdesc = new oxField($oXmlProduct->ShortDescription);
@@ -204,20 +204,173 @@ class fco2aartimport extends  fco2abase
     }
 
     /**
-     *
+     * Adds AB-Attributes of product into OXID Shop
      *
      * @param $oXmlProduct
      * @param $oArticle
      * @param $sType
      */
-    protected function _fcAddProductAttributes($oXmlProduct, &$oArticle, $sType)
+    protected function _fcAddProductAttributes($oXmlProduct, $oArticle, $sType)
     {
+        $aProductAttributes = (array) $oXmlProduct->Attributes;
 
-
+        foreach ($aProductAttributes as $aProductAttribute) {
+            $sAttributeId = $this->_fcGetAttributeId($aProductAttribute);
+            $sArticleId = $oArticle->getId();
+            $sAttributeValue = $aProductAttribute['AttributWert'];
+            $this->_fcAddAttributeValue($sAttributeId, $sArticleId, $sAttributeValue);
+        }
     }
 
-    protected function _fcAddProductCategories($oXmlProduct, &$oArticle, $sType)
+    /**
+     * Create or update attribute value
+     *
+     * @param $sAttributeId
+     * @param $sArticleId
+     * @param $sAttributeValue
+     */
+    protected function _fcAddAttributeValue($sAttributeId, $sArticleId, $sAttributeValue)
     {
+        $oDb = oxDb::getDb();
+        $sOxid = $this->_fcGetAttributeValueId($sAttributeId, $sArticleId);
+
+
+        if ($sOxid) {
+            $sQuery = "
+                UPDATE oxobject2attribute
+                SET oxvalue=".$oDb->quote($sAttributeValue)."
+                WHERE OXID=".$oDb->quote($sOxid);
+        } else {
+            $oUtilsObject = oxRegistry::get('oxUtilsObject');
+            $sNewOxid = $oUtilsObject->generateUId();
+            $sQuery = "
+                INSERT INTO oxobject2attribute
+                (
+                  OXID,
+                  OXOBJECTID,
+                  OXATTRID,
+                  OXVALUE
+                )
+                VALUES
+                (
+                  ".$oDb->quote($sNewOxid).",
+                  ".$oDb->quote($sArticleId).",
+                  ".$oDb->quote($sAttributeId).",
+                  ".$oDb->quote($sAttributeValue)."
+                )
+            ";
+        }
+
+        $oDb->execute($sQuery);
+    }
+
+    /**
+     * Returns id of attribute-value-assignment or false if none could
+     * be found
+     *
+     * @param $sAttributeId
+     * @param $sArticleId
+     * @return mixed string|bool
+     */
+    protected function _fcGetAttributeValueId($sAttributeId, $sArticleId)
+    {
+        $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
+
+        $sQuery = "
+            SELECT 
+                OXID 
+            FROM 
+                oxobject2attribute 
+            WHERE
+                OXOBJECTID=".$oDb->quote($sArticleId)." AND
+                OXATTRID=".$oDb->quote($sAttributeId)."
+            LIMIT 1
+        ";
+
+        $mOxid = $oDb->getOne($sQuery);
+
+        return $mOxid;
+    }
+
+    /**
+     * Fetches or creates attribute id
+     *
+     * @param $aProductAttribute
+     * @return string
+     */
+    protected function _fcGetAttributeId($aProductAttribute)
+    {
+        $sAttributeName = trim($aProductAttribute['AttributName']);
+        $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
+
+        $sQuery = "
+            SELECT 
+                OXID 
+            FROM 
+                oxattribute 
+            WHERE 
+                OXTITLE =".$oDb->quote($sAttributeName);
+
+        $sOxid = $oDb->getOne($sQuery);
+
+        if ($sOxid) return $sOxid;
+
+        $sOxid = $this->_fcCreateAttribute($aProductAttribute);
+
+        return $sOxid;
+    }
+
+    /**
+     * Creates a new attribute of AB-Attribute
+     *
+     * @param $aProductAttribute
+     * @return string
+     */
+    protected function _fcCreateAttribute($aProductAttribute)
+    {
+        $sAttributeName = trim($aProductAttribute['AttributName']);
+        $oAttribute = oxNew('oxattribute');
+        $oAttribute->setTitle($sAttributeName);
+        $sOxid = $oAttribute->getId();
+        $oAttribute->save();
+
+        return $sOxid;
+    }
+
+    /**
+     * Adds AB-Product categories to OXID Shop
+     *
+     * @param $oXmlProduct
+     * @param $oArticle
+     * @param $sType
+     */
+    protected function _fcAddProductCategories($oXmlProduct, $oArticle, $sType)
+    {
+        $aCatalogs = (array) $oXmlProduct->Catalogs;
+        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
+
+        foreach ($aCatalogs as $aCatalog) {
+            $sCatalogId = $aCatalog['CatalogID'];
+            $sResponse = $oAfterbuyApi->getShopCatalogsById($sCatalogId);
+            $oXmlResponse =
+                simplexml_load_string($sResponse);
+            $this->_fcParseApiCatalogResponse($oXmlResponse, $oArticle, $sType);
+        }
+    }
+
+    /**
+     * Handles response of GetShopCatalogs (ByID) Call
+     *
+     * @param $oXmlResponse
+     * @param $oArticle
+     * @param $sType
+     * @return void
+     */
+    protected function _fcParseApiCatalogResponse($oXmlResponse, $oArticle, $sType)
+    {
+        /**
+         * @todo:
+         */
     }
 
     /**

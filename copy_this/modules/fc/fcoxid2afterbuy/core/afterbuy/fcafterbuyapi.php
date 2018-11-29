@@ -259,6 +259,43 @@ class fcafterbuyapi {
     }
 
     /**
+     * Returns Information about a given catalogue id
+     *
+     * @param void
+     * @return string
+     */
+    public function getShopCatalogsById($sCatalogId)
+    {
+        $sXmlData = $this->getXmlHead('GetShopCatalogs', 30);
+        $sXmlData .= "<MaxCatalogs>1</MaxCatalogs>";
+        $sXmlData .= $this->getShopCatalogsFilterId($sCatalogId);
+        $sXmlData .= $this->getXmlFoot();
+        $sOutput = $this->requestAPI($sXmlData);
+
+        return $sOutput;
+    }
+
+    /**
+     * Adds id filter
+     *
+     * @param $sCatalogId
+     * @return string
+     */
+    protected function getShopCatalogsFilterId($sCatalogId)
+    {
+        $sXmlData = "
+          <DataFilter>
+           <Filter>
+            <FilterName>CatalogID</FilterName>
+            <FilterValue>".$sCatalogId."</FilterValue>
+           </Filter>
+          </DataFilter>        
+        ";
+
+        return $sXmlData;
+    }
+
+    /**
      * Checks if product request type is valid
      *
      * @param string $sType
