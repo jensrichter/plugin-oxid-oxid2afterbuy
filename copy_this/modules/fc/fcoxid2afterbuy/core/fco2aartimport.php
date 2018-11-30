@@ -63,6 +63,7 @@ class fco2aartimport extends fco2abase
      * Adds/Updates afterbuy product into oxid
      *
      * @param $oXmlProduct
+     * @return void
      */
     protected function _fcAddProductToOxid($oXmlProduct, $sType)
     {
@@ -89,18 +90,16 @@ class fco2aartimport extends fco2abase
      * @param object $oXmlProduct
      * @param object $oArticle
      * @param string $sType
+     * @return void
      */
     protected function _fcAddProductBasicData($oXmlProduct, &$oArticle, $sType)
     {
         // identification
         $this->_fcAddIdentificationData($oXmlProduct, $oArticle, $sType);
-
         // description
         $this->_fcAddDescriptionData($oXmlProduct, $oArticle, $sType);
-
         // productdata
         $this->_fcAddProductAmounts($oXmlProduct, $oArticle, $sType);
-
         // prices
         $this->_fcAddProductPrices($oXmlProduct, $oArticle, $sType);
     }
@@ -368,9 +367,123 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcParseApiCatalogResponse($oXmlResponse, $oArticle, $sType)
     {
-        /**
-         * @todo:
-         */
+        $aCatalogs = (array) $oXmlResponse->Result->Catalogs;
+        $sArticleId = $oArticle->getId();
+
+        foreach ($aCatalogs as $aCatalog) {
+            $sCategoryId = $this->_fcGetCategoryId($aCatalog);
+            $this->_fcAssignCategory($sCategoryId, $sArticleId);
+        }
+    }
+
+    /**
+     * Fetches existing category id or generate new entry
+     *
+     * @param $aCatalog
+     * @return string
+     */
+    protected function _fcGetCategoryId($aCatalog)
+    {
+        $sExpectedCategoryId = $aCatalog['CatalogID'];
+        $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
+
+        $sQuery = "
+            SELECT 
+                OXID 
+            FROM 
+                oxcategories 
+            WHERE OXID=".$oDb->quote($sExpectedCategoryId);
+
+        $sOxid = $oDb->getOne($sQuery);
+
+        if ($sOxid) return $sOxid;
+
+        $sOxid = $this->_fcCreateCategory($aCatalog);
+
+        return $sOxid;
+    }
+
+    /**
+     * Assigns category with article
+     *
+     * @param $sCategoryId
+     * @param $sArticleId
+     */
+    protected function _fcAssignCategory($sCategoryId, $sArticleId)
+    {
+        $blExists =
+            $this->_fcCategoryAssignmentExists($sCategoryId, $sArticleId);
+
+        if ($blExists) return;
+
+        $oUtilsObject = oxRegistry::get('oxUtilsObject');
+        $oDb = oxDb::getDb();
+        $sNewId = $oUtilsObject->generateUId();
+
+        $sQuery = "
+            INSERT INTO oxobject2category
+            (
+                OXID,
+                OXOBJECTID,
+                OXCATNID
+            )
+            VALUES
+            (
+                ".$oDb->quote($sNewId).",
+                ".$oDb->quote($sArticleId).",
+                ".$oDb->quote($sCategoryId)."
+            )
+        ";
+
+        $oDb->execute($sQuery);
+    }
+
+    /**
+     * Checks for existing assignment
+     *
+     * @param $sCategoryId
+     * @param $sArticleId
+     * @return bool
+     */
+    protected function _fcCategoryAssignmentExists($sCategoryId, $sArticleId)
+    {
+        $oDb = oxDb::getDb();
+
+        $sQuery = "
+            SELECT 
+                OXID 
+            FROM 
+                oxobject2category
+            WHERE
+                OXOBJECTID=".$oDb->quote($sArticleId)." AND
+                OXCATNID=".$oDb->quote($sCategoryId)."
+        ";
+
+        $blExists = (bool) $oDb->getOne($sQuery);
+
+        return $blExists;
+    }
+
+    /**
+     * Create category entry
+     *
+     * @param array $aCatalog
+     * @return string
+     */
+    protected function _fcCreateCategory($aCatalog) {
+        $sCategoryId = $aCatalog['CatalogID'];
+        $oCategory = oxNew('oxCategory');
+        $oCategory->setId($sCategoryId);
+        $oCategory->oxcategories__oxtitle = new oxField($aCatalog['Name']);
+        $oCategory->oxcategories__oxlongdesc = new oxField($aCatalog['Description']);
+        $oCategory->oxcategories__oxparentid = new oxField($aCatalog['ParentID']);
+        $oCategory->oxcategories__oxpos = new oxField($aCatalog['Position']);
+        $oCategory->oxcategories__oxactive = new oxField((int) $aCatalog['Show']);
+        $oCategory->save();
+
+        $sOxid = $oCategory->getId();
+
+        return $sOxid;
     }
 
     /**
