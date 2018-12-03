@@ -17,7 +17,7 @@ class fcafterbuy_oxarticle extends fcafterbuy_oxarticle_parent
         $mReturn = parent::load($oxID);
 
         if ($mReturn) {
-            $this->_fcAddCustomFieldsToObject($oxID);
+            $this->_fcLoadCustomFieldValuesToObject($oxID);
         }
 
         return $mReturn;
@@ -33,6 +33,17 @@ class fcafterbuy_oxarticle extends fcafterbuy_oxarticle_parent
         $this->fcSaveAfterbuyParams();
 
         return $blRet;
+    }
+
+    /**
+     * Adds fields of custom table too current object
+     *
+     * @param void
+     * @return void
+     */
+    public function fcAddCustomFieldsToObject() {
+        $this->oxarticles__fcafterbuyactive = new oxField('0');
+        $this->oxarticles__fcafterbuyid = new oxField('');
     }
 
     /**
@@ -65,7 +76,7 @@ class fcafterbuy_oxarticle extends fcafterbuy_oxarticle_parent
      * @param string $sOxid
      * @return void
      */
-    protected function _fcAddCustomFieldsToObject($sOxid) {
+    protected function _fcLoadCustomFieldValuesToObject($sOxid) {
         $oDb = oxDb::getDb(oxDB::FETCH_MODE_ASSOC);
         $sQuery = "
             SELECT

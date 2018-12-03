@@ -11,6 +11,10 @@
  */
 class fcafterbuyapi {
 
+    public static $ARTICLE_TYPE_VARIATIONSETS = 'variationsets';
+    public static $ARTICLE_TYPE_NONSETS = 'nonsets';
+    public static $ARTICLE_TYPE_SINGLES = 'singles';
+
     /**
      * Error log level 1=Only errors, 2= Errors and warnings, 3=Output all
      * @var int
@@ -28,6 +32,12 @@ class fcafterbuyapi {
      * @var string
      */
     protected $lastOrderId = null;
+
+    /**
+     * Ident for order which will be searched for
+     * @var string
+     */
+    protected $searchOrderId = null;
 
     /**
      * ShopInterface Base URL of Afterbuy
@@ -134,6 +144,16 @@ class fcafterbuyapi {
     }
 
     /**
+     * Setter for orderid to be requested
+     *
+     * @param $sSearchOrderId
+     * @return void
+     */
+    public function setSearchOrderId($sSearchOrderId) {
+        $this->searchOrderId = $sSearchOrderId;
+    }
+
+    /**
      * Request Afterbuy API with given XML Request
      *
      * @param string $sXmlData
@@ -209,8 +229,155 @@ class fcafterbuyapi {
         $sXmlData .= $this->getNewOrderFilter();
         $sXmlData .= $this->getXmlFoot();
         $sOutput = $this->requestAPI($sXmlData);
+
         return $sOutput;
     }
+
+    /**
+     * Requesting afterbuy api for items. If no page is given
+     * first page will be used default
+     *
+     *
+     * @param int $iPage
+     * @param string $sType
+     * @return int
+     */
+    public function getShopProductsFromAfterbuy($iPage=1, $sType) {
+        $blValidType = $this->isValidProductRequestType($sType);
+        if (!$blValidType) return 0;
+
+        $sXmlData = $this->getXmlHead('GetShopProducts', 30);
+        $sXmlData .= "<MaxShopItems>250</MaxShopItems>";
+        $sXmlData .= $this->_fcGetSuppressBaseProductData($sType);
+        $sXmlData .= "<PaginationEnabled>1</PaginationEnabled>";
+        $sXmlData .= "<PageNumber>".$iPage."</PageNumber>";
+        $sXmlData .= $this->getShopProductsFilter($sType);
+        $sXmlData .= $this->getXmlFoot();
+        $sOutput = $this->requestAPI($sXmlData);
+
+        return $sOutput;
+    }
+
+    /**
+     * Returns Information about a given catalogue id
+     *
+     * @param void
+     * @return string
+     */
+    public function getShopCatalogsById($sCatalogId)
+    {
+        $sXmlData = $this->getXmlHead('GetShopCatalogs', 30);
+        $sXmlData .= "<MaxCatalogs>1</MaxCatalogs>";
+        $sXmlData .= $this->getShopCatalogsFilterId($sCatalogId);
+        $sXmlData .= $this->getXmlFoot();
+        $sOutput = $this->requestAPI($sXmlData);
+
+        return $sOutput;
+    }
+
+    /**
+     * Adds id filter
+     *
+     * @param $sCatalogId
+     * @return string
+     */
+    protected function getShopCatalogsFilterId($sCatalogId)
+    {
+        $sXmlData = "
+          <DataFilter>
+           <Filter>
+            <FilterName>CatalogID</FilterName>
+            <FilterValue>".$sCatalogId."</FilterValue>
+           </Filter>
+          </DataFilter>        
+        ";
+
+        return $sXmlData;
+    }
+
+    /**
+     * Checks if product request type is valid
+     *
+     * @param string $sType
+     * @return bool
+     */
+    protected function isValidProductRequestType($sType)
+    {
+        $blValidType = in_array(
+            $sType,
+            array(
+                self::$ARTICLE_TYPE_SINGLES,
+                self::$ARTICLE_TYPE_VARIATIONSETS,
+                self::$ARTICLE_TYPE_NONSETS,
+            )
+        );
+
+        return $blValidType;
+    }
+
+    /**
+     * Returns surpress base products value if call type is singles
+     *
+     * @param $sType
+     * @return string
+     */
+    protected function _fcGetSuppressBaseProductData($sType)
+    {
+        $iSuppress = (int) ($sType==='singles');
+        if (!$iSuppress) return '';
+
+        $sXmlData = "
+            <SuppressBaseProductRelatedData>".$iSuppress."</SuppressBaseProductRelatedData>
+        ";
+
+        return $sXmlData;
+    }
+
+    /**
+     * Requesting afterbuy api for sold products (orders)
+     *
+     * @param string $sSearchOrderId
+     * @return string
+     */
+    public function getSoldItemsStatus($sSearchOrderId) {
+        $this->setSearchOrderId($sSearchOrderId);
+
+        $sXmlData = $this->getXmlHead('GetSoldItems', 30);
+        $sXmlData .= "<MaxSoldItems>1</MaxSoldItems>";
+        $sXmlData .= "<OrderDirection>1</OrderDirection>";
+        $sXmlData .= "<RequestAllItems>1</RequestAllItems>";
+        $sXmlData .= $this->getOrderByIdFilter();
+        $sXmlData .= $this->getXmlFoot();
+        $sOutput = $this->requestAPI($sXmlData);
+
+        return $sOutput;
+    }
+
+
+    /**
+     * Returns filter for requesting only new orders
+     *
+     * @param void
+     * @return string
+     */
+    protected function getShopProductsFilter($sType) {
+        $blNoFilter = ($sType==='singles');
+        if ($blNoFilter) return '';
+
+        $sFilterMode =
+            ($sType=='variationsets') ? 'VariationsSets' : 'not_VariationsSets';
+
+        $sXmlData = "";
+        $sXmlData .= "<DataFilter>";
+        $sXmlData .= "<Filter>";
+        $sXmlData .= "<FilterName>DefaultFilter</FilterName>";
+        $sXmlData .= "<FilterValue>".$sFilterMode."</FilterValue>";
+        $sXmlData .= "</Filter>";
+        $sXmlData .= "</DataFilter>";
+
+        return $sXmlData;
+    }
+
 
     /**
      * Returns filter for requesting only new orders
@@ -229,6 +396,27 @@ class fcafterbuyapi {
             $sXmlData .= "<ValueFrom>".$this->lastOrderId."</ValueFrom>";
             $sXmlData .= "<ValueTo>9999999999</ValueTo>";
             $sXmlData .= "</FilterValues>";
+            $sXmlData .= "</Filter>";
+            $sXmlData .= "</DataFilter>";
+        }
+
+        return $sXmlData;
+    }
+
+    /**
+     * Returns xml filter for requesting certain
+     *
+     * @param void
+     * @return string
+     */
+    protected function getOrderByIdFilter() {
+        $sXmlData = "";
+
+        if ($this->searchOrderId) {
+            $sXmlData .= "<DataFilter>";
+            $sXmlData .= "<Filter>";
+            $sXmlData .= "<FilterName>OrderID</FilterName>";
+            $sXmlData .= "<FilterValue>".$this->searchOrderId."</FilterValue>";
             $sXmlData .= "</Filter>";
             $sXmlData .= "</DataFilter>";
         }
