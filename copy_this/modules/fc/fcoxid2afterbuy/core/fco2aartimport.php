@@ -34,7 +34,7 @@ class fco2aartimport extends fco2abase
             $sResponse =
                 $oAfterbuyApi->getShopProductsFromAfterbuy($iPage, $sType);
             $oXmlResponse =
-                simplexml_load_string($sResponse);
+                simplexml_load_string($sResponse, null, LIBXML_NOCDATA);
             $iPage =
                 $this->_fcParseApiProductResponse($oXmlResponse, $sType);
         }
@@ -82,6 +82,7 @@ class fco2aartimport extends fco2abase
         $this->_fcAddProductPictures($oXmlProduct, $oArticle, $sType);
         $this->_fcAddProductAttributes($oXmlProduct, $oArticle, $sType);
         $this->_fcAddProductCategories($oXmlProduct, $oArticle, $sType);
+        $oArticle->save();
     }
 
     /**
@@ -211,13 +212,14 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddProductAttributes($oXmlProduct, $oArticle, $sType)
     {
-        $aProductAttributes = (array) $oXmlProduct->Attributes;
-
-        foreach ($aProductAttributes as $aProductAttribute) {
-            $sAttributeId = $this->_fcGetAttributeId($aProductAttribute);
-            $sArticleId = $oArticle->getId();
-            $sAttributeValue = $aProductAttribute['AttributWert'];
-            $this->_fcAddAttributeValue($sAttributeId, $sArticleId, $sAttributeValue);
+        foreach ($oXmlProduct->Attributes as $aProductAttributes) {
+            foreach ($aProductAttributes as $aProductAttribute) {
+                $aProductAttribute = (array) $aProductAttribute;
+                $sAttributeId = $this->_fcGetAttributeId($aProductAttribute);
+                $sArticleId = $oArticle->getId();
+                $sAttributeValue = $aProductAttribute['AttributValue'];
+                $this->_fcAddAttributeValue($sAttributeId, $sArticleId, $sAttributeValue);
+            }
         }
     }
 
@@ -309,7 +311,6 @@ class fco2aartimport extends fco2abase
                 oxattribute 
             WHERE 
                 OXTITLE =".$oDb->quote($sAttributeName);
-
         $sOxid = $oDb->getOne($sQuery);
 
         if ($sOxid) return $sOxid;
@@ -329,7 +330,7 @@ class fco2aartimport extends fco2abase
     {
         $sAttributeName = trim($aProductAttribute['AttributName']);
         $oAttribute = oxNew('oxattribute');
-        $oAttribute->setTitle($sAttributeName);
+        $oAttribute->oxattribute__oxtitle = new oxField($sAttributeName);
         $sOxid = $oAttribute->getId();
         $oAttribute->save();
 
@@ -345,15 +346,17 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddProductCategories($oXmlProduct, $oArticle, $sType)
     {
-        $aCatalogs = (array) $oXmlProduct->Catalogs;
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
-        foreach ($aCatalogs as $aCatalog) {
-            $sCatalogId = $aCatalog['CatalogID'];
-            $sResponse = $oAfterbuyApi->getShopCatalogsById($sCatalogId);
-            $oXmlResponse =
-                simplexml_load_string($sResponse);
-            $this->_fcParseApiCatalogResponse($oXmlResponse, $oArticle, $sType);
+        foreach ($oXmlProduct->Catalogs as $aCatalogs) {
+            foreach ($aCatalogs as $aCatalog) {
+                $aCatalog = (array) $aCatalog;
+                $sCatalogId = $aCatalog['CatalogID'];
+                $sResponse = $oAfterbuyApi->getShopCatalogsById($sCatalogId);
+                $oXmlResponse =
+                    simplexml_load_string($sResponse, null, LIBXML_NOCDATA);
+                $this->_fcParseApiCatalogResponse($oXmlResponse, $oArticle, $sType);
+            }
         }
     }
 
@@ -371,6 +374,7 @@ class fco2aartimport extends fco2abase
         $sArticleId = $oArticle->getId();
 
         foreach ($aCatalogs as $aCatalog) {
+            $aCatalog = (array) $aCatalog;
             $sCategoryId = $this->_fcGetCategoryId($aCatalog);
             $this->_fcAssignCategory($sCategoryId, $sArticleId);
         }
@@ -393,7 +397,6 @@ class fco2aartimport extends fco2abase
             FROM 
                 oxcategories 
             WHERE OXID=".$oDb->quote($sExpectedCategoryId);
-
         $sOxid = $oDb->getOne($sQuery);
 
         if ($sOxid) return $sOxid;
@@ -472,16 +475,15 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcCreateCategory($aCatalog) {
         $sCategoryId = $aCatalog['CatalogID'];
-        $oCategory = oxNew('oxCategory');
+        $oCategory = oxNew('oxcategory');
         $oCategory->setId($sCategoryId);
         $oCategory->oxcategories__oxtitle = new oxField($aCatalog['Name']);
         $oCategory->oxcategories__oxlongdesc = new oxField($aCatalog['Description']);
         $oCategory->oxcategories__oxparentid = new oxField($aCatalog['ParentID']);
         $oCategory->oxcategories__oxpos = new oxField($aCatalog['Position']);
         $oCategory->oxcategories__oxactive = new oxField((int) $aCatalog['Show']);
-        $oCategory->save();
-
         $sOxid = $oCategory->getId();
+        $oCategory->save();
 
         return $sOxid;
     }
@@ -496,14 +498,17 @@ class fco2aartimport extends fco2abase
     protected function _fcAddProductPictures($oXmlProduct, &$oArticle, $sType)
     {
         $aProductPictures = (array) $oXmlProduct->ProductPictures;
-
-        foreach ($aProductPictures as $iIndex=>$aProductPicture) {
-            $iPicNr = $iIndex + 1;
+        $iPicCounter = 1;
+        foreach ($aProductPictures as $aProductPicture) {
+            $aProductPicture = (array) $aProductPicture;
             $sImageUrl = (string) $aProductPicture['Url'];
+            if (empty($sImageUrl)) continue;
+
             $sTargetFileName = basename($sImageUrl);
-            $this->_fcDownloadImage($sImageUrl, $sTargetFileName, $iPicNr);
-            $sField = "oxarticles__oxpic".$iPicNr;
+            $this->_fcDownloadImage($sImageUrl, $sTargetFileName, $iPicCounter);
+            $sField = "oxarticles__oxpic".$iPicCounter;
             $oArticle->$sField = new oxField($sTargetFileName);
+            $iPicCounter++;
         }
     }
 
@@ -518,7 +523,7 @@ class fco2aartimport extends fco2abase
     {
         $oConfig = $this->getConfig();
         $sPicNrFolder = (string) $iPicNr;
-        $sMasterPictureFolder = $oConfig->getMasterPicturePath();
+        $sMasterPictureFolder = $oConfig->getMasterPicturePath('');
         $sTargetFolder = "{$sMasterPictureFolder}/product/{$sPicNrFolder}";
         $sTargetPath = "{$sTargetFolder}/{$sTargetFileName}";
         $oCurl = curl_init($sImageUrl);
