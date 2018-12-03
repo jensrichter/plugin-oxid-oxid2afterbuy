@@ -7,7 +7,17 @@
 
 class fco2aartimport extends fco2abase
 {
+    /**
+     * Number ox maximum pages that will be processed
+     * @var int
+     */
     protected $_iMaxPages = 500;
+
+    /**
+     * List of variation ids and their correspending parentid
+     * @var array
+     */
+    protected $_aVariations = array();
 
     /**
      * Central entry point for triggering product import
@@ -183,10 +193,53 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddIdentificationData($oXmlProduct, &$oArticle, $sType)
     {
-        $oArticle->setId($oXmlProduct->ProductID);
+        $sProductId = (string) $oXmlProduct->ProductID;
+        $oArticle->setId($sProductId);
         $sArtNum = $oXmlProduct->EAN ?: $oXmlProduct->Anr;
-        $oArticle->oxarticles__fcafterbuyid = new oxField($oXmlProduct->ProductID);
+        $oArticle->oxarticles__fcafterbuyid = new oxField($sProductId);
         $oArticle->oxarticles__oxartnum = new oxField($sArtNum);
+        if ($sType == 'variationsets') {
+            $this->_fcSaveVariations($oXmlProduct);
+        } else {
+            $sParentId = $this->_fcFetchParentId($sProductId);
+            $oArticle->oxarticles__oxparentid = new oxField($sParentId);
+        }
+    }
+
+    /**
+     * Fetching parent id from
+     *
+     * @param $sProductId
+     * @return string
+     */
+    protected function _fcFetchParentId($sProductId) {
+        $sParentId =
+            isset($this->_aVariations[$sProductId]) ?
+                $this->_aVariations[$sProductId] :
+                '';
+
+        return $sParentId;
+    }
+
+    /**
+     * Save related childproduct ids for later fetching parentids
+     *
+     * @param $oXmlProduct
+     * @return string
+     */
+    protected function _fcSaveVariations($oXmlProduct)
+    {
+        if (!isset($oXmlProduct->BaseProducts)) return '';
+        $sProductId = (string) $oXmlProduct->ProductID;
+
+        foreach ($oXmlProduct->BaseProducts as $aBaseProducts) {
+            foreach ($aBaseProducts as $aBaseProduct) {
+                $aBaseProduct = (array) $aBaseProduct;
+                $sBaseProductId = (string) $aBaseProduct['BaseProductID'];
+                if (empty($sBaseProductId)) continue;
+                $this->_aVariations[$sBaseProductId] = $sProductId;
+            }
+        }
     }
 
     /**
@@ -200,7 +253,42 @@ class fco2aartimport extends fco2abase
     {
         $oArticle->oxarticles__oxtitle = new oxField($oXmlProduct->Name);
         $oArticle->oxarticles__oxshortdesc = new oxField($oXmlProduct->ShortDescription);
-        $oArticle->setArticleLongDesc($oXmlProduct->Description);
+        $oArticle->setArticleLongDesc((string) $oXmlProduct->Description);
+        if ($sType=='nonsets') {
+            $sVarselect = $this->_fcFetchVarselect($oXmlProduct);
+            $oArticle->oxarticles__oxvarselect = new oxField($sVarselect);
+        }
+    }
+
+    /**
+     * Fetches varselect by subtracting parent product title
+     *
+     * @param object $oXmlProduct
+     * @return string
+     * @throws
+     */
+    protected function _fcFetchVarselect($oXmlProduct) {
+        $sProductId = (string) $oXmlProduct->ProductID;
+        $sParentId = $this->_fcFetchParentId($sProductId);
+        if (!$sParentId) return '';
+
+        $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
+
+        $sQuery = "
+            SELECT 
+                OXTITLE 
+            FROM 
+                oxarticles 
+            WHERE 
+                OXID=".$oDb->quote($sParentId);
+
+        $sParentTitle = (string) $oDb->getOne($sQuery);
+        $sChildTitle = (string) $oXmlProduct->Name;
+
+        $sVarSelect =
+            trim(str_replace($sParentTitle, '', $sChildTitle));
+
+        return $sVarSelect;
     }
 
     /**
@@ -474,18 +562,32 @@ class fco2aartimport extends fco2abase
      * @return string
      */
     protected function _fcCreateCategory($aCatalog) {
-        $sCategoryId = $aCatalog['CatalogID'];
-        $oCategory = oxNew('oxcategory');
-        $oCategory->setId($sCategoryId);
-        $oCategory->oxcategories__oxtitle = new oxField($aCatalog['Name']);
-        $oCategory->oxcategories__oxlongdesc = new oxField($aCatalog['Description']);
-        $oCategory->oxcategories__oxparentid = new oxField($aCatalog['ParentID']);
-        $oCategory->oxcategories__oxpos = new oxField($aCatalog['Position']);
-        $oCategory->oxcategories__oxactive = new oxField((int) $aCatalog['Show']);
-        $sOxid = $oCategory->getId();
-        $oCategory->save();
+        $sCategoryId = (string) $aCatalog['CatalogID'];
 
-        return $sOxid;
+        $oDb = oxDb::getDb();
+
+        $sQuery = "
+            INSERT INTO oxcategories
+            (
+                OXID,
+                OXACTIVE,
+                OXTITLE,
+                OXLONGDESC,
+                OXPARENTID
+            )
+            VALUES
+            (
+                ".$oDb->quote($sCategoryId).",
+                ".$oDb->quote((int) $aCatalog['Show']).",
+                ".$oDb->quote((string) $aCatalog['Name']).",
+                ".$oDb->quote((string) $aCatalog['Description']).",
+                ".$oDb->quote((string) $aCatalog['ParentID'])."
+            )
+        ";
+
+        $oDb->execute($sQuery);
+
+        return $sCategoryId;
     }
 
     /**
@@ -497,18 +599,19 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddProductPictures($oXmlProduct, &$oArticle, $sType)
     {
-        $aProductPictures = (array) $oXmlProduct->ProductPictures;
         $iPicCounter = 1;
-        foreach ($aProductPictures as $aProductPicture) {
-            $aProductPicture = (array) $aProductPicture;
-            $sImageUrl = (string) $aProductPicture['Url'];
-            if (empty($sImageUrl)) continue;
+        foreach ($oXmlProduct->ProductPictures as $aProductPictures) {
+            foreach ($aProductPictures as $aProductPicture) {
+                $aProductPicture = (array) $aProductPicture;
+                $sImageUrl = (string) $aProductPicture['Url'];
+                if (empty($sImageUrl)) continue;
 
-            $sTargetFileName = basename($sImageUrl);
-            $this->_fcDownloadImage($sImageUrl, $sTargetFileName, $iPicCounter);
-            $sField = "oxarticles__oxpic".$iPicCounter;
-            $oArticle->$sField = new oxField($sTargetFileName);
-            $iPicCounter++;
+                $sTargetFileName = basename($sImageUrl);
+                $this->_fcDownloadImage($sImageUrl, $sTargetFileName, $iPicCounter);
+                $sField = "oxarticles__oxpic".$iPicCounter;
+                $oArticle->$sField = new oxField($sTargetFileName);
+                $iPicCounter++;
+            }
         }
     }
 
@@ -524,7 +627,7 @@ class fco2aartimport extends fco2abase
         $oConfig = $this->getConfig();
         $sPicNrFolder = (string) $iPicNr;
         $sMasterPictureFolder = $oConfig->getMasterPicturePath('');
-        $sTargetFolder = "{$sMasterPictureFolder}/product/{$sPicNrFolder}";
+        $sTargetFolder = "{$sMasterPictureFolder}product/{$sPicNrFolder}";
         $sTargetPath = "{$sTargetFolder}/{$sTargetFileName}";
         $oCurl = curl_init($sImageUrl);
         $oFile = fopen($sTargetPath, 'wb');
