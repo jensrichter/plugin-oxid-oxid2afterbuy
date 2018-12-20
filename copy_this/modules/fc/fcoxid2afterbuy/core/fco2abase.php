@@ -40,6 +40,19 @@ class fco2abase extends oxBase {
      */
     protected $_aAfterbuyConfig = null;
 
+    protected $_aAllowedExecution = array(
+        '0' => array(
+            'artexport',
+            'orderimport',
+            'statusexport',
+        ),
+        '1' => array(
+            'artimport',
+            'statusimport',
+            'orderexport',
+        ),
+    );
+
     /**
      * fco2abase constructor.
      * initialize loglevel
@@ -66,6 +79,23 @@ class fco2abase extends oxBase {
             $oUtils = oxRegistry::getUtils();
             $oUtils->writeToLog($sFullMessage, $this->_sLogFile);
         }
+    }
+
+    /**
+     * Checks if job execution is allowed by configuration (Leading System)
+     *
+     * @param $sJobIdent
+     * @return bool
+     */
+    public function fcJobExecutionAllowed($sJobIdent) {
+        $oConfig = $this->getConfig();
+
+        $sLeadSystem =
+            (string) $oConfig->getConfigParam('sFcAfterbuyLeadSystem');
+        $aAllowedJobs = $this->_aAllowedExecution[$sLeadSystem];
+        $blAllowed = (bool) in_array($sJobIdent, $aAllowedJobs);
+
+        return $blAllowed;
     }
 
     /**

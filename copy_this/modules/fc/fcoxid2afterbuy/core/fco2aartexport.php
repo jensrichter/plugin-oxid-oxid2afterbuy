@@ -28,6 +28,12 @@ class fco2aartexport extends fco2abase {
      */
     public function execute()
     {
+        $blAllowed = $this->fcJobExecutionAllowed('artexport');
+        if (!$blAllowed) {
+            echo "Execution of artexport is not allowed by configuration\n";
+            exit(1);
+        }
+
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
         $aArticleIds = $this->_fcGetAffectedArticleIds();
 

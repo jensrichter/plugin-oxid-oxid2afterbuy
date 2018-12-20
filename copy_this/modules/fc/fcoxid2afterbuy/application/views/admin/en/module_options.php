@@ -21,11 +21,15 @@ $sLangName  = "English";
 $aLang = array(
     'charset'                                   	        => 'UTF-8',
     // module settings
+    'SHOP_MODULE_GROUP_fcafterbuy_general'                  => 'General settings',
     'SHOP_MODULE_GROUP_fcafterbuy_debug'                    => 'Logs and Debug modes',
     'SHOP_MODULE_GROUP_fcafterbuy_connect'                  => 'Connection Settings',
     'SHOP_MODULE_GROUP_fcafterbuy_order'                    => 'Transfer Orders',
     'SHOP_MODULE_GROUP_fcafterbuy_extended'                 => 'Additional Settings',
     'SHOP_MODULE_GROUP_fcafterbuy_export'                   => 'Export articles',
+    'SHOP_MODULE_sFcAfterbuyLeadSystem'                     => 'Leading System',
+    'SHOP_MODULE_sFcAfterbuyLeadSystem_0'                   => 'OXID-eShop',
+    'SHOP_MODULE_sFcAfterbuyLeadSystem_1'                   => 'Afterbuy',
     'SHOP_MODULE_iFcAfterbuyLogLevel'                       => 'Event logging',
     'SHOP_MODULE_iFcAfterbuyLogLevel_0'                     => 'No logging',
     'SHOP_MODULE_iFcAfterbuyLogLevel_1'                     => 'Log Errors',

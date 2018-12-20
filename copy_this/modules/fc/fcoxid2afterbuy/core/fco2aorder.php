@@ -12,9 +12,15 @@ class fco2aorder extends fco2abase {
      * 
      * @param object $oOrder 
      * @param object $oUser
-     * @return bool True if order was successfully sent, False if problems occurred
+     * @return void
      */
     public function fcSendOrderToAfterbuy($oOrder, $oUser) {
+        $blAllowed = $this->fcJobExecutionAllowed('orderexport');
+        if (!$blAllowed) {
+            $this->fcWriteLog("ERROR: Execution of orderexport is not allowed by configuration");
+            return;
+        }
+
         $oConfig = $this->getConfig();
         // build request url
         $sActionParameter = $this->_fcGetInterfaceAction();
