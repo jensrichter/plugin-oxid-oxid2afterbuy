@@ -43,6 +43,7 @@ $aLang = array(
     'SHOP_MODULE_sFcAfterbuyUsername'                       => 'Username',
     'SHOP_MODULE_sFcAfterbuyUserPassword'                   => 'Password',
     'SHOP_MODULE_blFcAfterbuyExportAll'                     => 'Export all articles to all channels',
+    'HELP_SHOP_MODULE_blFcAfterbuyExportAll'                => 'As default only articles will be exported, which has been flagged for export in product tab "Afterbuy".',
     'SHOP_MODULE_blFcStockLimitAuction'                     => 'Limit stock of ype auction',
     'SHOP_MODULE_blFcSendOrdersOnTheFly'                    => 'Directly transfer order on order finish',
     // 'SHOP_MODULE_sFcLastOrderId'                            => 'Bestellimport ab dieser BestellID (Wird automatisch befüllt)',
@@ -85,6 +86,7 @@ $aLang = array(
     'tbclorder_orderinfo'                                   => 'oxid2afterbuy',
 
     'FC_AFTERBUY_ARTICLE_ACTIVE'                            => 'Export article to Afterbuy',
+    'FC_AFTERBUY_ARTICLE_PRODUCTID'                         => 'Afterbuy-ProductID',
     'SHOP_MODULE_AFTERBUY_SAVE_PAYMENTS'                    => 'Save assignments',
     'SHOP_MODULE_AFTERBUY_PAYMENTS_SHOP'                    => 'Payment Methods Shop',
     'SHOP_MODULE_AFTERBUY_PAYMENTS_AFTERBUY'                => 'Payment Methods Afterbuy',

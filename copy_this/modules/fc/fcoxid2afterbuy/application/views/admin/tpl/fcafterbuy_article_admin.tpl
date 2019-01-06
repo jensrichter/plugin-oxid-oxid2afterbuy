@@ -65,6 +65,14 @@ $oxid needs to be from oxarticles
                                 [{ oxinputhelp ident="FC_AFTERBUY_ARTICLE_ACTIVE_HELP" }]
                             </td>
                         </tr>
+                        <tr>
+                            <td class="edittext" width="120">
+                                [{oxmultilang ident="FC_AFTERBUY_ARTICLE_PRODUCTID"}]
+                            </td>
+                            <td class="edittext">
+                                [{$edit->oxarticles__fcafterbuyid->value}]
+                            </td>
+                        </tr>
                     [{/oxhasrights}]
                     <tr>
                         <td class="edittext" colspan="2"><br><br>

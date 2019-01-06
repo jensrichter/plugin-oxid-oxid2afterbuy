@@ -43,6 +43,7 @@ $aLang = array(
     'SHOP_MODULE_sFcAfterbuyUsername'                       => 'Username',
     'SHOP_MODULE_sFcAfterbuyUserPassword'                   => 'Passwort',
     'SHOP_MODULE_blFcAfterbuyExportAll'                     => 'Alle Artikel an alle Kanäle exportieren',
+    'HELP_SHOP_MODULE_blFcAfterbuyExportAll'                => 'Standardmäßig werden nur Artikel zu Afterbuy übertragen, welche unter dem Reiter "Afterbuy" einen Haken gesetzt haben.',
     'SHOP_MODULE_blFcStockLimitAuction'                     => 'Bestandart vom Typ Auktion verwenden',
     'SHOP_MODULE_blFcSendOrdersOnTheFly'                    => 'Bestellungen direkt beim Bestellabschluss an Afterbuy übertragen',
     // 'SHOP_MODULE_sFcLastOrderId'                            => 'Bestellimport ab dieser BestellID (Wird automatisch befüllt)',
@@ -85,6 +86,7 @@ $aLang = array(
     'tbclorder_orderinfo'                                   => 'oxid2afterbuy',
 
     'FC_AFTERBUY_ARTICLE_ACTIVE'                            => 'Artikel zu Afterbuy übertragen',
+    'FC_AFTERBUY_ARTICLE_PRODUCTID'                         => 'Afterbuy-ProduktID',
     'SHOP_MODULE_AFTERBUY_SAVE_PAYMENTS'                    => 'Zuweisungen speichern',
     'SHOP_MODULE_AFTERBUY_PAYMENTS_SHOP'                    => 'Zahlarten Shop',
     'SHOP_MODULE_AFTERBUY_PAYMENTS_AFTERBUY'                => 'Zahlarten Afterbuy',
