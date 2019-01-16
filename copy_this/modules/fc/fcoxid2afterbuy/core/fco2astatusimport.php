@@ -9,6 +9,12 @@ class fco2astatusimport extends fco2abase {
      */
     public function execute()
     {
+        $blAllowed = $this->fcJobExecutionAllowed('statusimport');
+        if (!$blAllowed) {
+            echo "Execution of statusimport is not allowed by configuration\n";
+            exit(1);
+        }
+
         $aCheckOrderIds = $this->_fcGetNotFulfilledOrders();
 
         foreach ($aCheckOrderIds as $sOrderOxid) {

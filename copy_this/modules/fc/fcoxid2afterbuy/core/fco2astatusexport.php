@@ -9,6 +9,12 @@ class fco2astatusexport extends fco2abase {
      */
     public function execute()
     {
+        $blAllowed = $this->fcJobExecutionAllowed('statusexport');
+        if (!$blAllowed) {
+            echo "Execution of statusexport is not allowed by configuration\n";
+            exit(1);
+        }
+
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
         // load order IDs of changed afterbuy orders to export from oxorder/oxorderarticles

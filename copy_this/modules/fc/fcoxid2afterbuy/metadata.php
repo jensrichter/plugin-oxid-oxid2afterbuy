@@ -83,6 +83,13 @@ $aModule = array(
     ),
     'settings' => array(
         array(
+            'group' => 'fcafterbuy_general',
+            'name' => 'sFcAfterbuyLeadSystem',
+            'type' => 'select',
+            'value' => '0',
+            'constrains' => '0|1'
+        ),
+        array(
             'group' => 'fcafterbuy_connect',
             'name' => 'sFcAfterbuyShopInterfaceBaseUrl',
             'type' => 'str',

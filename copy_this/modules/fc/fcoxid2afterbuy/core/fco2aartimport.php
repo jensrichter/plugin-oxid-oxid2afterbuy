@@ -26,6 +26,12 @@ class fco2aartimport extends fco2abase
      * @return void
      */
     public function execute() {
+        $blAllowed = $this->fcJobExecutionAllowed('artimport');
+        if (!$blAllowed) {
+            echo "Execution of artimport is not allowed by configuration\n";
+            exit(1);
+        }
+
         $this->_fcProcessProducts('variationsets');
         $this->_fcProcessProducts('nonsets');
     }
@@ -62,7 +68,9 @@ class fco2aartimport extends fco2abase
     {
         $iPage = $this->_fcGetNextPage($oXmlResponse);
 
-        foreach ($oXmlResponse->Result->Products->Product as $oXmlProduct) {
+        $aProducts = (array) $oXmlResponse->Result->Products->Product;
+
+        foreach ($aProducts as $oXmlProduct) {
             $this->_fcAddProductToOxid($oXmlProduct, $sType);
         }
 

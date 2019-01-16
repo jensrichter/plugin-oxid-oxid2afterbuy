@@ -31,6 +31,12 @@ class fco2aorderimport extends fco2abase {
      * @return void
      */
     public function execute() {
+        $blAllowed = $this->fcJobExecutionAllowed('orderimport');
+        if (!$blAllowed) {
+            echo "Execution of orderimport is not allowed by configuration\n";
+            exit(1);
+        }
+
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
         $this->_fcSetFilter($oAfterbuyApi);
         $sResponse = $oAfterbuyApi->getSoldItemsFromAfterbuy();
