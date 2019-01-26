@@ -63,8 +63,8 @@ class fco2aartexport extends fco2abase {
      */
     protected function _fcGetVariants($oArticle) {
         if ($this->_aOxidVariants === null) {
-            $aVariants = array();
             $aVariantIds = $oArticle->getVariantIds();
+            $aVariants = null;
 
             foreach ($aVariantIds as $sVariantId) {
                 $oVariant = $this->_fcGetOxidArticle($sVariantId);
@@ -174,6 +174,7 @@ class fco2aartexport extends fco2abase {
         $oArticle = $this->_fcGetOxidArticle($sArticleOxid);
         if (!$oArticle) return false;
 
+        $this->_aOxidVariants = null;
         $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
         $oAfterbuyArticle = $this->_fcAddArticleValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddCatalogValues($oAfterbuyArticle, $oArticle);
@@ -319,6 +320,7 @@ class fco2aartexport extends fco2abase {
             $this->_fcAddVariantBaseValues($oAfterbuyArticle, $oArticle);
 
         $aVariants = $this->_fcGetVariants($oArticle);
+
         $blHasVariants = (
             is_array($aVariants) &&
             count($aVariants) > 0
@@ -358,13 +360,10 @@ class fco2aartexport extends fco2abase {
         if (!$blHasVariations)  return $oAfterbuyArticle;
 
         $aEbayVariations = array();
-
         foreach ($aVariations as $sVariationName=>$aVariationValues) {
-            foreach ($aVariationValues as $aVariationEntry) {
                 $oEbayVariation =
-                    $this->_fcGetUseeBayVariation($sVariationName, $aVariationEntry);
+                    $this->_fcGetUseeBayVariation($sVariationName, $aVariationValues);
                 $aEbayVariations[] = $oEbayVariation;
-            }
         }
 
         $oAfterbuyArticle->UseeBayVariations = $aEbayVariations;
@@ -424,7 +423,7 @@ class fco2aartexport extends fco2abase {
             $aVariation['pos'] = count((array) $aVariations[$sVariationName]);
             $aVariation['picurl'] = $oVariant->getPictureUrl();
 
-            $aVariations[$sVariationName][] = $aVariation;
+            $aVariations[urlencode($sVariationName)][] = $aVariation;
         }
 
         return $aVariations;
@@ -456,29 +455,31 @@ class fco2aartexport extends fco2abase {
         $sVarNames = $oArticle->oxarticles__oxvarname->value;
         $aVarNames = explode('|', $sVarNames);
         $aVarNames = array_map('trim', $aVarNames);
-        $aVariationNames = array_keys($aVarNames);
 
-        return $aVariationNames;
+        return $aVarNames;
     }
 
     /**
      * Adds variant values as afterbuy ebayvariation
      *
      * @param string $sVariationName
-     * @param array $aValueEntry
+     * @param array $aVariationValues
      * @return object
      */
-    protected function _fcGetUseeBayVariation($sVariationName, $aValueEntry)
+    protected function _fcGetUseeBayVariation($sVariationName, $aVariationValues)
     {
         $oAfterbuyUseeBayVariation =
             $this->_fcGetUseeBayVariationObject();
 
-        $oAfterbuyUseeBayVariation =
-            $this->_fcAssignEbayVariation(
-                $sVariationName,
-                $aValueEntry,
-                $oAfterbuyUseeBayVariation
-            );
+        $oAfterbuyUseeBayVariation->VariationName = urldecode($sVariationName);
+        foreach ($aVariationValues as $aVariationEntry) {
+            $oEbayVariationValue =
+                $this->_fcGetEbayVariationValue($aVariationEntry);
+
+            $aEbayVariationValues[] = $oEbayVariationValue;
+        }
+
+        $oAfterbuyUseeBayVariation->VariationValues = $aEbayVariationValues;
 
         return $oAfterbuyUseeBayVariation;
     }
@@ -537,26 +538,18 @@ class fco2aartexport extends fco2abase {
     /**
      * Assign variant values to ebayvariation
      *
-     * @param string $sVariationName
-     * @param $oUseeBayVariation
-     * @param $oOxidVariantArticle
-     * @param $iPos
+     * @param string $sValueEntry
      * @return object
      */
-    protected function _fcAssignEbayVariation($sVariationName, $aValueEntry, $oAfterbuyUseeBayVariation)
+    protected function _fcGetEbayVariationValue($aValueEntry)
     {
-        $oAfterbuyUseeBayVariation->Name = $sVariationName;
-
         $oEbayVariationValues =  $this->_fcGetEbayVariationValuesObject();
 
         $oEbayVariationValues->ValidForProdID = $aValueEntry['anr'];
         $oEbayVariationValues->VariationValue = $aValueEntry['value'];
         $oEbayVariationValues->VariationPos = $aValueEntry['pos'];
         $oEbayVariationValues->VariationPicURL = $aValueEntry['picurl'];
-
-        $oAfterbuyUseeBayVariation->VariationValues = $oEbayVariationValues;
-
-        return $oAfterbuyUseeBayVariation;
+        return $oEbayVariationValues;
     }
 
     /**

@@ -501,25 +501,25 @@ class fcafterbuyapi {
         $blHasEbayVariations = is_array($oArt->UseeBayVariations);
         if (!$blHasEbayVariations) return $sXmlData;
 
-        $sXmlData .= "<UseeBayVariations>";
+        $sXmlData .= "<UseeBayVariations>\n";
         foreach ($oArt->UseeBayVariations as $oEbayVariation) {
             $sXmlData .= "<Variation>\n";
             $sXmlData .= "\t<VariationName>".$oEbayVariation->VariationName."</VariationName>\n";
-            $sXmlData .= "\t<VariationValues>";
             foreach ($oEbayVariation->VariationValues as $oVariationValue) {
+                $sXmlData .= "\t<VariationValues>\n";
                 $sXmlData .=
-                    "\t\t<ValidForProdID>".$oVariationValue->ValidForProdID."</ValidForProdID>";
+                    "\t\t<ValidForProdID>".$oVariationValue->ValidForProdID."</ValidForProdID>\n";
                 $sXmlData .=
-                    "\t\t<VariationValue><![CDATA[".$oVariationValue->VariationValue."]]></VariationValue>";
+                    "\t\t<VariationValue><![CDATA[".$oVariationValue->VariationValue."]]></VariationValue>\n";
                 $sXmlData .=
-                    "\t\t<VariationPos>".$oVariationValue->VariationPos."</VariationPos>";
+                    "\t\t<VariationPos>".$oVariationValue->VariationPos."</VariationPos>\n";
                 $sXmlData .=
-                    "\t\t<VariationPicURL>".$oVariationValue->VariationPicURL."</VariationPicURL>";
+                    "\t\t<VariationPicURL>".$oVariationValue->VariationPicURL."</VariationPicURL>\n";
+                $sXmlData .= "\t</VariationValues>\n";
             }
-            $sXmlData .= "\t</VariationValues>";
             $sXmlData .= "</Variation>\n";
         }
-        $sXmlData .= "</UseeBayVariations>";
+        $sXmlData .= "</UseeBayVariations>\n";
 
         return $sXmlData;
     }
