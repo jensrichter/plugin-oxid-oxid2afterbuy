@@ -476,6 +476,7 @@ class fcafterbuyapi {
 
         $sXmlData = $this->_fcAddProductIdent($oArt, $sXmlData);
         $sXmlData = $this->_fcAddProductBaseValues($oArt, $sXmlData);
+        $sXmlData = $this->_fcAddEbayVariations($oArt, $sXmlData);
         $sXmlData = $this->_fcAddManufacturer($oArt, $sXmlData);
         $sXmlData = $this->_fcAddBaseProducts($oArt, $sXmlData);
         $sXmlData = $this->_fcAddCatalogs($oArt, $sXmlData);
@@ -484,6 +485,41 @@ class fcafterbuyapi {
 
         $sXmlData .= '</Product></Products>';
         $sXmlData .= $this->getXmlFoot();
+
+        return $sXmlData;
+    }
+
+    /**
+     * Adding ebay variations to xml
+     *
+     * @param $oArt
+     * @param $sXmlData
+     * @return mixed
+     */
+    protected function _fcAddEbayVariations($oArt, $sXmlData)
+    {
+        $blHasEbayVariations = is_array($oArt->UseeBayVariations);
+        if (!$blHasEbayVariations) return $sXmlData;
+
+        $sXmlData .= "<UseeBayVariations>";
+        foreach ($oArt->UseeBayVariations as $oEbayVariation) {
+            $sXmlData .= "<Variation>\n";
+            $sXmlData .= "\t<VariationName>".$oEbayVariation->VariationName."</VariationName>\n";
+            $sXmlData .= "\t<VariationValues>";
+            foreach ($oEbayVariation->VariationValues as $oVariationValue) {
+                $sXmlData .=
+                    "\t\t<ValidForProdID>".$oVariationValue->ValidForProdID."</ValidForProdID>";
+                $sXmlData .=
+                    "\t\t<VariationValue><![CDATA[".$oVariationValue->VariationValue."]]></VariationValue>";
+                $sXmlData .=
+                    "\t\t<VariationPos>".$oVariationValue->VariationPos."</VariationPos>";
+                $sXmlData .=
+                    "\t\t<VariationPicURL>".$oVariationValue->VariationPicURL."</VariationPicURL>";
+            }
+            $sXmlData .= "\t</VariationValues>";
+            $sXmlData .= "</Variation>\n";
+        }
+        $sXmlData .= "</UseeBayVariations>";
 
         return $sXmlData;
     }
