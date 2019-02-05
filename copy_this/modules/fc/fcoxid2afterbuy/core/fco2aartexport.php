@@ -21,6 +21,13 @@ class fco2aartexport extends fco2abase {
     );
 
     /**
+     * List of oxid variants for preventing loading those twice
+     *
+     * @var array|null
+     */
+    protected $_aOxidVariants = null;
+
+    /**
      * Executes upload of selected afterbuy articles
      *
      * @param void
@@ -46,6 +53,28 @@ class fco2aartexport extends fco2abase {
             $this->_fcValidateCallStatus($sResponse);
             $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
         }
+    }
+
+    /**
+     * Returns list of oxid variants
+     *
+     * @param $oArticle
+     * @return array
+     */
+    protected function _fcGetVariants($oArticle) {
+        if ($this->_aOxidVariants === null) {
+            $aVariantIds = $oArticle->getVariantIds();
+            $aVariants = null;
+
+            foreach ($aVariantIds as $sVariantId) {
+                $oVariant = $this->_fcGetOxidArticle($sVariantId);
+                $aVariants[] = $oVariant;
+            }
+
+            $this->_aOxidVariants = $aVariants;
+        }
+
+        return $this->_aOxidVariants;
     }
 
     /**
@@ -145,10 +174,12 @@ class fco2aartexport extends fco2abase {
         $oArticle = $this->_fcGetOxidArticle($sArticleOxid);
         if (!$oArticle) return false;
 
+        $this->_aOxidVariants = null;
         $oAfterbuyArticle = $this->_fcGetAfterbuyArticle();
         $oAfterbuyArticle = $this->_fcAddArticleValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddCatalogValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddVariantValues($oAfterbuyArticle, $oArticle);
+        $oAfterbuyArticle = $this->_fcAddEbayVariations($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddAttributeValues($oAfterbuyArticle, $oArticle);
         $oAfterbuyArticle = $this->_fcAddManufacturerValues($oAfterbuyArticle, $oArticle);
 
@@ -288,30 +319,192 @@ class fco2aartexport extends fco2abase {
         $oAfterbuyArticle =
             $this->_fcAddVariantBaseValues($oAfterbuyArticle, $oArticle);
 
-        $aVariantIds = $oArticle->getVariantIds();
+        $aVariants = $this->_fcGetVariants($oArticle);
+
         $blHasVariants = (
-            is_array($aVariantIds) &&
-            count($aVariantIds) > 0
+            is_array($aVariants) &&
+            count($aVariants) > 0
         );
 
         if (!$blHasVariants)  return $oAfterbuyArticle;
 
         $iPos = 1;
-        foreach ($aVariantIds as $sVariantOxid) {
-            $oOxidVariantArticle = $this->_fcGetOxidArticle($sVariantOxid);
-            $oAfterbuyAddBaseProduct = $this->_fcGetAddBaseProduct();
-            $oAfterbuyAddBaseProduct =
-                $this->_fcAssignVariantValues(
-                    $oAfterbuyAddBaseProduct,
-                    $oOxidVariantArticle,
-                    $iPos
-                );
-
-            $oAfterbuyArticle->AddBaseProducts[] =
-                $oAfterbuyAddBaseProduct;
+        foreach ($aVariants as $oVariant) {
+            $oAfterbuyArticle = $this->_fcGetAddBaseProduct(
+                $oAfterbuyArticle,
+                $oVariant,
+                $iPos
+            );
 
             $iPos++;
         }
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Add ebay variations
+     *
+     * @param $oAfterbuyArticle
+     * @param $oArticle
+     * @return object
+     */
+    protected function _fcAddEbayVariations($oAfterbuyArticle, $oArticle)
+    {
+        $aVariations = $this->_fcGetVariantVariations($oArticle);
+        $blHasVariations = (
+            is_array($aVariations) &&
+            count($aVariations) > 0
+        );
+
+        if (!$blHasVariations)  return $oAfterbuyArticle;
+
+        $aEbayVariations = array();
+        foreach ($aVariations as $sVariationName=>$aVariationValues) {
+                $oEbayVariation =
+                    $this->_fcGetUseeBayVariation($sVariationName, $aVariationValues);
+                $aEbayVariations[] = $oEbayVariation;
+        }
+
+        $oAfterbuyArticle->UseeBayVariations = $aEbayVariations;
+
+        return $oAfterbuyArticle;
+    }
+
+    /**
+     * Returns array which is sorted by variation names and
+     * its belonging values
+     *
+     * @param $oArticle
+     * @return array
+     */
+    protected function _fcGetVariantVariations($oArticle)
+    {
+        $aVariants = $this->_fcGetVariants($oArticle);
+        $blHasVariants = (
+            is_array($aVariants) &&
+            count($aVariants) > 0
+        );
+
+        if (!$blHasVariants) return array();
+
+        $aVariationNames = $this->_fcFetchVariationNames($oArticle);
+        $aVariations = array();
+
+        foreach ($aVariants as $oVariant) {
+            $aVariations = $this->_fcAddVariationValues(
+                $aVariations,
+                $aVariationNames,
+                $oVariant
+            );
+        }
+
+        return $aVariations;
+
+    }
+
+    /**
+     * Adding variant to variations dataset
+     *
+     * @param $aVariations
+     * @param $aVariationNames
+     * @param $oVariant
+     * @return mixed
+     */
+    protected function _fcAddVariationValues($aVariations, $aVariationNames, $oVariant)
+    {
+        foreach ($aVariationNames as $iIndex=>$sVariationName) {
+            $aVarSelects = $this->_fcFetchVariationValues($oVariant);
+            $sVarSelect = $aVarSelects[$iIndex];
+
+            $aVariation = array();
+            $aVariation['anr'] = $oVariant->oxarticles__fcafterbuyid->value;
+            $aVariation['value'] = $sVarSelect;
+            $aVariation['pos'] = count((array) $aVariations[$sVariationName]);
+            $aVariation['picurl'] = $oVariant->getPictureUrl();
+
+            $aVariations[urlencode($sVariationName)][] = $aVariation;
+        }
+
+        return $aVariations;
+    }
+
+    /**
+     * Returns array with index of variation values
+     *
+     * @param $oArticle
+     * @return array
+     */
+    protected function _fcFetchVariationValues($oArticle)
+    {
+        $sVarSelect = $oArticle->oxarticles__oxvarselect->value;
+        $aVarSelects = explode('|', $sVarSelect);
+        $aVarSelects = array_map('trim', $aVarSelects);
+
+        return $aVarSelects;
+    }
+
+    /**
+     * Returns array with index of variation names
+     *
+     * @param $oArticle
+     * @return array
+     */
+    protected function _fcFetchVariationNames($oArticle)
+    {
+        $sVarNames = $oArticle->oxarticles__oxvarname->value;
+        $aVarNames = explode('|', $sVarNames);
+        $aVarNames = array_map('trim', $aVarNames);
+
+        return $aVarNames;
+    }
+
+    /**
+     * Adds variant values as afterbuy ebayvariation
+     *
+     * @param string $sVariationName
+     * @param array $aVariationValues
+     * @return object
+     */
+    protected function _fcGetUseeBayVariation($sVariationName, $aVariationValues)
+    {
+        $oAfterbuyUseeBayVariation =
+            $this->_fcGetUseeBayVariationObject();
+
+        $oAfterbuyUseeBayVariation->VariationName = urldecode($sVariationName);
+        foreach ($aVariationValues as $aVariationEntry) {
+            $oEbayVariationValue =
+                $this->_fcGetEbayVariationValue($aVariationEntry);
+
+            $aEbayVariationValues[] = $oEbayVariationValue;
+        }
+
+        $oAfterbuyUseeBayVariation->VariationValues = $aEbayVariationValues;
+
+        return $oAfterbuyUseeBayVariation;
+    }
+
+    /**
+     * Adds oxid variant as afterbuy addbaseproduct
+     *
+     * @param $oAfterbuyArticle
+     * @param $oOxidVariantArticle
+     * @param $iPos
+     * @return object
+     */
+    protected function _fcGetAddBaseProduct($oAfterbuyArticle, $oOxidVariantArticle, $iPos)
+    {
+        $oAfterbuyAddBaseProduct =
+            $this->_fcGetAddBaseProductObject();
+        $oAfterbuyAddBaseProduct =
+            $this->_fcAssignVariantValues(
+                $oAfterbuyAddBaseProduct,
+                $oOxidVariantArticle,
+                $iPos
+            );
+
+        $oAfterbuyArticle->AddBaseProducts[] =
+            $oAfterbuyAddBaseProduct;
 
         return $oAfterbuyArticle;
     }
@@ -323,7 +516,8 @@ class fco2aartexport extends fco2abase {
      * @param $oOxidVariantArticle
      * @return object
      */
-    protected function _fcAssignVariantValues($oAfterbuyAddBaseProduct, $oOxidVariantArticle, $iPos) {
+    protected function _fcAssignVariantValues($oAfterbuyAddBaseProduct, $oOxidVariantArticle, $iPos)
+    {
         $sVariantLabel =
             $oOxidVariantArticle->oxarticles__oxtitle->value.
             " ".
@@ -342,16 +536,59 @@ class fco2aartexport extends fco2abase {
     }
 
     /**
+     * Assign variant values to ebayvariation
+     *
+     * @param string $sValueEntry
+     * @return object
+     */
+    protected function _fcGetEbayVariationValue($aValueEntry)
+    {
+        $oEbayVariationValues =  $this->_fcGetEbayVariationValuesObject();
+
+        $oEbayVariationValues->ValidForProdID = $aValueEntry['anr'];
+        $oEbayVariationValues->VariationValue = $aValueEntry['value'];
+        $oEbayVariationValues->VariationPos = $aValueEntry['pos'];
+        $oEbayVariationValues->VariationPicURL = $aValueEntry['picurl'];
+        return $oEbayVariationValues;
+    }
+
+    /**
      * Returns fresh instance of AddBaseProduct
      *
      * @param void
      * @return mixed
      */
-    protected function _fcGetAddBaseProduct()
+    protected function _fcGetAddBaseProductObject()
     {
         $oAddBaseProduct = oxNew('fcafterbuyaddbaseproduct');
 
         return $oAddBaseProduct;
+    }
+
+    /**
+     * Returns fresh instance of UseeBayVariation
+     *
+     * @param void
+     * @return mixed
+     */
+    protected function _fcGetUseeBayVariationObject()
+    {
+        $oUseeBayVariation = oxNew('fcafterbuyuseebayvariation');
+
+        return $oUseeBayVariation;
+    }
+
+    /**
+     * Returns fresh instance of ebay variation values object
+     *
+     * @param void
+     * @return mixed
+     */
+    protected function _fcGetEbayVariationValuesObject()
+    {
+        $oEbayVariationValues = oxNew('fcafterbuyebayvariationvalue');
+
+        return $oEbayVariationValues;
     }
 
     /**
