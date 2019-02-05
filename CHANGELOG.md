@@ -1,5 +1,12 @@
 # Changelog - oxid 2 afterbuy plugin for OXID 5
 
+## 1.2.0
+Released 2019-02-05
+* Added option to determine leading system which flags allowed plugins-actions
+* Displaying Afterbuy ProductID in article afterbuy tab
+* Added exporting article variants as eBay-Variations
+* Overall bugfixes and some code refactoring 
+
 ## 1.1.0
 Released 2018-11-14
 * Changed database structure for not extending existing tables
