@@ -18,6 +18,7 @@ class fco2aartexport extends fco2abase {
         'BuyingPrice' => 'oxarticles__oxbprice',
         'Weight' => 'oxarticles__oxweight',
         'ShortDescription' => 'oxarticles__oxshortdesc',
+        'FreeValue1'=> 'oxarticles__oxid',
     );
 
     /**
