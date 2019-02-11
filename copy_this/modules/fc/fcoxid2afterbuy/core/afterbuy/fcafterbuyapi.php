@@ -601,6 +601,7 @@ class fcafterbuyapi {
             <Keywords>'.$oArt->Keywords.'</Keywords>
             <BuyingPrice>'.str_replace('.',',',$oArt->BuyingPrice).'</BuyingPrice>
             <Weight>'.$oArt->Weight.'</Weight>
+            <FreeValue1><![CDATA['.$oArt->FreeValue1.']]></FreeValue1>
         ';
 
         return $sXmlData;
