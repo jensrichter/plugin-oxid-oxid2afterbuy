@@ -7,6 +7,17 @@
 
 class fco2adatabase extends oxBase
 {
+
+    /**
+     * List of tables dynamically filled with transaction data
+     * @var array
+     */
+    protected $_aAfterbuyTransactionTables = array(
+        'oxarticles_afterbuy',
+        'oxorder_afterbuy',
+        'oxuser_afterbuy',
+    );
+
     /**
      * Saving afterbuy params into own subtable
      *
@@ -129,5 +140,48 @@ class fco2adatabase extends oxBase
         $blExists = $this->fcRowExists($sTable, $sOxid);
 
         return $blExists;
+    }
+
+    /**
+     * Truncates given table without using the TRUNCATE statement
+     *
+     * @param $sTable
+     * @return void
+     * @throws
+     */
+    public function fcTruncateTable($sTable)
+    {
+        $oDb = oxDb::getDb();
+        $sQuery = "DELETE * FROM {$sTable}";
+        $oDb->execute($sQuery);
+    }
+
+    /**
+     * Truncates all transaction tables
+     *
+     * @param void
+     * @return void
+     */
+    public function fcResetTransactionData()
+    {
+        foreach ($this->_aAfterbuyTransactionTables as $sTable) {
+            $this->fcTruncateTable($sTable);
+        }
+    }
+
+    public function fcGetCategoryTree()
+    {
+        $aBaseCategories = $this->fcGetBaseCategories();
+        $aCategoryTree = $this->_fcParseCategories($aBaseCategories);
+
+        return $aCategoryTree;
+    }
+
+    protected function _fcParseCategories($aBaseCategories)
+    {
+        foreach($aBaseCategories as $sCategoryId=>$aBaseCategory) {
+            $aChildCategories = $this->_fcGetChildCategories($sCategoryId);
+            $aBaseCategories[$sCategoryId]['subcats'] = $aChildCategories;
+        }
     }
 }

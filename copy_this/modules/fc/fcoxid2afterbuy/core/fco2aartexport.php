@@ -42,6 +42,7 @@ class fco2aartexport extends fco2abase {
             exit(1);
         }
 
+        $this->_fcTransferCategories();
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
         $aArticleIds = $this->_fcGetAffectedArticleIds();
 
@@ -54,6 +55,14 @@ class fco2aartexport extends fco2abase {
             $this->_fcValidateCallStatus($sResponse);
             $this->_fcAddAfterbuyIdToArticle($sArticleOxid, $sResponse);
         }
+    }
+
+    /**
+     *
+     */
+    protected function _fcTransferCategories() {
+        $oAfterbuyDatabase = oxNew('fco2adatabase');
+        $oCatalogObject = oxNew();
     }
 
     /**

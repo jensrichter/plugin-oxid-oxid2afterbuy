@@ -68,9 +68,9 @@ class fco2aartimport extends fco2abase
     {
         $iPage = $this->_fcGetNextPage($oXmlResponse);
 
-        $aProducts = (array) $oXmlResponse->Result->Products->Product;
+        $aProducts = (array) $oXmlResponse->Result->Products;
 
-        foreach ($aProducts as $oXmlProduct) {
+        foreach ($aProducts['Product'] as $oXmlProduct) {
             $this->_fcAddProductToOxid($oXmlProduct, $sType);
         }
 
@@ -259,8 +259,8 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddDescriptionData($oXmlProduct, &$oArticle, $sType)
     {
-        $oArticle->oxarticles__oxtitle = new oxField($oXmlProduct->Name);
-        $oArticle->oxarticles__oxshortdesc = new oxField($oXmlProduct->ShortDescription);
+        $oArticle->oxarticles__oxtitle = new oxField((string)$oXmlProduct->Name);
+        $oArticle->oxarticles__oxshortdesc = new oxField((string)$oXmlProduct->ShortDescription);
         $oArticle->setArticleLongDesc((string) $oXmlProduct->Description);
         if ($sType=='nonsets') {
             $sVarselect = $this->_fcFetchVarselect($oXmlProduct);
@@ -308,6 +308,12 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddProductAttributes($oXmlProduct, $oArticle, $sType)
     {
+        $blValidNode = (
+            is_array($oXmlProduct->Attributes) ||
+            is_object($oXmlProduct->Attributes)
+        );
+        if (!$blValidNode) return;
+
         foreach ($oXmlProduct->Attributes as $aProductAttributes) {
             foreach ($aProductAttributes as $aProductAttribute) {
                 $aProductAttribute = (array) $aProductAttribute;
@@ -442,6 +448,12 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddProductCategories($oXmlProduct, $oArticle, $sType)
     {
+        $blValidNode = (
+            is_array($oXmlProduct->Catalogs) ||
+            is_object($oXmlProduct->Catalogs)
+        );
+        if (!$blValidNode) return;
+
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
         foreach ($oXmlProduct->Catalogs as $aCatalogs) {
@@ -607,7 +619,14 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddProductPictures($oXmlProduct, &$oArticle, $sType)
     {
+        $blValidNode = (
+            is_array($oXmlProduct->ProductPictures) ||
+            is_object($oXmlProduct->ProductPictures)
+        );
+        if (!$blValidNode) return;
+
         $iPicCounter = 1;
+
         foreach ($oXmlProduct->ProductPictures as $aProductPictures) {
             foreach ($aProductPictures as $aProductPicture) {
                 $aProductPicture = (array) $aProductPicture;

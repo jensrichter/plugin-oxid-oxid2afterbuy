@@ -94,4 +94,8 @@ $aLang = array(
     'SHOP_MODULE_AFTERBUYVALUE_NAME'                        => 'Afterbuy-Field',
     'SHOP_MODULE_AFTERBUYVALUE_VALUE'                       => 'Afterbuy-Fieldvalue',
     'SHOP_MODULE_AFTERBUYVALUE_NOVALUE'                     => 'No Afterbuy values for this assignment',
+    'SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA'            => 'Reset Afterbuy transaction data',
+    'SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA_SURE'       => 'Are you sure, that you want do delete ALL Afterbuy-Transactiondata related to products, orders and users?',
+    'SHOP_MODULE_AFTERBUY_TRANSACTIONDATA_RESET'            => 'Transactiondata have been reset',
+    'SHOP_MODULE_AFTERBUY_ACTIONS'                          => 'Actions',
 );

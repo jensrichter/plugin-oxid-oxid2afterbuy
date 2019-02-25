@@ -94,4 +94,8 @@ $aLang = array(
     'SHOP_MODULE_AFTERBUYVALUE_NAME'                        => 'Afterbuy-Feld',
     'SHOP_MODULE_AFTERBUYVALUE_VALUE'                       => 'Afterbuy-Feldwert',
     'SHOP_MODULE_AFTERBUYVALUE_NOVALUE'                     => 'Keine Afterbuy-Werte zu dieser Bestellung vorhanden!',
+    'SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA'            => 'Afterbuy-Bewegungsdaten zurückgesetzt',
+    'SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA_SURE'       => 'Sind Sie sicher, dass Sie ALLE Afterbuy-Daten zu Artikeln, Bestellungen und Benutzern löschen wollen?',
+    'SHOP_MODULE_AFTERBUY_TRANSACTIONDATA_RESET'            => 'Afterbuy-Bewegungsdaten zurückgesetzt',
+    'SHOP_MODULE_AFTERBUY_ACTIONS'                          => 'Aktionen',
 );
