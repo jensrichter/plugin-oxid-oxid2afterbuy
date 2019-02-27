@@ -41,6 +41,14 @@ class fco2a_events
         ) ENGINE=MyISAM;
     ";
 
+    public static $sQueryCreateABCategoriesTable = "
+        CREATE TABLE `oxcategories_afterbuy` (
+          `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
+          `FCAFTERBUY_CATALOGID` int(11) NOT NULL,
+          PRIMARY KEY (`OXID`)
+        ) ENGINE=MyISAM;
+    ";
+
     public static $sQueryCreateABPaymentAssignment = "
         CREATE TABLE IF NOT EXISTS `fcafterbuypayments` (
           `OXPAYMENTID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
@@ -301,6 +309,7 @@ class fco2a_events
         self::addTableIfNotExists('oxorder_afterbuy', self::$sQueryCreateABOrderTable);
         self::addTableIfNotExists('oxarticles_afterbuy', self::$sQueryCreateABArticleTable);
         self::addTableIfNotExists('oxuser_afterbuy', self::$sQueryCreateABUserTable);
+        self::addTableIfNotExists('oxcategories_afterbuy', self::$sQueryCreateABCategoriesTable);
         self::addTableIfNotExists('fcafterbuypayments', self::$sQueryCreateABPaymentAssignment);
         self::addTableIfNotExists('fcafterbuycountry', self::$sQueryCreateABCountry);
         // INSERT DATA

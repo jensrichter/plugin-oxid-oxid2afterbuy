@@ -58,11 +58,170 @@ class fco2aartexport extends fco2abase {
     }
 
     /**
+     * Build category tree structure fitting to Aferbuy needs and send it to Afterbuy
      *
+     * @param void
+     * @return bool
      */
     protected function _fcTransferCategories() {
-        $oAfterbuyDatabase = oxNew('fco2adatabase');
-        $oCatalogObject = oxNew();
+        $oAfterbuyDb = oxNew('fco2adatabase');
+        $oAfterbuyDb->fcCreateCatalogIds();
+
+        $oCategoryList = oxNew('oxCategoryList');
+        $aCatalogs = array();
+        $oCategoryList->setLoadFull(true);
+        $oCategoryList->buildTree(null);
+
+        foreach ($oCategoryList as $oTopCategory) {
+            $sOxid = $oTopCategory->getId();
+            $aCatalogs[$sOxid]['catalog'] =
+                $this->_fcGetCatalogByCategory($oTopCategory);
+            $aCatalogs[$sOxid]['subcatalogs'] = array();
+            $aSubCategories = $oTopCategory->getSubCats();
+            $blAddSubCats = (
+                is_array($aSubCategories) &&
+                count($aSubCategories) > 0
+            );
+
+            if ($blAddSubCats)
+                $this->_fcAddSubCats($aSubCategories, $oTopCategory, $aCatalogs);
+        }
+
+        if (count($aCatalogs) == 0) {
+            // no catalogs
+            return true;
+        }
+
+        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
+        $sResponse = $oAfterbuyApi->updateShopCatalogs($aCatalogs);
+        $this->_fcParseCatalogResult($sResponse);
+        $this->_fcValidateCallStatus($sResponse);
+    }
+
+    /**
+     * Parsing through xml result an update IDs where needed
+     *
+     * @param $sResponse
+     * @return void
+     */
+    protected function _fcParseCatalogResult($sResponse)
+    {
+        $oAfterbuyDB = oxNew('fco2adatabase');
+        $oResponse = simplexml_load_string($sResponse);
+
+        $aNewCatalogs =
+            (array) $oResponse->Result->NewCatalogs->Catalog;
+
+        foreach ($aNewCatalogs as $oNewCatalog) {
+            $sCatalogIDRequested = (string) $oNewCatalog->CatalogIDRequested;
+            $sCatalogId = (string) $oNewCatalog->CatalogID;
+            $oAfterbuyDB->fcUpdateCatalogId($sCatalogId, $sCatalogIDRequested);
+        }
+    }
+
+    /**
+     * Recursively build catalogs
+     *
+     * @param array $aSubCategories
+     * @param object $oCategory
+     * @param $aCatalogs
+     * @return void
+     */
+    protected function _fcAddSubCats($aSubCategories, $oCategory, &$aCatalogs)
+    {
+        $aMainPath = $this->_fcGetOxidArrayPath($oCategory);
+        $oCatalog = $this->_fcGetCatalogByCategory($oCategory);
+        $this->_fcSetRecursiveCatalog($aCatalogs, $aMainPath, $oCatalog);
+
+        foreach ($aSubCategories as $oSubCategory) {
+            $aSubSubCategories = $oSubCategory->getSubCats();
+            $this->_fcAddSubCats($aSubSubCategories, $oSubCategory, $aCatalogs);
+        }
+    }
+
+    /**
+     * Sets an element of a multidimensional array from an array containing
+     * the keys for each dimension.
+     *
+     * @param array &$aArray The array to manipulate
+     * @param array $aPath An array containing keys for each dimension
+     * @param mixed $oCatalog The value that is assigned to the element
+     */
+    protected function _fcSetRecursiveCatalog(&$aArray, $aPath, $oCatalog)
+    {
+        $key = array_shift($aPath);
+        if (empty($aPath)) {
+            $aArray[$key]['catalog'] = $oCatalog;
+            $aArray[$key]['subcatalogs'] = array();
+        } else {
+            if (!isset($aArray[$key]) || !is_array($aArray[$key])) {
+                $aArray[$key] = array();
+            }
+            $this->_fcSetRecursiveCatalog($aArray[$key], $aPath, $oCatalog);
+        }
+    }
+
+    /**
+     * Returns oxid's in an array path
+     *
+     * @param $oCategory
+     * @param array $aPath
+     * @return array
+     */
+    protected function _fcGetOxidArrayPath($oCategory, $aPath=array()) {
+        $sValue = $oCategory->getId();
+        array_unshift($aPath, $sValue);
+
+        $oParentCategory = $oCategory->getParentCategory();
+        if ($oParentCategory)
+            $aPath = $this->_fcGetOxidArrayPath($oParentCategory, $aPath);
+
+        $aFinalPath = array();
+        $blFill = false;
+
+        foreach ($aPath as $sValue) {
+            $blAddSubCatalog = (
+                $blFill &&
+                $sValue != 'subcatalogs'
+            );
+
+            if ($blAddSubCatalog) {
+                $aFinalPath[] = 'subcatalogs';
+                $blFill = false;
+            } else {
+                $blFill = ($sValue == 'subcatalogs') ? false : true;
+            }
+            $aFinalPath[] = $sValue;
+        }
+
+        return $aFinalPath;
+    }
+
+    /**
+     * Returns proper Afterbuy object of given OXID category object
+     *
+     * @param object $oSlimCategory
+     * @return object
+     */
+    protected function _fcGetCatalogByCategory($oSlimCategory)
+    {
+        $sOxid = $oSlimCategory->getId();
+        $oCategory = oxNew('oxCategory');
+        $oCategory->load($sOxid);
+        $oCatalog = oxNew('fcafterbuycatalog');
+
+        $oCatalog->CatalogID = $oCategory->oxcategories__fcafterbuy_catalogid->value;
+        $oCatalog->CatalogName = $oCategory->oxcategories__oxtitle->value;
+        $oCatalog->CatalogDescription = $oCategory->oxcategories__oxlongdesc->value;
+        $oCatalog->AdditionalURL = $oCategory->oxcategories__oxextlink->value;
+        $oCatalog->Level = '';
+        $oCatalog->Position = $oCategory->oxcategories__oxsort->value;
+        $oCatalog->AdditionalText = $oCategory->oxcategories__oxdesc->value;
+        $oCatalog->ShowCatalog = (string) $oCategory->oxcategories__oxactive->value;
+        $oCatalog->Picture = (string) $oCategory->getThumbUrl();
+        $oCatalog->MouseOverPicture = (string) $oCategory->getThumbUrl();
+
+        return $oCatalog;
     }
 
     /**
@@ -218,7 +377,6 @@ class fco2aartexport extends fco2abase {
             $oAfterbuyArticle->AddCatalogs[] = $oAddCatalog;
         }
 
-
         return $oAfterbuyArticle;
     }
 
@@ -243,9 +401,9 @@ class fco2aartexport extends fco2abase {
 
         foreach ($aTmpCategories as $oCategory) {
             $aCategories[] = array(
-                'CatalogID' => $oCategory->getId(),
+                'CatalogID' => $oCategory->oxcategories__fcafterbuy_catalogid->value,
                 'CatalogName' => $oCategory->getTitle(),
-                'CatalogLevel' => $iLevel,
+                'CatalogLevel' => '',
             );
 
             $iLevel--;

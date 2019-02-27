@@ -16,7 +16,7 @@ function confirmReset() {
     var question = "[{oxmultilang ident="SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA_SURE"}]";
     var answer = confirm(question);
     if (answer == true) {
-        document.myedit.fnc = "fcResetTransactionData";
+        document.myedit.fnc.value = "fcResetTransactionData";
         document.myedit.submit();
     }
 }
@@ -50,7 +50,7 @@ function confirmReset() {
 <table>
     <tr>
         <th>
-            [{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTION"}]
+            [{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS"}]
         </th>
     </tr>
     <tr>

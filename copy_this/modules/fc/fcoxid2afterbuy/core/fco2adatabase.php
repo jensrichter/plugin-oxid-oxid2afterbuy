@@ -16,6 +16,7 @@ class fco2adatabase extends oxBase
         'oxarticles_afterbuy',
         'oxorder_afterbuy',
         'oxuser_afterbuy',
+        'oxcategories_afterbuy',
     );
 
     /**
@@ -152,7 +153,7 @@ class fco2adatabase extends oxBase
     public function fcTruncateTable($sTable)
     {
         $oDb = oxDb::getDb();
-        $sQuery = "DELETE * FROM {$sTable}";
+        $sQuery = "DELETE FROM {$sTable} WHERE 1";
         $oDb->execute($sQuery);
     }
 
@@ -169,19 +170,74 @@ class fco2adatabase extends oxBase
         }
     }
 
-    public function fcGetCategoryTree()
+    /**
+     * Make sure that every category has got its own unique and
+     * numeric value
+     *
+     * @param void
+     * @return void
+     * @throws
+     */
+    public function fcCreateCatalogIds()
     {
-        $aBaseCategories = $this->fcGetBaseCategories();
-        $aCategoryTree = $this->_fcParseCategories($aBaseCategories);
+        $iStartNumber = 2250000;
+        $oDb = oxDb::getDb();
+        $sQuery = "SELECT MAX(FCAFTERBUY_CATALOGID) FROM oxcategories_afterbuy";
+        $iLastFoundNumber = (int) $oDb->getOne($sQuery);
+        if ($iLastFoundNumber > $iStartNumber)
+            $iStartNumber = $iLastFoundNumber;
 
-        return $aCategoryTree;
+        $iCatalogId = $iStartNumber +1;
+        $aOxids = $this->_fcGetNonsetCatalogCategoryIds();
+        foreach ($aOxids as $sOxid) {
+            $this->fcCreateAfterbuyDataRow('oxcategories_afterbuy', $sOxid);
+            $this->fcUpdateFieldOfTable(
+                'oxcategories_afterbuy',
+                $sOxid,
+                'FCAFTERBUY_CATALOGID',
+                $iCatalogId
+            );
+            $iCatalogId++;
+        }
     }
 
-    protected function _fcParseCategories($aBaseCategories)
+    public function fcUpdateCatalogId($sCatalogId, $sCatalogIDRequested)
     {
-        foreach($aBaseCategories as $sCategoryId=>$aBaseCategory) {
-            $aChildCategories = $this->_fcGetChildCategories($sCategoryId);
-            $aBaseCategories[$sCategoryId]['subcats'] = $aChildCategories;
+        $oDb = oxDb::getDb();
+        $sQuery = "
+            UPDATE oxcategories_afterbuy SET
+              FCAFTERBUY_CATALOGID={$sCatalogId}
+            WHERE
+              FCAFTERBUY_CATALOGID={$sCatalogIDRequested}
+        ";
+
+        $oDb->execute($sQuery);
+    }
+
+    /**
+     * Returns a list of category oxIDs which currently have no
+     * catalogid
+     *
+     * @param void
+     * @return array
+     */
+    protected function _fcGetNonsetCatalogCategoryIds()
+    {
+        $oDb = oxDb::getDb();
+        $sQuery = "
+            SELECT oc.OXID 
+            FROM oxcategories oc 
+            LEFT JOIN oxcategories_afterbuy oca ON (oc.OXID=oca.OXID)
+            WHERE oca.FCAFTERBUY_CATALOGID IS NULL 
+            OR oca.FCAFTERBUY_CATALOGID = ''
+        ";
+
+        $aRows = (array) $oDb->getAll($sQuery);
+        $aOxids = array();
+        foreach ($aRows as $aRow) {
+            $aOxids[] = $aRow[0];
         }
+
+        return $aOxids;
     }
 }

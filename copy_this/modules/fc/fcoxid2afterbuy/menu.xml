@@ -9,6 +9,7 @@
         <MAINMENU id="mxfcafterbuy">
             <SUBMENU id="mxfcafterbuyorder" cl="fcafterbuy_admin" list="fcafterbuy_list" >
                 <TAB id="mxfcafterbuy_payments" cl="fcafterbuy_payments" />
+                <TAB id="mxfcafterbuy_actions" cl="fcafterbuy_actions" />
             </SUBMENU>
         </MAINMENU>
         <MAINMENU id="mxorders">

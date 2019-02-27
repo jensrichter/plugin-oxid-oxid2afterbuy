@@ -15,7 +15,7 @@ window.onload = function ()
 <form name="search" id="search" action="[{$oViewConf->getSelfLink()}]" method="post">
     [{$oViewConf->getHiddenSid()}]
     <input type="hidden" name="actedit" value="[{ $actedit }]">
-    <input type="hidden" name="cl" value="fcafterbuyconnect_list">
+    <input type="hidden" name="cl" value="fcafterbuy_list">
     <input type="hidden" name="oxid" value="x">
 </form>
 

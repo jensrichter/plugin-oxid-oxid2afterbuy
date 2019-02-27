@@ -36,6 +36,7 @@ $aModule = array(
         // models
         'oxarticle'         => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxarticle',
         'oxuser'            => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxuser',
+        'oxcategory'        => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxcategory',
         'oxorder'           => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxorder',
         'oxcounter'         => 'fc/fcoxid2afterbuy/extend/application/models/fcafterbuy_oxcounter',
     ),
@@ -77,6 +78,7 @@ $aModule = array(
         'fcafterbuy_article_admin.tpl'      => 'fc/fcoxid2afterbuy/application/views/admin/tpl/fcafterbuy_article_admin.tpl',
         'fcafterbuy_admin.tpl'              => 'fc/fcoxid2afterbuy/application/views/admin/tpl/fcafterbuy_admin.tpl',
         'fcafterbuy_list.tpl'               => 'fc/fcoxid2afterbuy/application/views/admin/tpl/fcafterbuy_list.tpl',
+        'fcafterbuy_actions.tpl'            => 'fc/fcoxid2afterbuy/application/views/admin/tpl/fcafterbuy_actions.tpl',
         'fcafterbuy_payments.tpl'           => 'fc/fcoxid2afterbuy/application/views/admin/tpl/fcafterbuy_payments.tpl',
         'fcafterbuy_orderinfo.tpl'          => 'fc/fcoxid2afterbuy/application/views/admin/tpl/fcafterbuy_orderinfo.tpl',
     ),

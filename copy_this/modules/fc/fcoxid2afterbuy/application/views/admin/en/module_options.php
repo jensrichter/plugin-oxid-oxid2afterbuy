@@ -82,7 +82,8 @@ $aLang = array(
     'mxfcafterbuy_article_admin'                            => 'Afterbuy',
     'mxfcafterbuy'                                          => 'oxid2afterbuy',
     'mxfcafterbuy_payments'                                 => 'Assign payments',
-    'mxfcafterbuyorder'                                     => 'Order management',
+    'mxfcafterbuy_actions'                                  => 'Wartung/Aktionen',
+    'mxfcafterbuyorder'                                     => 'Management',
     'tbclorder_orderinfo'                                   => 'oxid2afterbuy',
 
     'FC_AFTERBUY_ARTICLE_ACTIVE'                            => 'Export article to Afterbuy',
