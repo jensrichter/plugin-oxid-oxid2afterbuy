@@ -55,7 +55,7 @@ class fco2astatusexport extends fco2abase {
      * @return object
      */
     protected function _fcAssignOrderDataToOrderStatus($oOrder, $oAfterbuyOrderStatus) {
-        $oAfterbuyOrderStatus->OrderID = $oOrder->oxorder__fcafterbuy_aid->value;
+        $oAfterbuyOrderStatus->OrderID = $this->_fcFetchAfterbuyOrderId($oOrder);
         $sOrderSendDate = $oOrder->oxorder__oxsenddate->value;
         $sPaidDate = $oOrder->oxorder__oxpaid->value;
 
@@ -71,6 +71,23 @@ class fco2astatusexport extends fco2abase {
         }
 
         return $oAfterbuyOrderStatus;
+    }
+
+    /**
+     * Extracts afterbuy orderid from order. This can be placed in AID or UID
+     * field
+     *
+     * @param $oOrder
+     * @return string
+     */
+    protected function _fcFetchAfterbuyOrderId($oOrder)
+    {
+        $sAId = (string) $oOrder->oxorder__fcafterbuy_aid->value;
+        $sUId = (string) $oOrder->oxorder__fcafterbuy_uid->value;
+
+        $sOrderID = ($sAId) ? $sAId : $sUId;
+
+        return $sOrderID;
     }
 
     /**
