@@ -203,6 +203,13 @@ class fco2adatabase extends oxBase
 
     public function fcUpdateCatalogId($sCatalogId, $sCatalogIDRequested)
     {
+        $blValid = (
+            !empty($sCatalogIDRequested) &&
+            !empty($sCatalogId)
+        );
+
+        if (!$blValid) return;
+
         $oDb = oxDb::getDb();
         $sQuery = "
             UPDATE oxcategories_afterbuy SET

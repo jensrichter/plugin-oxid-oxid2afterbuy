@@ -106,16 +106,48 @@ class fco2aartexport extends fco2abase {
      */
     protected function _fcParseCatalogResult($sResponse)
     {
-        $oAfterbuyDB = oxNew('fco2adatabase');
         $oResponse = simplexml_load_string($sResponse);
 
-        $aNewCatalogs =
-            (array) $oResponse->Result->NewCatalogs->Catalog;
+        if (!isset($oResponse->Result->NewCatalogs))
+            return;
 
-        foreach ($aNewCatalogs as $oNewCatalog) {
-            $sCatalogIDRequested = (string) $oNewCatalog->CatalogIDRequested;
-            $sCatalogId = (string) $oNewCatalog->CatalogID;
-            $oAfterbuyDB->fcUpdateCatalogId($sCatalogId, $sCatalogIDRequested);
+        $oNewCatalogs = $oResponse->Result->NewCatalogs;
+        $this->_fcSetCatalogCorrections($oNewCatalogs);
+    }
+
+    /**
+     * Method handles correction of catalogid
+     *
+     * @param $oNewCatalogs
+     * @return void
+     */
+    protected function _fcSetCatalogCorrections($oNewCatalogs)
+    {
+        foreach ($oNewCatalogs->NewCatalog as $oNewCatalog) {
+            $this->_fcHandleCatalogCorrection($oNewCatalog);
+        }
+    }
+
+    /**
+     * Recursive walk through updated catalogid
+     *
+     * @param $oNewCatalog
+     * @return void
+     */
+    protected function _fcHandleCatalogCorrection($oNewCatalog)
+    {
+        $oAfterbuyDB = oxNew('fco2adatabase');
+        $sCatalogIDRequested = (string) $oNewCatalog->CatalogIDRequested;
+        $sCatalogId = (string) $oNewCatalog->CatalogID;
+
+        $oAfterbuyDB->fcUpdateCatalogId($sCatalogId, $sCatalogIDRequested);
+
+        // subcatalog available
+        $blSubCatalogAvailable = isset($oNewCatalog->NewCatalog);
+        if (!$blSubCatalogAvailable) return;
+
+        foreach ($oNewCatalog->NewCatalog as $oSubCatalog) {
+            $this->_fcHandleCatalogCorrection($oSubCatalog);
         }
     }
 
