@@ -216,6 +216,77 @@ class fcafterbuyapi {
     }
 
     /**
+     * @param $aCatalogs
+     * @return string
+     */
+    public function updateShopCatalogs($aCatalogs)
+    {
+        $sXmlData = $this->getXmlHead('UpdateCatalogs', 0);
+        $sXmlData .= "<Catalogs>"."\n";
+        $sXmlData .= "<UpdateAction>2</UpdateAction>";
+        $sXmlData .= $this->getCatalogsAsXml($aCatalogs);
+        $sXmlData .= "</Catalogs>";
+        $sXmlData .= $this->getXmlFoot();
+
+        $sOutput = $this->requestAPI($sXmlData);
+        return $sOutput;
+    }
+
+    /**
+     * Returns category tree in demanded xml structure
+     *
+     * @param $aCatalogs
+     * @return string
+     */
+    public function getCatalogsAsXml($aCatalogs)
+    {
+        $sXmlData = '';
+        foreach ($aCatalogs as $aMainCatalog) {
+            $sXmlData .= $this->_getCalogAsXml($aMainCatalog, 1);
+        }
+
+        return $sXmlData;
+    }
+
+    /**
+     * Iterates through catalog and their subcatalogs
+     *
+     * @param $aCatalog
+     * @return string
+     */
+    public function _getCalogAsXml($aCatalog, $iIndent)
+    {
+        $oCatalog = $aCatalog['catalog'];
+        $sIndent = '';
+        for ($iIndex=0;$iIndex<=$iIndent;$iIndex++) {
+            $sIndent .= "\t";
+        }
+        $sInnerIndent = $sIndent."\t";
+
+        $sXmlData = $sIndent.'<Catalog>'."\n";
+        $sXmlData .= $sInnerIndent.'<CatalogID>'.$oCatalog->CatalogID.'</CatalogID>'."\n";
+        $sXmlData .= $sInnerIndent.'<CatalogName><![CDATA['.$oCatalog->CatalogName.']]></CatalogName>'."\n";
+        $sXmlData .= $sInnerIndent.'<CatalogDescription><![CDATA['.$oCatalog->CatalogDescription.']]></CatalogDescription>'."\n";
+        $sXmlData .= $sInnerIndent.'<AdditionalURL><![CDATA['.$oCatalog->AdditionalURL.']]></AdditionalURL>'."\n";
+        $sXmlData .= $sInnerIndent.'<Level>'.$iIndent.'</Level>'."\n";
+        $sXmlData .= $sInnerIndent.'<Position>'.$oCatalog->Position.'</Position>'."\n";
+        $sXmlData .= $sInnerIndent.'<AdditionalText><![CDATA['.$oCatalog->AdditionalText.']]></AdditionalText>'."\n";
+        $sXmlData .= $sInnerIndent.'<ShowCatalog>'.$oCatalog->ShowCatalog.'</ShowCatalog>'."\n";
+        $sXmlData .= $sInnerIndent.'<Picture><![CDATA['.$oCatalog->Picture.']]></Picture>'."\n";
+        $sXmlData .= $sInnerIndent.'<MouseOverPicture><![CDATA['.$oCatalog->MouseOverPicture.']]></MouseOverPicture>'."\n";
+
+        $aSubCatalogs = $aCatalog['subcatalogs'];
+        foreach ($aSubCatalogs as $aSubCatalog) {
+            $iSubIndent = $iIndent+1;
+            $sXmlData .= $this->_getCalogAsXml($aSubCatalog, $iSubIndent);
+        }
+
+        $sXmlData .= $sIndent.'</Catalog>'."\n";
+
+        return $sXmlData;
+    }
+
+    /**
      * Requesting afterbuy api for sold products (orders)
      *
      * @param void
@@ -269,6 +340,22 @@ class fcafterbuyapi {
         $sXmlData = $this->getXmlHead('GetShopCatalogs', 30);
         $sXmlData .= "<MaxCatalogs>1</MaxCatalogs>";
         $sXmlData .= $this->getShopCatalogsFilterId($sCatalogId);
+        $sXmlData .= $this->getXmlFoot();
+        $sOutput = $this->requestAPI($sXmlData);
+
+        return $sOutput;
+    }
+
+    /**
+     * Returns category structure in afterbuy
+     *
+     * @param void
+     * @return string
+     */
+    public function getShopCatalogs()
+    {
+        $sXmlData = $this->getXmlHead('GetShopCatalogs', 30);
+        $sXmlData .= "<MaxCatalogs>200</MaxCatalogs>";
         $sXmlData .= $this->getXmlFoot();
         $sOutput = $this->requestAPI($sXmlData);
 

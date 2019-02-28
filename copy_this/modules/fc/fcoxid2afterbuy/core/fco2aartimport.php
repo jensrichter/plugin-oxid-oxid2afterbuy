@@ -32,8 +32,112 @@ class fco2aartimport extends fco2abase
             exit(1);
         }
 
+        $this->_fcProcessCategoryTree();
         $this->_fcProcessProducts('variationsets');
         $this->_fcProcessProducts('nonsets');
+        $this->_fcProcessParentCategoryAssignment();
+        $this->_fcUpdateCategoryIndex();
+    }
+
+    /**
+     * Rebuilding nested sets information
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcUpdateCategoryIndex()
+    {
+        $oCatList = oxNew('oxCategoryList');
+        $oCatList->updateCategoryTree();
+    }
+
+    /**
+     * Due to there is no product assignments for variattionsets
+     * we need to determine variant assignments and also have to
+     * assign parent products to categories
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcProcessParentCategoryAssignment()
+    {
+        $oAfterbuyDb = oxNew('fco2adatabase');
+        $aMissingAssignments = $oAfterbuyDb->fcGetMissingParentAssignments();
+
+        $blValid = (
+            is_array($aMissingAssignments) &&
+            count($aMissingAssignments)
+        );
+
+        if (!$blValid) return;
+
+        foreach ($aMissingAssignments as $aMissingAssignment) {
+            $sArticleId = $aMissingAssignment['sArticleId'];
+            $sCategoryId = $aMissingAssignment['sCategoryId'];
+            $this->_fcAssignCategory($sCategoryId, $sArticleId);
+        }
+    }
+
+    /**
+     * Fetching category information from AB and create
+     * category structure in OXID
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcProcessCategoryTree()
+    {
+        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
+        $sResponse = $oAfterbuyApi->getShopCatalogs();
+        $this->_fcParseCatalogStructure($sResponse);
+    }
+
+    /**
+     * Parses response from afterbuy, create object and iterate
+     * through it
+     *
+     * @param $sResponse
+     * @return array
+     */
+    protected function _fcParseCatalogStructure($sResponse) {
+        if (empty($sResponse)) return array();
+        $oXmlResponse = simplexml_load_string($sResponse);
+
+        $aCatalogs = (array) $oXmlResponse->Result->Catalogs;
+        foreach ($aCatalogs['Catalog'] as $oCatalog) {
+            $this->_fcCreateOxidCategory($oCatalog);
+        }
+    }
+
+    /**
+     * Recursively create oxid categories and
+     * product assignments
+     *
+     * @param $oCatalog
+     * @return void
+     */
+    protected function _fcCreateOxidCategory($oCatalog)
+    {
+        $aCatalog = (array) $oCatalog;
+        $this->_fcCreateCategory($aCatalog);
+
+        // assigned products
+        $sCatalogId = (string) $oCatalog->CatalogID;
+
+        $blHasAssignedProducts = isset($oCatalog->CatalogProducts);
+
+        if ($blHasAssignedProducts) {
+            $aCatalogProducts = (array) $oCatalog->CatalogProducts;
+            foreach ($aCatalogProducts['ProductID'] as $sArticleId) {
+                $this->_fcAssignCategory($sCatalogId, $sArticleId);
+            }
+        }
+
+        if (!isset($oCatalog->Catalog)) return;
+
+        foreach ($oCatalog->Catalog as $oSubCatalog) {
+            $this->_fcCreateOxidCategory($oSubCatalog);
+        }
     }
 
     /**
@@ -68,9 +172,9 @@ class fco2aartimport extends fco2abase
     {
         $iPage = $this->_fcGetNextPage($oXmlResponse);
 
-        $aProducts = (array) $oXmlResponse->Result->Products->Product;
+        $aProducts = (array) $oXmlResponse->Result->Products;
 
-        foreach ($aProducts as $oXmlProduct) {
+        foreach ($aProducts['Product'] as $oXmlProduct) {
             $this->_fcAddProductToOxid($oXmlProduct, $sType);
         }
 
@@ -99,7 +203,6 @@ class fco2aartimport extends fco2abase
         $this->_fcAddProductBasicData($oXmlProduct, $oArticle, $sType);
         $this->_fcAddProductPictures($oXmlProduct, $oArticle, $sType);
         $this->_fcAddProductAttributes($oXmlProduct, $oArticle, $sType);
-        $this->_fcAddProductCategories($oXmlProduct, $oArticle, $sType);
         $oArticle->save();
     }
 
@@ -259,8 +362,8 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddDescriptionData($oXmlProduct, &$oArticle, $sType)
     {
-        $oArticle->oxarticles__oxtitle = new oxField($oXmlProduct->Name);
-        $oArticle->oxarticles__oxshortdesc = new oxField($oXmlProduct->ShortDescription);
+        $oArticle->oxarticles__oxtitle = new oxField((string)$oXmlProduct->Name);
+        $oArticle->oxarticles__oxshortdesc = new oxField((string)$oXmlProduct->ShortDescription);
         $oArticle->setArticleLongDesc((string) $oXmlProduct->Description);
         if ($sType=='nonsets') {
             $sVarselect = $this->_fcFetchVarselect($oXmlProduct);
@@ -308,6 +411,12 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddProductAttributes($oXmlProduct, $oArticle, $sType)
     {
+        $blValidNode = (
+            is_array($oXmlProduct->Attributes) ||
+            is_object($oXmlProduct->Attributes)
+        );
+        if (!$blValidNode) return;
+
         foreach ($oXmlProduct->Attributes as $aProductAttributes) {
             foreach ($aProductAttributes as $aProductAttribute) {
                 $aProductAttribute = (array) $aProductAttribute;
@@ -433,74 +542,6 @@ class fco2aartimport extends fco2abase
         return $sOxid;
     }
 
-    /**
-     * Adds AB-Product categories to OXID Shop
-     *
-     * @param $oXmlProduct
-     * @param $oArticle
-     * @param $sType
-     */
-    protected function _fcAddProductCategories($oXmlProduct, $oArticle, $sType)
-    {
-        $oAfterbuyApi = $this->_fcGetAfterbuyApi();
-
-        foreach ($oXmlProduct->Catalogs as $aCatalogs) {
-            foreach ($aCatalogs as $aCatalog) {
-                $aCatalog = (array) $aCatalog;
-                $sCatalogId = $aCatalog['CatalogID'];
-                $sResponse = $oAfterbuyApi->getShopCatalogsById($sCatalogId);
-                $oXmlResponse =
-                    simplexml_load_string($sResponse, null, LIBXML_NOCDATA);
-                $this->_fcParseApiCatalogResponse($oXmlResponse, $oArticle, $sType);
-            }
-        }
-    }
-
-    /**
-     * Handles response of GetShopCatalogs (ByID) Call
-     *
-     * @param $oXmlResponse
-     * @param $oArticle
-     * @param $sType
-     * @return void
-     */
-    protected function _fcParseApiCatalogResponse($oXmlResponse, $oArticle, $sType)
-    {
-        $aCatalogs = (array) $oXmlResponse->Result->Catalogs;
-        $sArticleId = $oArticle->getId();
-
-        foreach ($aCatalogs as $aCatalog) {
-            $aCatalog = (array) $aCatalog;
-            $sCategoryId = $this->_fcGetCategoryId($aCatalog);
-            $this->_fcAssignCategory($sCategoryId, $sArticleId);
-        }
-    }
-
-    /**
-     * Fetches existing category id or generate new entry
-     *
-     * @param $aCatalog
-     * @return string
-     */
-    protected function _fcGetCategoryId($aCatalog)
-    {
-        $sExpectedCategoryId = $aCatalog['CatalogID'];
-        $oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
-
-        $sQuery = "
-            SELECT 
-                OXID 
-            FROM 
-                oxcategories 
-            WHERE OXID=".$oDb->quote($sExpectedCategoryId);
-        $sOxid = $oDb->getOne($sQuery);
-
-        if ($sOxid) return $sOxid;
-
-        $sOxid = $this->_fcCreateCategory($aCatalog);
-
-        return $sOxid;
-    }
 
     /**
      * Assigns category with article
@@ -571,11 +612,14 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcCreateCategory($aCatalog) {
         $sCategoryId = (string) $aCatalog['CatalogID'];
+        $sParentId = ($aCatalog['ParentID']) ?
+            (string) $aCatalog['ParentID'] :
+            'oxrootid';
 
         $oDb = oxDb::getDb();
 
         $sQuery = "
-            INSERT INTO oxcategories
+            REPLACE INTO oxcategories
             (
                 OXID,
                 OXACTIVE,
@@ -587,9 +631,9 @@ class fco2aartimport extends fco2abase
             (
                 ".$oDb->quote($sCategoryId).",
                 ".$oDb->quote((int) $aCatalog['Show']).",
-                ".$oDb->quote((string) $aCatalog['Name']).",
+                ".$oDb->quote((string) htmlspecialchars_decode($aCatalog['Name'])).",
                 ".$oDb->quote((string) $aCatalog['Description']).",
-                ".$oDb->quote((string) $aCatalog['ParentID'])."
+                ".$oDb->quote((string) $sParentId)."
             )
         ";
 
@@ -607,7 +651,14 @@ class fco2aartimport extends fco2abase
      */
     protected function _fcAddProductPictures($oXmlProduct, &$oArticle, $sType)
     {
+        $blValidNode = (
+            is_array($oXmlProduct->ProductPictures) ||
+            is_object($oXmlProduct->ProductPictures)
+        );
+        if (!$blValidNode) return;
+
         $iPicCounter = 1;
+
         foreach ($oXmlProduct->ProductPictures as $aProductPictures) {
             foreach ($aProductPictures as $aProductPicture) {
                 $aProductPicture = (array) $aProductPicture;

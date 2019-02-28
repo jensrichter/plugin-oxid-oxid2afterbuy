@@ -255,6 +255,10 @@ class fco2abase extends oxBase {
         return $oAfterbuyArticle;
     }
 
+    protected function _fcGetAfterbuyCatalog() {
+
+    }
+
     /**
      * Rerturns true/false depending on response of an API-Call
      *
