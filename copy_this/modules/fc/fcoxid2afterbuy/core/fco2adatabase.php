@@ -171,6 +171,40 @@ class fco2adatabase extends oxBase
     }
 
     /**
+     * Returns list of assignments that are missing for parent
+     * articles
+     */
+    public function fcGetMissingParentAssignments() {
+        $oDb = oxDb::getDb();
+        $sQuery = "
+            SELECT 
+            o2c.OXCATNID, 
+            oa.OXPARENTID 
+            FROM oxobject2category o2c
+            LEFT JOIN oxarticles oa ON (o2c.OXOBJECTID=oa.OXID)
+            WHERE oa.OXPARENTID IS NOT NULL
+            AND oa.OXPARENTID != ''
+            GROUP BY oa.OXPARENTID
+        ";
+        $aRows = $oDb->getAll($sQuery);
+        $aMissingAssignments = array();
+
+        foreach ($aRows as $aRow) {
+            $sCategoryId = $aRow[0];
+            $sArticleId = $aRow[1];
+
+            $aEntry = array(
+                'sCategoryId' => $sCategoryId,
+                'sArticleId' => $sArticleId,
+            );
+
+            $aMissingAssignments[] = $aEntry;
+        }
+
+            return $aMissingAssignments;
+    }
+
+    /**
      * Make sure that every category has got its own unique and
      * numeric value
      *

@@ -347,6 +347,22 @@ class fcafterbuyapi {
     }
 
     /**
+     * Returns category structure in afterbuy
+     *
+     * @param void
+     * @return string
+     */
+    public function getShopCatalogs()
+    {
+        $sXmlData = $this->getXmlHead('GetShopCatalogs', 30);
+        $sXmlData .= "<MaxCatalogs>200</MaxCatalogs>";
+        $sXmlData .= $this->getXmlFoot();
+        $sOutput = $this->requestAPI($sXmlData);
+
+        return $sOutput;
+    }
+
+    /**
      * Adds id filter
      *
      * @param $sCatalogId
