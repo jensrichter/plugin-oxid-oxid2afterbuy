@@ -396,11 +396,11 @@ class fco2aartexport extends fco2abase {
      */
     protected function _fcAddCatalogValues($oAfterbuyArticle, $oArticle)
     {
-        $oCategory = $oArticle->getCategory();
+        $oCategory = $this->_fcGetReloadedCategory($oArticle);
+
+
         if (!$oCategory) return $oAfterbuyArticle;
-
         $aCategories = $this->_fcFetchArticleCategoryValues($oCategory);
-
         foreach ($aCategories as $aCategory) {
             $oAddCatalog = $this->_fcGetAddCatalog();
             $oAddCatalog->CatalogID = $aCategory['CatalogID'];
@@ -413,6 +413,24 @@ class fco2aartexport extends fco2abase {
     }
 
     /**
+     * Method makes sure that no caching is used here while
+     * loading a category
+     *
+     * @param $oArticle
+     * @return object
+     * @todo: if this code is still here, it's a performance breaking thing and means caching of std oxid is making trouble
+     */
+    protected function _fcGetReloadedCategory($oArticle)
+    {
+        $oCategory = $oArticle->getCategory();
+        $sCategoryId = $oCategory->getId();
+        $oCategory = oxNew('oxCategory');
+        $oCategory->load($sCategoryId);
+
+        return $oCategory;
+    }
+
+    /**
      * Gets depth in catgory tree and returns array with needed node
      * information
      *
@@ -421,9 +439,8 @@ class fco2aartexport extends fco2abase {
      */
     protected function _fcFetchArticleCategoryValues($oCategory)
     {
-        $iLevel = 1;
+        $iLevel = 0;
         $aTmpCategories = $aCategories = [];
-
 
         while ($oCategory->getParentCategory()) {
             $iLevel++;
@@ -432,10 +449,11 @@ class fco2aartexport extends fco2abase {
         }
 
         foreach ($aTmpCategories as $oCategory) {
+
             $aCategories[] = array(
                 'CatalogID' => $oCategory->oxcategories__fcafterbuy_catalogid->value,
                 'CatalogName' => $oCategory->getTitle(),
-                'CatalogLevel' => '',
+                'CatalogLevel' => $iLevel,
             );
 
             $iLevel--;
