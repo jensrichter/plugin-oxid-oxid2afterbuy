@@ -154,12 +154,20 @@ class fco2aorderimport extends fco2abase {
         // temporary save for getting an id
         $oOrder->save();
 
+        // set folder
+        $sFolder = $this->_fcGetAppropriateFolder($oAfterbuyOrder);
+        $oOrder->oxorder__oxfolder = new oxField($sFolder, oxField::T_RAW);
+
         // set orderarticles
         $oSumPrice = $this->_fcSetOxidOrderarticlesByAfterbuyOrder($oAfterbuyOrder, $oOrder);
 
         // cumulate sums
         $oOrder->oxorder__oxtotalbrutsum = new oxField($oSumPrice->getBruttoPrice(), oxField::T_RAW);
         $oOrder->oxorder__oxtotalnetsum = new oxField($oSumPrice->getNettoPrice(), oxField::T_RAW);
+
+        // delivery date
+        $sDeliveryDate = $this->_fcGetOxidDeliveryDate($oAfterbuyOrder);
+        $oOrder->oxorder__oxsenddate = new oxField($sDeliveryDate, oxField::T_RAW);
 
         // shipping costs
         $oShippingPrice = oxNew('oxPrice');
@@ -172,6 +180,90 @@ class fco2aorderimport extends fco2abase {
         $oOrder->save();
     }
 
+    /**
+     * Fetches delivery date in oxid-appropriate format
+     *
+     * @param $oAfterbuyOrder
+     * @return string
+     */
+    protected function _fcGetOxidDeliveryDate($oAfterbuyOrder)
+    {
+        $oShippingInfo = $oAfterbuyOrder->ShippingInfo;
+        $sRawDeliveryDate = (string) $oShippingInfo->DeliveryDate;
+
+        $iOrderTime = strtotime($sRawDeliveryDate);
+        $sOxidSendDate = date('Y-m-d H:i:s', $iOrderTime);
+
+        return $sOxidSendDate;
+    }
+
+    /**
+     * Returns matching folder string
+     *
+     * @param $oAfterbuyOrder
+     * @return string
+     * @todo: Currently just using oxstandard. Should be configurable for user
+     */
+    protected function _fcGetAppropriateFolder($oAfterbuyOrder)
+    {
+        $sOrderStatus = $this->_fcDetermineOrderStatus($oAfterbuyOrder);
+
+        switch ($sOrderStatus) {
+            case 'fulfilled':
+                $sFolder = 'ORDERFOLDER_FINISHED';
+                break;
+            case 'problems':
+                $sFolder = 'ORDERFOLDER_PROBLEMS';
+                break;
+            case 'paid':
+            case 'sent':
+            case 'new':
+            default:
+                // default is new
+                $sFolder = 'ORDERFOLDER_NEW';
+        }
+
+        return $sFolder;
+    }
+
+    /**
+     * Method will check certain indicators of afterbuyorder and return
+     * an appropriate state as string.
+     * These values can be either
+     * - fulfilled => sent and paid
+     * - paid => paid but not yet sent
+     * - sent => sent but not yet paid
+     * - problems => @todo: determine problems
+     * - new => wether sent nor paid
+     *
+     * @param object $oAfterbuyOrder
+     * @return string
+     */
+    protected function _fcDetermineOrderStatus($oAfterbuyOrder)
+    {
+        $oPaymentInfo = $oAfterbuyOrder->PaymentInfo;
+        $oShippintInfo = $oAfterbuyOrder->ShippingInfo;
+        $sPaidDate = (string) $oPaymentInfo->PaymentDate;
+        $sShipDate = (string) $oShippintInfo->DeliveryDate;
+        $blPaid = !empty($sPaidDate);
+        $blShipped = !empty($sShipDate);
+        $blFulfilled = ($blPaid && $blShipped);
+
+        if ($blFulfilled)
+            return 'fulfilled';
+
+        if ($blShipped)
+            return 'sent';
+
+        if ($blPaid)
+            return 'paid';
+
+        /**
+         * @todo implement problem determination here and early return on problems
+         */
+
+        return 'new';
+    }
 
     /**
      * Assign solditems values to orderarticles
