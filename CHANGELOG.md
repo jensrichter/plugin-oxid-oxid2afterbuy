@@ -1,4 +1,10 @@
-# Changelog - oxid 2 afterbuy plugin for OXID 5
+# Changelog - oxid 2 afterbuy plugin for OXID 5 and OXID6
+
+## 1.2.1
+Released 2019-03-04
+* Fixed category assigning problem
+* Fixed folder assignment
+* Added automatic migration of afterbuy data of versions prior 1.1.0 while activating
 
 ## 1.2.0
 Released 2019-02-05
