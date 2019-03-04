@@ -28,7 +28,6 @@ class fco2a_events
             `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
             `FCAFTERBUYACTIVE` TINYINT(1) not null default 0,
             `FCAFTERBUYID` VARCHAR(255) not null,
-            `FCAFTERBUYBASEPRODUCTS` TEXT not null,
           PRIMARY KEY (`OXID`)
         ) ENGINE=MyISAM;
     ";
@@ -236,7 +235,6 @@ class fco2a_events
         ALTER TABLE oxfield2shop
           ADD COLUMN FCAFTERBUYACTIVE TINYINT(1) not null default 0,
           ADD COLUMN FCAFTERBUYID VARCHAR(255) not null,
-          ADD COLUMN FCAFTERBUYBASEPRODUCTS TEXT not null,
           ADD COLUMN FCAFTERBUY_AID VARCHAR(255) not null,
           ADD COLUMN FCAFTERBUY_VID VARCHAR(255) not null,
           ADD COLUMN FCAFTERBUY_UID VARCHAR(255) not null,
@@ -256,6 +254,7 @@ class fco2a_events
     public static function onActivate()
     {
         self::addDatabaseStructure();
+        self::migrateFromOldVersion();
         self::regenerateViews();
         self::clearTmp();
     }
@@ -324,6 +323,151 @@ class fco2a_events
     }
 
     /**
+     * Initiates migrating of all former data
+     *
+     * @param void
+     * @return void
+     */
+    public static function migrateFromOldVersion()
+    {
+        // articles
+        $blMigrateArticles =
+            self::checkMigrationNeeded('oxarticles', 'oxarticles_afterbuy');
+        if ($blMigrateArticles)
+            self::migrateData('oxarticles', 'oxarticles_afterbuy');
+
+        // orders
+        $blMigrateOrders =
+            self::checkMigrationNeeded('oxorder', 'oxorder_afterbuy');
+        if ($blMigrateOrders)
+            self::migrateData('oxorder', 'oxorder_afterbuy', array(''));
+
+        // user
+        $blMigrateUsers =
+            self::checkMigrationNeeded('oxuser', 'oxuser_afterbuy');
+        if ($blMigrateUsers)
+            self::migrateData('oxuser', 'oxuser_afterbuy');
+    }
+
+    /**
+     * Migrate afterbuy data from source to target table
+     *
+     * @param $sSourceTable
+     * @param $sTargetTable
+     * @return void
+     */
+    public static function migrateData($sSourceTable, $sTargetTable, $aEmptyFields=array())
+    {
+        $aSourceColums =
+            self::getAfterbuyColumsOfTable($sSourceTable);
+
+        if (count($aSourceColums) == 0)
+            return;
+
+        $aTransferColumns =
+            self::filterAfterbuyTransferColums($aSourceColums, $sTargetTable);
+
+        self::transferAfterbuyData($sSourceTable, $sTargetTable, $aTransferColumns, $aEmptyFields);
+    }
+
+    /**
+     * Remove colums which are not available in target
+     *
+     * @param array $aSourceColumns
+     * @param array $sTargetTable
+     * @return array
+     */
+    public static function filterAfterbuyTransferColums($aSourceColumns, $sTargetTable)
+    {
+        array_unshift($aSourceColumns, 'OXID');
+        $aTargetColums = self::getAfterbuyColumsOfTable($sTargetTable);
+        array_unshift($aTargetColums, 'OXID');
+
+        foreach ($aSourceColumns as $iIndex=>$sColumn) {
+            $blAvailable = in_array($sColumn, $aTargetColums);
+            if (!$blAvailable) unset($aSourceColumns[$iIndex]);
+        }
+
+        return $aSourceColumns;
+    }
+
+    /**
+     * Perform data transfer
+     *
+     * @param $sSourceTable
+     * @param $sTargetTable
+     * @param $aTransferColumns
+     */
+    public static function transferAfterbuyData($sSourceTable, $sTargetTable, $aTransferColumns, $aEmptyFields)
+    {
+        $oDb = oxDb::getDb();
+
+        $sFields = implode(',', $aTransferColumns);
+        $sEmptyFields = "";
+        foreach ($aEmptyFields as $sEmptyField) {
+            $sEmptyFields .= ",''";
+        }
+        $sQuery =
+            "INSERT INTO {$sTargetTable} SELECT {$sFields}{$sEmptyFields} FROM {$sSourceTable}";
+
+        $oDb->execute($sQuery);
+    }
+
+    /**
+     * Checks that there are no existing data entries in afterbuy table
+     * and table contains afterbuy colums
+     *
+     * @param $sTable
+     * @param $sAfterbuyTable
+     * @return bool
+     */
+    public static function checkMigrationNeeded($sTable, $sAfterbuyTable)
+    {
+        $oDb = oxDb::getDb();
+
+        // is there already any data set in target?
+        $sQuery = "SELECT count(*) FROM {$sAfterbuyTable} WHERE 1";
+        $iAmountRows = (int) $oDb->getOne($sQuery);
+
+        // never overwrite existing data -> early exit
+        if ($iAmountRows > 0)
+            return false;
+
+        $aColumns = self::getAfterbuyColumsOfTable($sTable);
+
+        $blMigrate = (
+            is_array($aColumns) &&
+            count($aColumns) > 0
+        );
+
+        return $blMigrate;
+    }
+
+    /**
+     * Returns list of colums of table. Default isset to all afterbuy
+     * colums but can be overwritten as needed with file pattern param
+     *
+     * @param $sTable
+     * @param string $sFieldPattern
+     * @return mixed
+     */
+    public static function getAfterbuyColumsOfTable($sTable, $sFieldPattern='FCAFTERBUY_%')
+    {
+        $oDb = oxDb::getDb();
+
+        $sQuery = "SHOW COLUMNS FROM {$sTable} LIKE '{$sFieldPattern}'";
+        $aRows = $oDb->getAll($sQuery);
+
+        $aColumns = array();
+
+        foreach ($aRows as $aRow) {
+            $aColumns[] = $aRow[0];
+        }
+
+        return $aColumns;
+    }
+
+    /**
      * Executes a query
      *
      * @param $sQuery
@@ -363,5 +507,4 @@ class fco2a_events
     public static function replaceData($sTableName, $sQuery) {
         oxDb::getDb()->execute($sQuery);
     }
-
 }

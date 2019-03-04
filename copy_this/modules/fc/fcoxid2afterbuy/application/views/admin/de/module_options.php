@@ -80,11 +80,11 @@ $aLang = array(
     'SHOP_MODULE_aFcAfterbuyPayments'                       => 'Afterbuy-Zahlarten',
 
     'mxfcafterbuy_article_admin'                            => 'Afterbuy',
-    'mxfcafterbuy'                                          => 'oxid2afterbuy',
+    'mxfcafterbuy'                                          => 'Afterbuy',
     'mxfcafterbuy_payments'                                 => 'Zahlarten zuweisen',
     'mxfcafterbuy_actions'                                  => 'Wartung/Aktionen',
     'mxfcafterbuyorder'                                     => 'Verwaltung',
-    'tbclorder_orderinfo'                                   => 'oxid2afterbuy',
+    'tbclorder_orderinfo'                                   => 'Afterbuy',
 
     'FC_AFTERBUY_ARTICLE_ACTIVE'                            => 'Artikel zu Afterbuy übertragen',
     'FC_AFTERBUY_ARTICLE_PRODUCTID'                         => 'Afterbuy-ProduktID',

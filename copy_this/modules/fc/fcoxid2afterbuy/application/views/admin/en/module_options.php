@@ -80,11 +80,11 @@ $aLang = array(
     'SHOP_MODULE_aFcAfterbuyPayments'                       => 'Afterbuy-Payments',
 
     'mxfcafterbuy_article_admin'                            => 'Afterbuy',
-    'mxfcafterbuy'                                          => 'oxid2afterbuy',
+    'mxfcafterbuy'                                          => 'Afterbuy',
     'mxfcafterbuy_payments'                                 => 'Assign payments',
-    'mxfcafterbuy_actions'                                  => 'Wartung/Aktionen',
+    'mxfcafterbuy_actions'                                  => 'Maintenance/Actions',
     'mxfcafterbuyorder'                                     => 'Management',
-    'tbclorder_orderinfo'                                   => 'oxid2afterbuy',
+    'tbclorder_orderinfo'                                   => 'Afterbuy',
 
     'FC_AFTERBUY_ARTICLE_ACTIVE'                            => 'Export article to Afterbuy',
     'FC_AFTERBUY_ARTICLE_PRODUCTID'                         => 'Afterbuy-ProductID',

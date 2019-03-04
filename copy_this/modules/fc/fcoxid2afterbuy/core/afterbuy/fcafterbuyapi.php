@@ -726,7 +726,7 @@ class fcafterbuyapi {
      */
     protected function _fcAddCatalogs($oArt, $sXmlData)
     {
-        if (!is_array($oArt->AddAttributes)) return $sXmlData;
+        if (!is_array($oArt->AddCatalogs)) return $sXmlData;
 
         $sXmlData .= "<AddCatalogs>";
         $sXmlData .= "<UpdateAction>1</UpdateAction>";
