@@ -81,31 +81,56 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
      */
     protected function _fcAddCustomFieldsToObject($sOxid) {
         $oDb = oxDb::getDb(oxDB::FETCH_MODE_ASSOC);
+
+        $aFields = array(
+            'FCAFTERBUY_AID',
+            'FCAFTERBUY_VID',
+            'FCAFTERBUY_UID',
+            'FCAFTERBUY_CUSTOMNR',
+            'FCAFTERBUY_ECUSTOMNR',
+            'FCAFTERBUY_LASTCHECKED',
+            'FCAFTERBUY_FULFILLED',
+            'FCAFTERBUY_FULFILLEDEXT',
+        );
+        $sFields = implode(",", $aFields);
+
         $sQuery = "
             SELECT
-              `FCAFTERBUY_AID`,
-              `FCAFTERBUY_VID`,
-              `FCAFTERBUY_UID`,
-              `FCAFTERBUY_CUSTOMNR`,
-              `FCAFTERBUY_ECUSTOMNR`,
-              `FCAFTERBUY_LASTCHECKED`,
-              `FCAFTERBUY_FULFILLED`,
-              `FCAFTERBUY_FULFILLEDEXT`
+                {$sFields}
             FROM
                 oxorder_afterbuy
             WHERE OXID = '{$sOxid}'
         ";
 
         $aRow = $oDb->getRow($sQuery);
-        if (is_array($aRow) && count($aRow)>0) {
-            foreach ($aRow as $sDbField=>$sValue) {
-                $sDbField = strtolower($sDbField);
-                $sField = "oxorder__".$sDbField;
-                $this->$sField = new oxField($sValue);
-            }
+        if (!is_array($aRow) || count($aRow)==0) {
+            $this->_fcFillFields($aFields);
+            return;
+        }
+
+        foreach ($aRow as $sDbField=>$sValue) {
+            $sDbField = strtolower($sDbField);
+            $sField = "oxorder__".$sDbField;
+            $this->$sField = new oxField($sValue);
         }
     }
 
+    /**
+     * Fills empty values if row has not been found. Shall
+     * prevent usage of former table values
+     *
+     * @param $aFields
+     * @return void
+     */
+    protected function _fcFillFields($aFields)
+    {
+        foreach ($aFields as $sDbField) {
+            $sDbField = strtolower($sDbField);
+            $sField = "oxorder__".$sDbField;
+            $this->$sField = new oxField('');
+        }
+
+    }
 
     /**
      * Adds triggering to send order to afterbuy if configured

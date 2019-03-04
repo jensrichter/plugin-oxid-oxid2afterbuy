@@ -43,22 +43,48 @@ class fcafterbuy_oxuser extends fcafterbuy_oxuser_parent
      */
     protected function _fcAddCustomFieldsToObject($sOxid) {
         $oDb = oxDb::getDb(oxDB::FETCH_MODE_ASSOC);
+
+        $aFields = array('FCAFTERBUY_USERID');
+        $sFields = implode(",", $aFields);
+
         $sQuery = "
             SELECT
-                `FCAFTERBUY_USERID`
+                {$sFields}
             FROM
                 oxuser_afterbuy
             WHERE OXID = '{$sOxid}'
         ";
 
         $aRow = $oDb->getRow($sQuery);
-        if (is_array($aRow) && count($aRow)>0) {
-            foreach ($aRow as $sDbField=>$sValue) {
-                $sDbField = strtolower($sDbField);
-                $sField = "oxuser__".$sDbField;
-                $this->$sField = new oxField($sValue);
-            }
+        if (!is_array($aRow) || count($aRow)==0) {
+            $this->_fcFillFields($aFields);
+            return;
         }
+
+        foreach ($aRow as $sDbField=>$sValue) {
+            $sDbField = strtolower($sDbField);
+            $sField = "oxuser__".$sDbField;
+            $this->$sField = new oxField($sValue);
+        }
+    }
+
+    /**
+     * Fills empty values if row has not been found. Shall
+     * prevent usage of former table values
+     *
+     * @param $aFields
+     * @return void
+     */
+    protected function _fcFillFields($aFields)
+    {
+        // fill values anyway due to possibly
+        // resisting values in former structure
+        foreach ($aFields as $sDbField) {
+            $sDbField = strtolower($sDbField);
+            $sField = "oxuser__".$sDbField;
+            $this->$sField = new oxField('');
+        }
+
     }
 
     /**

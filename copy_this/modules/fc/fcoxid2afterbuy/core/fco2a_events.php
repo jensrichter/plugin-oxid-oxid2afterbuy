@@ -28,7 +28,6 @@ class fco2a_events
             `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
             `FCAFTERBUYACTIVE` TINYINT(1) not null default 0,
             `FCAFTERBUYID` VARCHAR(255) not null,
-            `FCAFTERBUYBASEPRODUCTS` TEXT not null,
           PRIMARY KEY (`OXID`)
         ) ENGINE=MyISAM;
     ";
@@ -236,7 +235,6 @@ class fco2a_events
         ALTER TABLE oxfield2shop
           ADD COLUMN FCAFTERBUYACTIVE TINYINT(1) not null default 0,
           ADD COLUMN FCAFTERBUYID VARCHAR(255) not null,
-          ADD COLUMN FCAFTERBUYBASEPRODUCTS TEXT not null,
           ADD COLUMN FCAFTERBUY_AID VARCHAR(255) not null,
           ADD COLUMN FCAFTERBUY_VID VARCHAR(255) not null,
           ADD COLUMN FCAFTERBUY_UID VARCHAR(255) not null,
@@ -342,7 +340,7 @@ class fco2a_events
         $blMigrateOrders =
             self::checkMigrationNeeded('oxorder', 'oxorder_afterbuy');
         if ($blMigrateOrders)
-            self::migrateData('oxorder', 'oxorder_afterbuy');
+            self::migrateData('oxorder', 'oxorder_afterbuy', array(''));
 
         // user
         $blMigrateUsers =
@@ -358,7 +356,7 @@ class fco2a_events
      * @param $sTargetTable
      * @return void
      */
-    public static function migrateData($sSourceTable, $sTargetTable)
+    public static function migrateData($sSourceTable, $sTargetTable, $aEmptyFields=array())
     {
         $aSourceColums =
             self::getAfterbuyColumsOfTable($sSourceTable);
@@ -369,7 +367,7 @@ class fco2a_events
         $aTransferColumns =
             self::filterAfterbuyTransferColums($aSourceColums, $sTargetTable);
 
-        self::transferAfterbuyData($sSourceTable, $sTargetTable, $aTransferColumns);
+        self::transferAfterbuyData($sSourceTable, $sTargetTable, $aTransferColumns, $aEmptyFields);
     }
 
     /**
@@ -381,10 +379,11 @@ class fco2a_events
      */
     public static function filterAfterbuyTransferColums($aSourceColumns, $sTargetTable)
     {
-        array_unshift($aSourceColumns, array('OXID'));
+        array_unshift($aSourceColumns, 'OXID');
         $aTargetColums = self::getAfterbuyColumsOfTable($sTargetTable);
+        array_unshift($aTargetColums, 'OXID');
 
-        foreach ($aSourceColumns as $iIndex=> $sColumn) {
+        foreach ($aSourceColumns as $iIndex=>$sColumn) {
             $blAvailable = in_array($sColumn, $aTargetColums);
             if (!$blAvailable) unset($aSourceColumns[$iIndex]);
         }
@@ -399,13 +398,17 @@ class fco2a_events
      * @param $sTargetTable
      * @param $aTransferColumns
      */
-    public static function transferAfterbuyData($sSourceTable, $sTargetTable, $aTransferColumns)
+    public static function transferAfterbuyData($sSourceTable, $sTargetTable, $aTransferColumns, $aEmptyFields)
     {
         $oDb = oxDb::getDb();
 
         $sFields = implode(',', $aTransferColumns);
+        $sEmptyFields = "";
+        foreach ($aEmptyFields as $sEmptyField) {
+            $sEmptyFields .= ",''";
+        }
         $sQuery =
-            "INSERT INTO {$sTargetTable} SELECT {$sFields} FROM {$sSourceTable}";
+            "INSERT INTO {$sTargetTable} SELECT {$sFields}{$sEmptyFields} FROM {$sSourceTable}";
 
         $oDb->execute($sQuery);
     }
@@ -453,7 +456,13 @@ class fco2a_events
         $oDb = oxDb::getDb();
 
         $sQuery = "SHOW COLUMNS FROM {$sTable} LIKE '{$sFieldPattern}'";
-        $aColumns = $oDb->getAll($sQuery);
+        $aRows = $oDb->getAll($sQuery);
+
+        $aColumns = array();
+
+        foreach ($aRows as $aRow) {
+            $aColumns[] = $aRow[0];
+        }
 
         return $aColumns;
     }
