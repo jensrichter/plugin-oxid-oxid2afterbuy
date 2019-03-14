@@ -1,4 +1,4 @@
-# OXID eShop to Afterbuy for OXID 5
+# OXID eShop to Afterbuy for OXID
 With this plugin you can Export Articles from your OXID eShop to Afterbuy.  
 More on: https://www.fatchip.de/Plugins/OXID-eShop/OXID-2-Afterbuy.html
 
@@ -14,8 +14,11 @@ FATCHIP GmbH | https://www.fatchip.de | support@fatchip.de
 see LICENSE file
 
 ## Extend
-oxorder
+oxarticle
+oxcategory
 oxcounter
+oxorder
+oxuser
 
 ## How to contribute
 If you want to contribute to this plugin ask FATCHIP GmbH for access to the private repository, fork it and make a pull request with your changes.
