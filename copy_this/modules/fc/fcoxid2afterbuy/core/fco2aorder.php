@@ -503,7 +503,10 @@ class fco2aorder extends fco2abase {
      */
     protected function _fcEncodeParameters($sParam, $urlEncode = true, $trim = true, $utf8Decode = false)
     {
-        if($utf8Decode === true && $this->_fcGetEncodedConfigParameter('blFcAfterbuyExportUTF8Orders') === true ) {
+        $oConfig = $this->getConfig();
+        $blFcAfterbuyExportUTF8Orders = $oConfig->getConfigParam('blFcAfterbuyExportUTF8Orders');
+        
+        if($utf8Decode === true && $blFcAfterbuyExportUTF8Orders === true ) {
             $utf8Decode = false;
         }
 
