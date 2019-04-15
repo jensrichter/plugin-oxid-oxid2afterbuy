@@ -98,15 +98,9 @@ $aModule = array(
         ),
         array(
             'group' => 'fcafterbuy_connect',
-            'name' => 'sFcAfterbuyShopInterfaceBaseUrl',
-            'type' => 'str',
-            'value' => "https://api.afterbuy.de/afterbuy/ShopInterface.aspx"
-        ),
-        array(
-            'group' => 'fcafterbuy_connect',
-            'name' => 'sFcAfterbuyAbiUrl',
-            'type' => 'str',
-            'value' => "https://api.afterbuy.de/afterbuy/ABInterface.aspx"
+            'name' => 'blFcAfterbuyExportUTF8Orders',
+            'type' => 'bool',
+            'value' => true
         ),
         array(
             'group' => 'fcafterbuy_connect',
@@ -132,7 +126,6 @@ $aModule = array(
             'type' => 'password',
             'value' => ""
         ),
-
         array(
             'group' => 'fcafterbuy_export',
             'name' => 'blFcAfterbuyExportAll',
