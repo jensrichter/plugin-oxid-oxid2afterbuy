@@ -62,13 +62,13 @@ class fco2aorder extends fco2abase {
             $ArtikelStammID = $oArticle->oxarticles__oxartnum->value;
             $sOrderarticleParameters .= "&ArtikelStammID_{$iSuffix}=" . $ArtikelStammID;
             $sOrderarticleParameters .= "&Artikelnr_{$iSuffix}=" . preg_replace("/[^0-9]/", "", $oOrderArticle->oxorderarticles__oxartnum->value); // we need to offer a numeric artnum so we replace non numeric characters
-            $sOrderarticleParameters .= "&AlternArtikelNr1_{$iSuffix}=" . urlencode($oOrderArticle->oxorderarticles__oxartnum->value);
-            $sOrderarticleParameters .= "&Artikelname_{$iSuffix}=" . urlencode(utf8_decode($oOrderArticle->oxorderarticles__oxtitle->value . " " . $oOrderArticle->oxorderarticles__oxselvariant->value));
+            $sOrderarticleParameters .= "&AlternArtikelNr1_{$iSuffix}=" . $this->_fcEncodeParameters($oOrderArticle->oxorderarticles__oxartnum->value, true, false);
+            $sOrderarticleParameters .= "&Artikelname_{$iSuffix}=" . $this->_fcEncodeParameters($oOrderArticle->oxorderarticles__oxtitle->value . " " . $oOrderArticle->oxorderarticles__oxselvariant->value, true, false, true);
             $sOrderarticleParameters .= "&ArtikelEpreis_{$iSuffix}=" . str_replace(".", ",", $oOrderArticle->oxorderarticles__oxbprice->value);
             $sOrderarticleParameters .= "&ArtikelMwSt_{$iSuffix}=" . str_replace(".", ",",$oOrderArticle->oxorderarticles__oxvat->value);
             $sOrderarticleParameters .= "&ArtikelMenge_{$iSuffix}=" . $oOrderArticle->oxorderarticles__oxamount->value;
             $sOrderarticleParameters .= "&ArtikelGewicht_{$iSuffix}=" . $oOrderArticle->oxorderarticles__oxweight->value;
-            $sOrderarticleParameters .= "&ArtikelLink_{$iSuffix}=" . urlencode($oArticle->getLink());
+            $sOrderarticleParameters .= "&ArtikelLink_{$iSuffix}=" . $this->_fcEncodeParameters($oArticle->getLink(), true, false);
             $aAttributes = $oArticle->getAttributes();
             $sAttributeParameters = "&Attribute_{$iSuffix}=";
             $iAttributeSuffix = 1;
@@ -77,8 +77,8 @@ class fco2aorder extends fco2abase {
                 /**
                  * @todo This code will possibly not work needs to be debugged
                  */
-                $sAttributeParameters .= urlencode($oAttribute->oxattribute__oxtitle->value) . ":"; //."{$iAttributeSuffix}:";
-                $sAttributeParameters .= urlencode($oAttribute->oxobject2attribute__oxvalue->value); // ."{$iAttributeSuffix};
+                $sAttributeParameters .= $this->_fcEncodeParameters($oAttribute->oxattribute__oxtitle->value, true, false) . ":"; //."{$iAttributeSuffix}:";
+                $sAttributeParameters .= $this->_fcEncodeParameters($oAttribute->oxobject2attribute__oxvalue->value, true, false); // ."{$iAttributeSuffix};
                 if ($iAttributeSuffix < $iAmountAttributes) {
                     $sAttributeParameters .= "|";
                 }
@@ -130,9 +130,9 @@ class fco2aorder extends fco2abase {
     {
         $aConfig = $this->_fcGetAfterbuyConfigArray();
 
-        $sCredentialParameters = "&Partnerid=" . trim($aConfig['afterbuyPartnerId']);
-        $sCredentialParameters .= "&PartnerPass=" . trim($aConfig['afterbuyPartnerPassword']);
-        $sCredentialParameters .= "&UserID=" . trim($aConfig['afterbuyUsername']);
+        $sCredentialParameters = "&Partnerid=" . $this->_fcEncodeParameters($aConfig['afterbuyPartnerId'], false);
+        $sCredentialParameters .= "&PartnerPass=" . $this->_fcEncodeParameters($aConfig['afterbuyPartnerPassword'], false);
+        $sCredentialParameters .= "&UserID=" . $this->_fcEncodeParameters($aConfig['afterbuyUsername'], false);
 
         return $sCredentialParameters;
     }
@@ -169,40 +169,40 @@ class fco2aorder extends fco2abase {
          * @todo There is also a merchant Flag &Haendler= available this should be implemented by 
          * defining a Group via config. If user belongs to this group the flag is true
          */
-        $sCustomerParameters = "&Kbenutzername=" . trim(urlencode($oUser->oxuser__oxusername->value));
+        $sCustomerParameters = "&Kbenutzername=" . $this->_fcEncodeParameters($oUser->oxuser__oxusername->value);
         // bill parameters
-        $sCustomerParameters .= "&Kanrede=" . trim(urlencode(utf8_decode($sBillSalutation)));
-        $sCustomerParameters .= "&KFirma=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxbillcompany->value)));
-        $sCustomerParameters .= "&KVorname=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxbillfname->value)));
-        $sCustomerParameters .= "&KNachname=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxbilllname->value)));
-        $sCustomerParameters .= "&KStrasse=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxbillstreet->value . " " . trim($oOrder->oxorder__oxbillstreetnr->value))));
-        $sCustomerParameters .= "&KStrasse2=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxbilladdinfo->value)));
-        $sCustomerParameters .= "&KPLZ=" . trim(urlencode($oOrder->oxorder__oxbillzip->value));
-        $sCustomerParameters .= "&KOrt=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxbillcity->value)));
-        $sCustomerParameters .= "&KBundesland=" . trim(urlencode(utf8_decode($sBillState)));
-        $sCustomerParameters .= "&Ktelefon=" . trim(urlencode($oOrder->oxorder__oxbillfon->value));
-        $sCustomerParameters .= "&Kfax=" . trim(urlencode($oOrder->oxorder__oxbillfax->value));
-        $sCustomerParameters .= "&Kemail=" . trim(urlencode($oOrder->oxorder__oxbillemail->value));
-        $sCustomerParameters .= "&KLand=" . trim(urlencode($sBillCountry));
-        $sCustomerParameters .= "&KBirthday=" . trim(urlencode($oUser->oxuser__oxbirthdate->value));
-        $sCustomerParameters .= "&UsStID=" . trim(urlencode($oOrder->oxorder__oxbillustid->value));
+        $sCustomerParameters .= "&Kanrede=" . $this->_fcEncodeParameters($sBillSalutation, true, true, true);
+        $sCustomerParameters .= "&KFirma=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillcompany->value, true, true, true);
+        $sCustomerParameters .= "&KVorname=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillfname->value, true, true, true);
+        $sCustomerParameters .= "&KNachname=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbilllname->value, true, true, true);
+        $sCustomerParameters .= "&KStrasse=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillstreet->value . " " . $this->_fcEncodeParameters($oOrder->oxorder__oxbillstreetnr->value, false), true, true, true);
+        $sCustomerParameters .= "&KStrasse2=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbilladdinfo->value, true, true, true);
+        $sCustomerParameters .= "&KPLZ=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillzip->value);
+        $sCustomerParameters .= "&KOrt=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillcity->value, true, true, true);
+        $sCustomerParameters .= "&KBundesland=" . $this->_fcEncodeParameters($sBillState, true, true, true);
+        $sCustomerParameters .= "&Ktelefon=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillfon->value);
+        $sCustomerParameters .= "&Kfax=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillfax->value);
+        $sCustomerParameters .= "&Kemail=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillemail->value);
+        $sCustomerParameters .= "&KLand=" . $this->_fcEncodeParameters($sBillCountry);
+        $sCustomerParameters .= "&KBirthday=" . $this->_fcEncodeParameters($oUser->oxuser__oxbirthdate->value);
+        $sCustomerParameters .= "&UsStID=" . $this->_fcEncodeParameters($oOrder->oxorder__oxbillustid->value);
         $sCustNr = ($blUseCustNr) ? $oUser->oxuser__oxcustnr->value : '';
-        $sCustomerParameters .= "&EKundenNr=" . trim(urlencode($sCustNr));
+        $sCustomerParameters .= "&EKundenNr=" . $this->_fcEncodeParameters($sCustNr);
 
         // delivery parameters
-        $sCustomerParameters .= "&KLanrede=" . trim(urlencode(utf8_decode($sDelSalutation)));
-        $sCustomerParameters .= "&KLFirma=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxdelcompany->value)));
-        $sCustomerParameters .= "&KLVorname=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxdelfname->value)));
-        $sCustomerParameters .= "&KLNachname=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxdellname->value)));
-        $sCustomerParameters .= "&KLStrasse=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxdelstreet->value . " " . trim($oOrder->oxorder__oxdelstreetnr->value))));
-        $sCustomerParameters .= "&KLStrasse2=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxdeladdinfo->value)));
-        $sCustomerParameters .= "&KLPLZ=" . trim(urlencode($oOrder->oxorder__oxdelzip->value));
-        $sCustomerParameters .= "&KLOrt=" . trim(urlencode(utf8_decode($oOrder->oxorder__oxdelcity->value)));
-        $sCustomerParameters .= "&KLBundesland=" . trim(urlencode(utf8_decode($sDelState)));
-        $sCustomerParameters .= "&KLtelefon=" . trim(urlencode($oOrder->oxorder__oxdelfon->value));
-        $sCustomerParameters .= "&KLfax=" . trim(urlencode($oOrder->oxorder__oxdelfax->value));
-        $sCustomerParameters .= "&KLemail=" . trim(urlencode($oOrder->oxorder__oxdelemail->value));
-        $sCustomerParameters .= "&KLLand=" . trim(urlencode($sDelCountry));
+        $sCustomerParameters .= "&KLanrede=" . $this->_fcEncodeParameters($sDelSalutation, true, true, true);
+        $sCustomerParameters .= "&KLFirma=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdelcompany->value, true, true, true);
+        $sCustomerParameters .= "&KLVorname=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdelfname->value, true, true, true);
+        $sCustomerParameters .= "&KLNachname=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdellname->value, true, true, true);
+        $sCustomerParameters .= "&KLStrasse=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdelstreet->value . " " . $this->_fcEncodeParameters($oOrder->oxorder__oxdelstreetnr->value, false), true,true, true);
+        $sCustomerParameters .= "&KLStrasse2=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdeladdinfo->value, true, true, true);
+        $sCustomerParameters .= "&KLPLZ=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdelzip->value);
+        $sCustomerParameters .= "&KLOrt=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdelcity->value, true, true, true);
+        $sCustomerParameters .= "&KLBundesland=" . $this->_fcEncodeParameters($sDelState, true, true, true);
+        $sCustomerParameters .= "&KLtelefon=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdelfon->value);
+        $sCustomerParameters .= "&KLfax=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdelfax->value);
+        $sCustomerParameters .= "&KLemail=" . $this->_fcEncodeParameters($oOrder->oxorder__oxdelemail->value);
+        $sCustomerParameters .= "&KLLand=" . $this->_fcEncodeParameters($sDelCountry);
 
         return $sCustomerParameters;
     }
@@ -225,15 +225,15 @@ class fco2aorder extends fco2abase {
         $sBuyDateRaw = $oOrder->oxorder__oxorderdate->value;
         $iTimeBuyDate = strtotime($sBuyDateRaw);
         $sBuyDateFormatted = date("d.m.Y H:i:s", $iTimeBuyDate);
-        $sBuyDateUrlFormatted = trim(urlencode($sBuyDateFormatted));
-        $sRemark = trim(urlencode($oOrder->oxorder__oxremark->value));
-        $sDeliveryType = trim(urlencode($oDeliverySet->oxdeliveryset__oxtitle->value));
-        $sDeliveryCosts = trim (urlencode(str_replace(".", ",", $dOrderDeliveryCosts)));
-        $sPaymentName = trim(urlencode($oPayment->oxpayments__oxdesc->value));
-        $sZFunktionsID = trim(urlencode($this->_fcGetAfterbuyPaymentId($sPaymentId)));
-        $sPaymentCosts = trim(urlencode(number_format($dOrderPaymentCosts,2,',','.')));
-        $sOrderId = trim(urlencode($oOrder->getId()));
-        $sOrderCurrency = trim(urlencode($oOrder->getOrderCurrency()->name));
+        $sBuyDateUrlFormatted = $this->_fcEncodeParameters($sBuyDateFormatted);
+        $sRemark = $this->_fcEncodeParameters($oOrder->oxorder__oxremark->value);
+        $sDeliveryType = $this->_fcEncodeParameters($oDeliverySet->oxdeliveryset__oxtitle->value);
+        $sDeliveryCosts = $this->_fcEncodeParameters(str_replace(".", ",", $dOrderDeliveryCosts));
+        $sPaymentName = $this->_fcEncodeParameters($oPayment->oxpayments__oxdesc->value);
+        $sZFunktionsID = $this->_fcEncodeParameters($this->_fcGetAfterbuyPaymentId($sPaymentId));
+        $sPaymentCosts = $this->_fcEncodeParameters(number_format($dOrderPaymentCosts,2,',','.'));
+        $sOrderId = $this->_fcEncodeParameters($oOrder->getId());
+        $sOrderCurrency = $this->_fcEncodeParameters($oOrder->getOrderCurrency()->name);
 
         $sOrderParameters = "&BuyDate=" . $sBuyDateUrlFormatted;
         $sOrderParameters .= "&Kommentar=" . $sRemark;
@@ -282,7 +282,7 @@ class fco2aorder extends fco2abase {
             $blPaypalPaidState
         );
 
-        $sPaydateUrlFormatted = ($iTimePayDate) ? trim(urlencode($sPayDateFormatted)) : '';
+        $sPaydateUrlFormatted = ($iTimePayDate) ? $this->_fcEncodeParameters($sPayDateFormatted) : '';
 
         $sOrderParameters .= "&SetPay=".(string) $iPaid;
         $sOrderParameters .= "&PayDate=" . $sPaydateUrlFormatted;
@@ -325,7 +325,7 @@ class fco2aorder extends fco2abase {
         $sOrderParameters = '';
         $aDynValues = $oPaymentType->getDynValues();
         foreach ($aDynValues as $oValue) {
-            $sValue = trim(urlencode($oValue->value));
+            $sValue = $this->_fcEncodeParameters($oValue->value);
             $sName = $oValue->name;
 
             $blBankName =
@@ -383,7 +383,7 @@ class fco2aorder extends fco2abase {
     protected function _fcGetEncodedConfigParameter($sConfigName) {
         $oConfig = $this->getConfig();
         $sValue = $oConfig->getConfigParam($sConfigName);
-        $sValue = trim(urlencode($sValue));
+        $sValue = $this->_fcEncodeParameters($sValue);
 
         return $sValue;
     }
@@ -491,6 +491,38 @@ class fco2aorder extends fco2abase {
         $oOrder->oxorder__fcafterbuy_fulfilled = new oxField('0', oxField::T_RAW);
         
         $oOrder->save();
+    }
+
+
+    /**
+     * @param $sParam
+     * @param bool $urlEncode
+     * @param bool $trim
+     * @param bool $utf8Decode
+     * @return string
+     */
+    protected function _fcEncodeParameters($sParam, $urlEncode = true, $trim = true, $utf8Decode = false)
+    {
+        $oConfig = $this->getConfig();
+        $blFcAfterbuyExportUTF8Orders = $oConfig->getConfigParam('blFcAfterbuyExportUTF8Orders');
+        
+        if($utf8Decode === true && $blFcAfterbuyExportUTF8Orders === true ) {
+            $utf8Decode = false;
+        }
+
+        if($utf8Decode === true) {
+            $sParam = utf8_decode($sParam);
+        }
+
+        if($urlEncode === true) {
+            $sParam = urlencode($sParam);
+        }
+
+        if($trim === true) {
+            $sParam = trim($sParam);
+        }
+
+        return $sParam;
     }
 
 }

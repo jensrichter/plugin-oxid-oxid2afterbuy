@@ -9,6 +9,21 @@
 class fco2abase extends oxBase {
 
     /**
+     * @var string
+     */
+    protected $sAfterbuyShopInterfaceUrl = "https://api.afterbuy.de/afterbuy/ShopInterface.aspx";
+
+    /**
+     * @var string
+     */
+    protected $sAfterbuyShopInterfaceUTF8Url = "https://api.afterbuy.de/afterbuy/ShopInterfaceUTF8.aspx";
+
+    /**
+     * @var string
+     */
+    protected $sAfterbuyInterfaceUrl = "https://api.afterbuy.de/afterbuy/ABInterface.aspx";
+
+    /**
      * Current loglevel
      * @var int
      */
@@ -108,10 +123,9 @@ class fco2abase extends oxBase {
         if ($this->_aAfterbuyConfig === null) {
             $oConfig = $this->getConfig();
             $aConfig = array(
-                'afterbuyShopInterfaceBaseUrl' =>
-                    $oConfig->getConfigParam('sFcAfterbuyShopInterfaceBaseUrl'),
+                'afterbuyShopInterfaceBaseUrl' => ($oConfig->getConfigParam('blFcAfterbuyExportUTF8Orders') === true) ? $this->sAfterbuyShopInterfaceUTF8Url : $this->sAfterbuyShopInterfaceUrl,
                 'afterbuyAbiUrl' =>
-                    $oConfig->getConfigParam('sFcAfterbuyAbiUrl'),
+                    $this->sAfterbuyInterfaceUrl,
                 'afterbuyPartnerId' =>
                     $oConfig->getConfigParam('sFcAfterbuyPartnerId'),
                 'afterbuyPartnerPassword' =>
