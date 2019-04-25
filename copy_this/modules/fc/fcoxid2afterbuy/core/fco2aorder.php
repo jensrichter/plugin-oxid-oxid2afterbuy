@@ -495,30 +495,35 @@ class fco2aorder extends fco2abase {
 
 
     /**
+     * Method will be used for parameter preparation related to encodings etc.
+     *
      * @param $sParam
-     * @param bool $urlEncode
-     * @param bool $trim
-     * @param bool $utf8Decode
+     * @param bool $blUrlEncode
+     * @param bool $blTrim
+     * @param bool $blUtf8Decode
      * @return string
      */
-    protected function _fcEncodeParameters($sParam, $urlEncode = true, $trim = true, $utf8Decode = false)
+    protected function _fcEncodeParameters($sParam, $blUrlEncode = true, $blTrim = true, $blUtf8Decode = false)
     {
         $oConfig = $this->getConfig();
-        $blFcAfterbuyExportUTF8Orders = $oConfig->getConfigParam('blFcAfterbuyExportUTF8Orders');
-        
-        if($utf8Decode === true && $blFcAfterbuyExportUTF8Orders === true ) {
-            $utf8Decode = false;
-        }
 
-        if($utf8Decode === true) {
+        $blFcAfterbuyExportUTF8Orders =
+            $oConfig->getConfigParam('blFcAfterbuyExportUTF8Orders');
+
+        $blPerformDecode = (
+            $blUtf8Decode === true &&
+            $blFcAfterbuyExportUTF8Orders === false
+        );
+
+        if($blPerformDecode) {
             $sParam = utf8_decode($sParam);
         }
 
-        if($urlEncode === true) {
+        if($blUrlEncode === true) {
             $sParam = urlencode($sParam);
         }
 
-        if($trim === true) {
+        if($blTrim === true) {
             $sParam = trim($sParam);
         }
 
