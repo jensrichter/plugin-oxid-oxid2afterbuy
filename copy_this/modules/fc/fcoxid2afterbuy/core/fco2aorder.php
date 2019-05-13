@@ -53,6 +53,9 @@ class fco2aorder extends fco2abase {
      */
     protected function _fcGetOrderarticleParameters($oOrder)
     {
+        $oConfig = $this->getConfig();
+        $bSubmitWeight = $oConfig->getConfigParam('sFcAfterbuySendWeight') == '1';
+
         $aOrderArticles = $oOrder->getOrderArticles();
         $sOrderarticleParameters = "";
         $iSuffix = 1;
@@ -68,7 +71,11 @@ class fco2aorder extends fco2abase {
             $sOrderarticleParameters .= "&ArtikelEpreis_{$iSuffix}=" . str_replace(".", ",", $oOrderArticle->oxorderarticles__oxbprice->value);
             $sOrderarticleParameters .= "&ArtikelMwSt_{$iSuffix}=" . str_replace(".", ",",$oOrderArticle->oxorderarticles__oxvat->value);
             $sOrderarticleParameters .= "&ArtikelMenge_{$iSuffix}=" . $oOrderArticle->oxorderarticles__oxamount->value;
-            $sOrderarticleParameters .= "&ArtikelGewicht_{$iSuffix}=" . $oOrderArticle->oxorderarticles__oxweight->value;
+
+            if($bSubmitWeight) {
+                $sOrderarticleParameters .= "&ArtikelGewicht_{$iSuffix}=" . $oOrderArticle->oxorderarticles__oxweight->value;
+            }
+
             $sOrderarticleParameters .= "&ArtikelLink_{$iSuffix}=" . $this->_fcEncodeParameters($oArticle->getLink(), true, false);
             $aAttributes = $oArticle->getAttributes();
             $sAttributeParameters = "&Attribute_{$iSuffix}=";
