@@ -98,4 +98,8 @@ $aLang = array(
     'SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA_SURE'       => 'Sind Sie sicher, dass Sie ALLE Afterbuy-Daten zu Artikeln, Bestellungen und Benutzern löschen wollen?',
     'SHOP_MODULE_AFTERBUY_TRANSACTIONDATA_RESET'            => 'Afterbuy-Bewegungsdaten zurückgesetzt',
     'SHOP_MODULE_AFTERBUY_ACTIONS'                          => 'Aktionen',
+    'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_HEAD'           => 'Bestellung erneut übertragen',
+    'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_INFORMATION'    => 'Die manuelle Übertragung von Bestellungen ist nur möglich, wenn Afterbuy als datenführendes System konfiguriert wurde.',
+    'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_MESSAGE'        => 'Bestellung übermittelt',
+    'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_ERROR'          => 'Fehler beim Übermitteln der Bestellung',
 );

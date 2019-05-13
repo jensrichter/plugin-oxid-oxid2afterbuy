@@ -33,6 +33,9 @@ class fco2aorder extends fco2abase {
         $sConfigParameters = $this->_fcGetConfigParameters();
 
         $sRequest = $oConfig->getConfigParam('sFcAfterbuyShopInterfaceBaseUrl');
+        $sRequest = $this->_fcGetAfterbuyConfigArray()['afterbuyShopInterfaceBaseUrl'];
+
+
         $sRequest .= $sActionParameter . $sDeliveryAddressFlagParameter . $sAfterbuyCredentialParameters;
         $sRequest .= $sCustomerInfoParameters . $sOrderArticleParameters . $sGenericOrderParameters . $sConfigParameters;
 

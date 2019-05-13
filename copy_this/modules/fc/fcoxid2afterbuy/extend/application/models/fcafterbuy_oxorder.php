@@ -170,6 +170,35 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
         return $iRet;
     }
 
+    public function _submitOrderToAfterbuy($oUser = null, $oBasket = null) {
+        if($oUser === null) {
+            $oUser = $this->getOrderUser();
+        }
+
+        try {
+            $oFcAfterbuyOrder = oxNew('fco2aorder');
+            $sMessage =
+                'MESSAGE: Attempting to send order: '.
+                $this->oxorder__oxordernr->value.
+                ' to Afterbuy...';
+
+            $oFcAfterbuyOrder->fcWriteLog($sMessage, 3);
+            $this->_fcMarkOrderPaid($oBasket);
+            $oFcAfterbuyOrder->fcSendOrderToAfterbuy($this, $oUser);
+
+            return true;
+        } catch(Exception $e) {
+            $sMessage =
+                'ERROR: Could not send order with ordernr:'.
+                $this->oxorder__oxordernr->value.
+                '. Error that was catched:'.
+                $e->getMessage();
+            $oFcAfterbuyOrder->fcWriteLog($sMessage, 1);
+            return false;
+        }
+
+    }
+
     /**
      * Marks certain orders as paid if condition matches
      * 

@@ -98,4 +98,9 @@ $aLang = array(
     'SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA_SURE'       => 'Are you sure, that you want do delete ALL Afterbuy-Transactiondata related to products, orders and users?',
     'SHOP_MODULE_AFTERBUY_TRANSACTIONDATA_RESET'            => 'Transactiondata have been reset',
     'SHOP_MODULE_AFTERBUY_ACTIONS'                          => 'Actions',
+    'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_HEAD'           => 'Submit order manually',
+    'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_INFORMATION'    => 'Manual submission is only available if Afterbuy is the data carrying system.',
+    'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_MESSAGE'        => 'Order submitted',
+    'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_ERROR'          => 'Error submitting order',
+
 );
