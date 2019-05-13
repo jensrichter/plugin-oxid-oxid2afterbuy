@@ -269,6 +269,13 @@ $aModule = array(
             )
         ),
         array(
+            'group' => 'fcafterbuy_order',
+            'name' => 'sFcAfterbuySendWeight',
+            'type' => 'select',
+            'value' => '1',
+            'constrains' => '0|1'
+        ),
+        array(
             'group' => 'fcafterbuy_debug',
             'name' => 'iFcAfterbuyLogLevel',
             'type' => 'select',
