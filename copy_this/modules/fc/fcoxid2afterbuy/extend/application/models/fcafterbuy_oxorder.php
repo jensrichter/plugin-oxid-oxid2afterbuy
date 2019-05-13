@@ -148,24 +148,7 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
             (bool) $oConfig->getConfigParam('blFcSendOrdersOnTheFly');
         if (!$blSendOrdersOnTheFly) return $iRet;
 
-        try {
-            $oFcAfterbuyOrder = oxNew('fco2aorder');
-            $sMessage =
-                'MESSAGE: Attempting to send order: '.
-                $this->oxorder__oxordernr->value.
-                ' to Afterbuy...';
-
-            $oFcAfterbuyOrder->fcWriteLog($sMessage, 3);
-            $this->_fcMarkOrderPaid($oBasket);
-            $oFcAfterbuyOrder->fcSendOrderToAfterbuy($this, $oUser);
-        } catch(Exception $e) {
-            $sMessage =
-                'ERROR: Could not send order with ordernr:'.
-                $this->oxorder__oxordernr->value.
-                '. Error that was catched:'.
-                $e->getMessage();
-            $oFcAfterbuyOrder->fcWriteLog($sMessage, 1);
-        }
+        $this->_submitOrderToAfterbuy($oUser, $oBasket);
 
         return $iRet;
     }
