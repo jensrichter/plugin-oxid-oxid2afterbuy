@@ -44,7 +44,7 @@ class fcafterbuy_orderinfo extends oxAdminDetails {
     /**
      * Get config parameter for data carrying system
      *
-     * @return $string
+     * @return bool
      */
     public function getFcAfterbuyLeadSystem()
     {
@@ -58,6 +58,9 @@ class fcafterbuy_orderinfo extends oxAdminDetails {
         return false;
     }
 
+    /**
+     * action for fubmitting order
+     */
     public function fcSubmitAfterbuyOrder() {
         $sMessage = '';
 
@@ -77,6 +80,5 @@ class fcafterbuy_orderinfo extends oxAdminDetails {
             $sMessage = oxRegistry::getLang()->translateString('SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_ERROR');
             oxRegistry::get('oxUtilsView')->addErrorToDisplay(oxNew('oxException', $sMessage));
         }
-
     }
 }

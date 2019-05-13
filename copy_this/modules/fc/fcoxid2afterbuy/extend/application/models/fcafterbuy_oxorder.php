@@ -153,6 +153,12 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
         return $iRet;
     }
 
+
+    /**
+     * @param null $oUser
+     * @param null $oBasket
+     * @return bool
+     */
     public function _submitOrderToAfterbuy($oUser = null, $oBasket = null) {
         if($oUser === null) {
             $oUser = $this->getOrderUser();
@@ -179,7 +185,6 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
             $oFcAfterbuyOrder->fcWriteLog($sMessage, 1);
             return false;
         }
-
     }
 
     /**
