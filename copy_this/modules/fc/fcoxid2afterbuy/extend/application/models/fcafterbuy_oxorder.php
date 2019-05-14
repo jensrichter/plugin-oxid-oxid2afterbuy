@@ -148,7 +148,7 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
             (bool) $oConfig->getConfigParam('blFcSendOrdersOnTheFly');
         if (!$blSendOrdersOnTheFly) return $iRet;
 
-        $this->_submitOrderToAfterbuy($oUser, $oBasket);
+        $this->submitOrderToAfterbuy($oUser, $oBasket);
 
         return $iRet;
     }
@@ -159,7 +159,7 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
      * @param null $oBasket
      * @return bool
      */
-    public function _submitOrderToAfterbuy($oUser = null, $oBasket = null) {
+    public function submitOrderToAfterbuy($oUser = null, $oBasket = null) {
         if($oUser === null) {
             $oUser = $this->getOrderUser();
         }

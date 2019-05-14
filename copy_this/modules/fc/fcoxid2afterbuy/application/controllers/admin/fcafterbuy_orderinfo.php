@@ -51,11 +51,7 @@ class fcafterbuy_orderinfo extends oxAdminDetails {
         $oConfig = $this->getConfig();
         $sValue = $oConfig->getConfigParam('sFcAfterbuyLeadSystem');
 
-        if($sValue == '1') {
-            return true;
-        }
-
-        return false;
+        return ($sValue == '1');
     }
 
     /**
@@ -70,7 +66,7 @@ class fcafterbuy_orderinfo extends oxAdminDetails {
 
         if ($oOrder->load($sOxid)) {
             /* @var fcafterbuy_oxorder $oOrder */
-            if($oOrder->_submitOrderToAfterbuy()) {
+            if($oOrder->submitOrderToAfterbuy()) {
                 $sMessage = oxRegistry::getLang()->translateString('SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_MESSAGE');
                 oxRegistry::get('oxUtilsView')->addErrorToDisplay(oxNew('oxException', $sMessage));
             }
