@@ -423,9 +423,12 @@ class fco2aartexport extends fco2abase {
     protected function _fcGetReloadedCategory($oArticle)
     {
         $oCategory = $oArticle->getCategory();
-        $sCategoryId = $oCategory->getId();
-        $oCategory = oxNew('oxCategory');
-        $oCategory->load($sCategoryId);
+
+        if($oCategory) {
+            $sCategoryId = $oCategory->getId();
+            $oCategory = oxNew('oxCategory');
+            $oCategory->load($sCategoryId);
+        }
 
         return $oCategory;
     }
