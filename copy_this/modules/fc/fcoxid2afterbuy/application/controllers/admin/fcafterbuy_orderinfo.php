@@ -40,4 +40,41 @@ class fcafterbuy_orderinfo extends oxAdminDetails {
 
         return $mReturn;
     }
+
+    /**
+     * Get config parameter for data carrying system
+     *
+     * @return bool
+     */
+    public function getFcAfterbuyLeadSystem()
+    {
+        $oConfig = $this->getConfig();
+        $sValue = $oConfig->getConfigParam('sFcAfterbuyLeadSystem');
+
+        return ($sValue == '1');
+    }
+
+    /**
+     * action for fubmitting order
+     */
+    public function fcSubmitAfterbuyOrder() {
+        $sMessage = '';
+
+        $oConfig = $this->getConfig();
+        $sOxid = $oConfig->getRequestParameter("oxid");
+        $oOrder = oxNew("oxorder");
+
+        if ($oOrder->load($sOxid)) {
+            /* @var fcafterbuy_oxorder $oOrder */
+            if($oOrder->submitOrderToAfterbuy()) {
+                $sMessage = oxRegistry::getLang()->translateString('SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_MESSAGE');
+                oxRegistry::get('oxUtilsView')->addErrorToDisplay(oxNew('oxException', $sMessage));
+            }
+        }
+
+        if(!$sMessage) {
+            $sMessage = oxRegistry::getLang()->translateString('SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_ERROR');
+            oxRegistry::get('oxUtilsView')->addErrorToDisplay(oxNew('oxException', $sMessage));
+        }
+    }
 }
