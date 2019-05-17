@@ -1,5 +1,10 @@
 # Changelog - oxid 2 afterbuy plugin for OXID 5 and OXID6
 
+## 1.3.1
+Released 2019-05-17
+* Fixed order submission
+* Fixed error assigning categories at import
+
 ## 1.3.0
 Released 2019-04-25
 * Added option for transferring orders in utf8
