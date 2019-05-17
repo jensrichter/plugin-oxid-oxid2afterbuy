@@ -148,6 +148,22 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
             (bool) $oConfig->getConfigParam('blFcSendOrdersOnTheFly');
         if (!$blSendOrdersOnTheFly) return $iRet;
 
+        $this->submitOrderToAfterbuy($oUser, $oBasket);
+
+        return $iRet;
+    }
+
+
+    /**
+     * @param null $oUser
+     * @param null $oBasket
+     * @return bool
+     */
+    public function submitOrderToAfterbuy($oUser = null, $oBasket = null) {
+        if($oUser === null) {
+            $oUser = $this->getOrderUser();
+        }
+
         try {
             $oFcAfterbuyOrder = oxNew('fco2aorder');
             $sMessage =
@@ -158,6 +174,8 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
             $oFcAfterbuyOrder->fcWriteLog($sMessage, 3);
             $this->_fcMarkOrderPaid($oBasket);
             $oFcAfterbuyOrder->fcSendOrderToAfterbuy($this, $oUser);
+
+            return true;
         } catch(Exception $e) {
             $sMessage =
                 'ERROR: Could not send order with ordernr:'.
@@ -165,9 +183,8 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
                 '. Error that was catched:'.
                 $e->getMessage();
             $oFcAfterbuyOrder->fcWriteLog($sMessage, 1);
+            return false;
         }
-
-        return $iRet;
     }
 
     /**

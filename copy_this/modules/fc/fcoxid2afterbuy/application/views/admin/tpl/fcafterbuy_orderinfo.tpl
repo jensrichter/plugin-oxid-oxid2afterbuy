@@ -1,5 +1,6 @@
 [{include file="headitem.tpl" title="GENERAL_ADMIN_TITLE"|oxmultilangassign}]
 [{assign var="aAfterbuyValues" value=$oView->fcGetOrderAfterbuyValues()}]
+[{assign var="bAfterbuyManuaOrderSubmissionEnabled" value=$oView->getFcAfterbuyLeadSystem()}]
 
 <script type="text/javascript">
     <!--
@@ -32,10 +33,9 @@
 
 <form name="myedit" id="myedit" action="[{$oViewConf->getSelfLink()}]" method="post">
     [{$oViewConf->getHiddenSid() }]
-    <input type="hidden" name="cl" value="fcafterbuy_payments">
-    <input type="hidden" name="fnc" value="">
-    <input type="hidden" name="oxid" value="[{$oViewConf->getActiveShopId()}]">
-    <input type="hidden" name="editval[oxshops__oxid]" value="[{$oxid}]">
+    <input type="hidden" name="cl" value="fcafterbuy_orderinfo">
+    <input type="hidden" name="fnc" value="fcSubmitAfterbuyOrder">
+    <input type="hidden" name="oxid" value="[{$oxid}]">
 
     <table>
         <tr>
@@ -65,7 +65,35 @@
             </tr>
         [{/if}]
     </table>
+
+    <br/><br/>
+    <table style="border : 1px #A9A9A9; border-style : solid solid solid solid; padding-top: 5px; padding-bottom: 5px; padding-right: 5px; padding-left: 5px; width: 600px;">
+
+        <tr>
+            <td class="edittext" colspan="2">
+                <b>[{oxmultilang ident="SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_HEAD"}]</b>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="edittext" valign="middle">
+                [{oxmultilang ident="SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_INFORMATION"}]
+            </td>
+            <td class="edittext" valign="bottom">
+            </td>
+        </tr>
+        <tr>
+            <td class="edittext" valign="middle">
+                <input type="submit" [{if $bAfterbuyManuaOrderSubmissionEnabled != true}]disabled="true"[{/if}] />
+            </td>
+            <td class="edittext" valign="bottom">
+
+            </td>
+        </tr>
+    </table>
 </form>
+
+
 <br/><br/><br/>
 <div align="right">
     <a href="http://www.fatchip.de" target="_blank">
