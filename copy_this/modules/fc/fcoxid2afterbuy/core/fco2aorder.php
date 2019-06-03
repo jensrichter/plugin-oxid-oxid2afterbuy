@@ -30,12 +30,13 @@ class fco2aorder extends fco2abase {
         $sCustomerInfoParameters = $this->_fcGetCustomerInfoParameters($oOrder, $oUser);
         $sOrderArticleParameters = $this->_fcGetOrderarticleParameters($oOrder);
         $sGenericOrderParameters = $this->_fcGetGenericOrderParameters($oOrder);
+        $sAdditiondalOrderParameters = $this->_fcEncodeParameters($this->_fcGetAdditionalOrderParameters($oOrder));
         $sConfigParameters = $this->_fcGetConfigParameters();
 
         $sRequest = $this->_fcGetAfterbuyConfigArray()['afterbuyShopInterfaceBaseUrl'];
 
         $sRequest .= $sActionParameter . $sDeliveryAddressFlagParameter . $sAfterbuyCredentialParameters;
-        $sRequest .= $sCustomerInfoParameters . $sOrderArticleParameters . $sGenericOrderParameters . $sConfigParameters;
+        $sRequest .= $sCustomerInfoParameters . $sOrderArticleParameters . $sGenericOrderParameters . $sAdditiondalOrderParameters . $sConfigParameters;
 
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
@@ -254,13 +255,45 @@ class fco2aorder extends fco2abase {
         $sOrderParameters .= "&VID=" . $sOrderId;
         $sOrderParameters .= "&SoldCurrency=" . $sOrderCurrency;
         $sOrderParameters .= $this->_fcGetPayState($oOrder);
-        $sOrderParameters .= "&VMemo=";
+
         $sOrderParameters .= "&CheckVID=1";
         $sOrderParameters .= "&Bestandart=shop";
         $sOrderParameters .= "&Versandgruppe=shop";
         $sOrderParameters .= "&Artikelerkennung=2";
 
         return $sOrderParameters;
+    }
+
+    /**
+     * Handles non-obligatory parameters
+     *
+     * @param $oOrder
+     * @return string
+     */
+    protected function _fcGetAdditionalOrderParameters($oOrder) {
+        $sAdditionalOrderParameters = '';
+        $sAdditionalOrderParameters .= $this->_fcProvideOxidOrderNrInAdditionalField($oOrder->oxorder__oxordernr->value);
+        return $sAdditionalOrderParameters;
+    }
+
+    /**
+     * Add oxid ordernumber to a specific field based on config
+     *
+     * @param $sOrderParameters
+     * @return
+     */
+    protected function _fcProvideOxidOrderNrInAdditionalField($sOrderNr) {
+        $oConfig = $this->getConfig();
+        $sTargetField = $oConfig->getConfigParam('sFcSendOrderNrInAdditionalField');
+
+        switch($sTargetField) {
+            case '1': $result = "&VMemo=" . 'OXID Order No: ' . $sOrderNr;
+                break;
+            default:
+                $result = '';
+        }
+
+        return $result;
     }
 
     /**
