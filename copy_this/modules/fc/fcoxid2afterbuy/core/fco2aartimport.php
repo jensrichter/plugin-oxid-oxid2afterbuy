@@ -164,7 +164,6 @@ class fco2aartimport extends fco2abase
      * Processing get shop products api response
      *
      * @param object $oXmlResponse
-     * @param object $oAfterbuyApi
      * @param string $sType
      * @return int
      */
@@ -175,6 +174,9 @@ class fco2aartimport extends fco2abase
         $aProducts = (array) $oXmlResponse->Result->Products;
 
         foreach ($aProducts['Product'] as $oXmlProduct) {
+            if($this->_fcCheckIfArticleNumberIsValid($oXmlProduct) == false) {
+                continue;
+            }
             $this->_fcAddProductToOxid($oXmlProduct, $sType);
         }
 
@@ -306,7 +308,8 @@ class fco2aartimport extends fco2abase
     {
         $sProductId = (string) $oXmlProduct->ProductID;
         $oArticle->setId($sProductId);
-        $sArtNum = $oXmlProduct->EAN ?: $oXmlProduct->Anr;
+
+        $sArtNum = $this->_fcGetArticleNumber($oXmlProduct);
         $oArticle->oxarticles__fcafterbuyid = new oxField($sProductId);
         $oArticle->oxarticles__oxartnum = new oxField($sArtNum);
         if ($sType == 'variationsets') {
@@ -315,6 +318,55 @@ class fco2aartimport extends fco2abase
             $sParentId = $this->_fcFetchParentId($sProductId);
             $oArticle->oxarticles__oxparentid = new oxField($sParentId);
         }
+    }
+
+    /**
+     * declare articles as invalid if article number does not match the configurated conditions
+     *
+     * @param $oXmlProduct
+     * @return bool
+     */
+    protected function _fcCheckIfArticleNumberIsValid($oXmlProduct) {
+        $blDiscard = $this->getConfig()->getConfigParam('blFcAfterbuyIgnoreArticlesWithoutNr');
+
+        if($blDiscard != true) {
+            return true;
+        }
+
+        $sArtNum = $this->_fcGetArticleNumber($oXmlProduct);
+
+        if(empty($sArtNum) || $sArtNum == 0) {
+            $this->fcWriteLog(
+                "INFO: Product has been discarded because of missing article number \n".
+                print_r($oXmlProduct ,true), 2);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Assign article number based on given config
+     *
+     * @param $oXmlProduct
+     * @return string
+     */
+    protected function _fcGetArticleNumber($oXmlProduct) {
+        $sSource = $this->getConfig()->getConfigParam('sFcAfterbuyImportArticleNumber');
+
+        switch($sSource) {
+            case '0': $sArtNum = $oXmlProduct->EAN ?: $oXmlProduct->Anr;
+                break;
+            case '1': $sArtNum = $oXmlProduct->EAN;
+                break;
+            case '2': $sArtNum = $oXmlProduct->ProductID;
+                break;
+            case '3': $sArtNum = $oXmlProduct->Anr;
+                break;
+            default: $sArtNum = $oXmlProduct->EAN ?: $oXmlProduct->Anr;
+        }
+
+        return $sArtNum;
     }
 
     /**
