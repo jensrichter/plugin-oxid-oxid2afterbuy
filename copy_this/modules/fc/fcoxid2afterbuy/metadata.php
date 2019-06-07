@@ -142,6 +142,13 @@ $aModule = array(
         ),
         array(
             'group' => 'fcafterbuy_order',
+            'name' => 'sFcSendOrderNrInAdditionalField',
+            'type' => 'select',
+            'value' => '0',
+            'constrains' => '0|1'
+        ),
+        array(
+            'group' => 'fcafterbuy_order',
             'name' => 'aFcAfterbuyDebitPayments',
             'type' => 'arr',
             'value' => array(
