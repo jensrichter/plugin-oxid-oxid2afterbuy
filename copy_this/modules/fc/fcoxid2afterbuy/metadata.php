@@ -132,6 +132,20 @@ $aModule = array(
             'type' => 'bool',
             'value' => false
         ),
+
+        array(
+            'group' => 'fcafterbuy_import',
+            'name' => 'sFcAfterbuyImportArticleNumber',
+            'type' => 'select',
+            'value' => '0',
+            'constrains' => '0|1|2|3'
+        ),
+        array(
+            'group' => 'fcafterbuy_import',
+            'name' => 'blFcAfterbuyIgnoreArticlesWithoutNr',
+            'type' => 'bool',
+            'value' => false
+        ),
         // array('group' => 'fcafterbuy_export', 'name' => 'sFcAfterbuyArticleIdent', 'type' => 'select', 'value' => '3', 'constrains' => '0|1|2|3' ),
 
         array(
