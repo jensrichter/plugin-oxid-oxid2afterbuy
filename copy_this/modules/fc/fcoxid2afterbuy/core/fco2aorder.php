@@ -21,7 +21,6 @@ class fco2aorder extends fco2abase {
             return;
         }
 
-        $oConfig = $this->getConfig();
         // build request url
         $sActionParameter = $this->_fcGetInterfaceAction();
         $sDeliveryFlagParameter = ($oOrder->oxorder__oxdelstreet->value != "") ? 1 : 0;
@@ -30,7 +29,7 @@ class fco2aorder extends fco2abase {
         $sCustomerInfoParameters = $this->_fcGetCustomerInfoParameters($oOrder, $oUser);
         $sOrderArticleParameters = $this->_fcGetOrderarticleParameters($oOrder);
         $sGenericOrderParameters = $this->_fcGetGenericOrderParameters($oOrder);
-        $sAdditiondalOrderParameters = $this->_fcEncodeParameters($this->_fcGetAdditionalOrderParameters($oOrder));
+        $sAdditiondalOrderParameters = $this->_fcGetAdditionalOrderParameters($oOrder);
         $sConfigParameters = $this->_fcGetConfigParameters();
 
         $sRequest = $this->_fcGetAfterbuyConfigArray()['afterbuyShopInterfaceBaseUrl'];
@@ -271,8 +270,12 @@ class fco2aorder extends fco2abase {
      * @return string
      */
     protected function _fcGetAdditionalOrderParameters($oOrder) {
+        $sOrderNr = $oOrder->oxorder__oxordernr->value;
         $sAdditionalOrderParameters = '';
-        $sAdditionalOrderParameters .= $this->_fcProvideOxidOrderNrInAdditionalField($oOrder->oxorder__oxordernr->value);
+
+        $sAdditionalOrderParameters .=
+            $this->_fcProvideOxidOrderNrInAdditionalField($sOrderNr);
+
         return $sAdditionalOrderParameters;
     }
 
@@ -287,11 +290,14 @@ class fco2aorder extends fco2abase {
         $sTargetField = $oConfig->getConfigParam('sFcSendOrderNrInAdditionalField');
 
         switch($sTargetField) {
-            case '1': $result = "&VMemo=" . 'OXID Order No: ' . $sOrderNr;
+            case '1':
+                $result = "&VMemo=" .
+                    $this->_fcEncodeParameters('OXID Order No: ' . $sOrderNr);
                 break;
             default:
                 $result = '';
         }
+
 
         return $result;
     }
