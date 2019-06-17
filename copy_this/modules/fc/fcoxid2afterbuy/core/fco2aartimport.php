@@ -124,10 +124,13 @@ class fco2aartimport extends fco2abase
         // assigned products
         $sCatalogId = (string) $oCatalog->CatalogID;
 
-        $blHasAssignedProducts = isset($oCatalog->CatalogProducts);
+        $blHasAssignedProducts = (
+            isset($oCatalog->CatalogProducts) &&
+            $aCatalogProducts = (array) $oCatalog->CatalogProducts &&
+            isset($aCatalogProducts['ProductID'])
+        );
 
         if ($blHasAssignedProducts) {
-            $aCatalogProducts = (array) $oCatalog->CatalogProducts;
             foreach ($aCatalogProducts['ProductID'] as $sArticleId) {
                 $this->_fcAssignCategory($sCatalogId, $sArticleId);
             }
