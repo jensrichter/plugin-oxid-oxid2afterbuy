@@ -116,4 +116,11 @@ $aLang = array(
     'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_MESSAGE'        => 'Order submitted',
     'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_ERROR'          => 'Error submitting order',
 
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_LOG'             => 'OXID-Logfile',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG'          => 'API-Log',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_TRUNCATE'        => 'Reset',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DOWNLOAD'        => 'Download',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG_TRUNCATE' => 'Do you really want to truncate the API logfile?',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG_TRUNCATED'=> 'API-Log successfully truncated'
+
 );
