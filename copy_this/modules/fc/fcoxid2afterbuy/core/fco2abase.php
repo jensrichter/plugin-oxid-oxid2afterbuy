@@ -123,7 +123,7 @@ class fco2abase extends oxBase {
         if ($this->_aAfterbuyConfig === null) {
             $oConfig = $this->getConfig();
             $aConfig = array(
-                'afterbuyShopInterfaceBaseUrl' => ($oConfig->getConfigParam('blFcAfterbuyExportUTF8Orders') === true) ? $this->sAfterbuyShopInterfaceUTF8Url : $this->sAfterbuyShopInterfaceUrl,
+                'afterbuyShopInterfaceBaseUrl' => $this->_fcGetShopInterfaceBaseUrl(),
                 'afterbuyAbiUrl' =>
                     $this->sAfterbuyInterfaceUrl,
                 'afterbuyPartnerId' =>
@@ -144,6 +144,21 @@ class fco2abase extends oxBase {
         }
 
         return $this->_aAfterbuyConfig;
+    }
+
+
+    /**
+     * returns shopInterfaceBaseUrl depending on configuration
+     *
+     * @param $oConfig
+     * @return string
+     */
+    protected function _fcGetShopInterfaceBaseUrl($oConfig) {
+        if($oConfig->getConfigParam('blFcAfterbuyExportUTF8Orders') === true) {
+            return $this->sAfterbuyShopInterfaceUTF8Url;
+        }
+
+        return $this->sAfterbuyShopInterfaceUrl;
     }
 
     /**
