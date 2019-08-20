@@ -53,15 +53,15 @@ class fco2aorderimport extends fco2abase {
      */
     protected function _fcParseApiResponse($oXmlResponse, $oAfterbuyApi) {
         if (!isset($oXmlResponse->Result->Orders->Order)) {
-            $this->fcWriteLog('ERROR: No valid Response from API while trying to fetch new orders. Content of Response is'.print_r($oXmlResponse,true),1);
+            $this->oApiLogger->fcWriteLog('ERROR: No valid Response from API while trying to fetch new orders. Content of Response is'.print_r($oXmlResponse,true),1);
             return;
         }
 
         foreach ($oXmlResponse->Result->Orders->Order as $oXmlOrder) {
-            $this->fcWriteLog("DEBUG: oXmlOrder:\n".print_r($oXmlOrder,true), 4);
+            $this->oApiLogger->fcWriteLog("DEBUG: oXmlOrder:\n".print_r($oXmlOrder,true), 4);
             $oAfterbuyOrder = $this->_fcGetAfterbuyOrder();
             $oAfterbuyOrder->createOrderByApiResponse($oXmlOrder);
-            $this->fcWriteLog("DEBUG: Created result in oAfterbuyOrder:\n".print_r($oAfterbuyOrder,true), 4);
+            $this->oApiLogger->fcWriteLog("DEBUG: Created result in oAfterbuyOrder:\n".print_r($oAfterbuyOrder,true), 4);
             $this->_fcCreateOxidOrder($oAfterbuyOrder);
             $this->_fcNotifyExported($oAfterbuyOrder, $oAfterbuyApi);
         }
@@ -284,7 +284,7 @@ class fco2aorderimport extends fco2abase {
         $oSumPrice->setVat($dDefaultVat);
         $oSumPrice->setBruttoPriceMode();
 
-        $this->fcWriteLog('Importing orderarticles of order with id '.$sOrderId.': '.print_r($aSoldItems,true), 4);
+        $this->oDefaultLogger->fcWriteLog('Importing orderarticles of order with id '.$sOrderId.': '.print_r($aSoldItems,true), 4);
 
         foreach ($aSoldItems as $oSoldItem) {
             $oOrderArticle = clone $oOrderArticleTemplate;
@@ -581,7 +581,7 @@ class fco2aorderimport extends fco2abase {
      * @return array
      */
     protected function _fcSetOxidUserByAfterbuyOrder($oAfterbuyOrder) {
-        $this->fcWriteLog("Receiving afterbuy orderdata from response:\n".print_r($oAfterbuyOrder,true),4);
+        $this->oApiLogger->fcWriteLog("Receiving afterbuy orderdata from response:\n".print_r($oAfterbuyOrder,true),4);
         $oBillingAddress = $oAfterbuyOrder->BuyerInfoBilling;
         $oShippingAddress = $oAfterbuyOrder->BuyerInfoShipping;
         $oUser = oxNew('oxuser');
@@ -597,7 +597,7 @@ class fco2aorderimport extends fco2abase {
         $oAddress = $this->_fcSetUserAddressData($oShippingAddress, $oUser);
 
         $aReturn = array('oxuser'=>$oUser, 'oxaddress'=>$oAddress);
-        $this->fcWriteLog("Returning userdata:\n".print_r($aReturn,true),4);
+        $this->oDefaultLogger->fcWriteLog("Returning userdata:\n".print_r($aReturn,true),4);
         return $aReturn;
     }
 

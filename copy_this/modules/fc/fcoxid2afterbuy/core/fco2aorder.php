@@ -17,7 +17,7 @@ class fco2aorder extends fco2abase {
     public function fcSendOrderToAfterbuy($oOrder, $oUser) {
         $blAllowed = $this->fcJobExecutionAllowed('orderexport');
         if (!$blAllowed) {
-            $this->fcWriteLog("ERROR: Execution of orderexport is not allowed by configuration");
+            $this->oDefaultLogger->fcWriteLog("ERROR: Execution of orderexport is not allowed by configuration");
             return;
         }
 
@@ -40,8 +40,8 @@ class fco2aorder extends fco2abase {
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
 
         $sOutput = $oAfterbuyApi->requestShopInterfaceAPI($sRequest);
-        $this->fcWriteLog("DEBUG: Requesting shopinterface for sending order:\n".$sRequest,4);
-        $this->fcWriteLog("DEBUG: Response:\n".$sOutput,4);
+        $this->oApiLogger->fcWriteLog("DEBUG: Requesting shopinterface for sending order:\n".$sRequest,4);
+        $this->oApiLogger->fcWriteLog("DEBUG: Response:\n".$sOutput,4);
         $this->_fcHandleShopInterfaceAnswer($sOutput, $oOrder);
     }
 
@@ -514,7 +514,7 @@ class fco2aorder extends fco2abase {
             }
         } catch (oxException $ex) {
             // this will mean either that xml could not be loaded or xml could not be parsed
-            $this->fcWriteLog($ex->getMessage(), 1);
+            $this->oApiLogger->fcWriteLog($ex->getMessage(), 1);
         }
         
         return $mReturn;

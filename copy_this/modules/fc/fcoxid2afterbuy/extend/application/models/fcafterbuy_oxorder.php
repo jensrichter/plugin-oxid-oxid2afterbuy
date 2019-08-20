@@ -171,7 +171,7 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
                 $this->oxorder__oxordernr->value.
                 ' to Afterbuy...';
 
-            $oFcAfterbuyOrder->fcWriteLog($sMessage, 3);
+            $oFcAfterbuyOrder->oApiLogger->fcWriteLog($sMessage, 3);
             $this->_fcMarkOrderPaid($oBasket);
             $oFcAfterbuyOrder->fcSendOrderToAfterbuy($this, $oUser);
 
@@ -182,7 +182,7 @@ class fcafterbuy_oxorder extends fcafterbuy_oxorder_parent {
                 $this->oxorder__oxordernr->value.
                 '. Error that was catched:'.
                 $e->getMessage();
-            $oFcAfterbuyOrder->fcWriteLog($sMessage, 1);
+            $oFcAfterbuyOrder->oApiLogger->fcWriteLog($sMessage, 1);
             return false;
         }
     }

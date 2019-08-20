@@ -316,7 +316,7 @@ class fco2aartexport extends fco2abase {
                 $sMessage =
                     "WARNING: ".
                     (string)$oXml->Result->WarningList->Warning->WarningLongDescription;
-                $this->fcWriteLog($sMessage,2);
+                $this->oApiLogger->fcWriteLog($sMessage,2);
                 break;
         }
     }
@@ -350,12 +350,12 @@ class fco2aartexport extends fco2abase {
     {
         $oArticle = oxNew('oxarticle');
         if (!$oArticle->load($sArticleOxid))  {
-            $this->fcWriteLog("ERROR: Could not load article object with ID:".$sArticleOxid, 1);
+            $this->oDefaultLogger->fcWriteLog("ERROR: Could not load article object with ID:".$sArticleOxid, 1);
             return false;
         }
 
-        $this->fcWriteLog("DEBUG: Loaded OXID article object with ID:".$sArticleOxid, 4);
-        $this->fcWriteLog(
+        $this->oDefaultLogger->fcWriteLog("DEBUG: Loaded OXID article object with ID:".$sArticleOxid, 4);
+        $this->oDefaultLogger->fcWriteLog(
             "DEBUG: Existing AfterbuyID is:".
             $oArticle->oxarticles__fcafterbuyid->value,
             4
@@ -475,12 +475,12 @@ class fco2aartexport extends fco2abase {
     protected function _fcAddAttributeValues($oAfterbuyArticle, $oArticle)
     {
         $aAttributes = $oArticle->getAttributes();
-        $this->fcWriteLog(
+        $this->oDefaultLogger->fcWriteLog(
             "DEBUG: Loaded Attributes of article object with ID:".
             $oArticle->getId(),
             4
         );
-        $this->fcWriteLog(
+        $this->oDefaultLogger->fcWriteLog(
             "DEBUG: Fetched attributes:".
             print_r($aAttributes,true),
             4

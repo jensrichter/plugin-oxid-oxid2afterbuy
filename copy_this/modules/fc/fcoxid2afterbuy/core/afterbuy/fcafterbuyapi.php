@@ -22,12 +22,6 @@ class fcafterbuyapi {
     protected $logLevel;
 
     /**
-     * Filename for logfile
-     * @var string
-     */
-    protected $afterbuyLogFilepath = null;
-
-    /**
      * Ident for last requested order
      * @var string
      */
@@ -77,6 +71,8 @@ class fcafterbuyapi {
      */
     protected $afterbuyUserPassword = "";
 
+    protected $oApiLogger;
+
 
     /**
      * fcafterbuyapi constructor.
@@ -101,36 +97,8 @@ class fcafterbuyapi {
         } catch (Exception $e) {
             throw $e;
         }
-    }
 
-    /**
-     * Central api logging method. Timestamp will be added automatically.
-     * Logs only if loglevel matches
-     *
-     * @param string $sMessage
-     * @param int $iLogLevel
-     * @return void
-     * @access protected
-     */
-    public function writeLog($sMessage, $iLogLevel = 1) {
-        // it is mandatory that a logfilepath has to be set
-        if ($this->afterbuyLogFilepath === null) return;
-
-        $sTime = date("Y-m-d H:i:s");
-        $sFullMessage = "[" . $sTime . "] " . $sMessage . "\n";
-        if ($iLogLevel <= $this->logLevel) {
-            file_put_contents($this->afterbuyLogFilepath, $sFullMessage, FILE_APPEND);
-        }
-    }
-
-    /**
-     * Sets the path for api logs
-     *
-     * @param $sPath
-     * @return void
-     */
-    public function setLogFilePath($sPath) {
-        $this->afterbuyLogFilepath = $sPath;
+        $this->oApiLogger = oxNew('fco2alogger', 'fco2a_api.log');
     }
 
     /**
@@ -161,7 +129,7 @@ class fcafterbuyapi {
      * @access protected
      */
     public function requestAPI($sXmlData) {
-        $this->writeLog("DEBUG: Requesting Afterbuy API:\n".$sXmlData."\n",4);
+        $this->oApiLogger->fcWriteLog("DEBUG: Requesting Afterbuy API:\n".$sXmlData."\n",4);
         $ch = curl_init($this->afterbuyAbiUrl);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -171,7 +139,7 @@ class fcafterbuyapi {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $sOutput = curl_exec($ch);
         curl_close($ch);
-        $this->writeLog("DEBUG: RESPONSE of Afterbuy API:\n".$sOutput."\n",4);
+        $this->oApiLogger->fcWriteLog("DEBUG: RESPONSE of Afterbuy API:\n".$sOutput."\n",4);
         return $sOutput;
     }
 
@@ -182,7 +150,7 @@ class fcafterbuyapi {
      * @return string
      */
     public function updateArticleToAfterbuy($oArt) {
-        $this->writeLog("MESSAGE: Transfer article to afterbuy:".print_r($oArt,true));
+        $this->oApiLogger->fcWriteLog("MESSAGE: Transfer article to afterbuy:".print_r($oArt,true));
         $sXmlData = $this->getUpdateArticleXml($oArt);
         $sOutput = $this->requestAPI($sXmlData);
 
