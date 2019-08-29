@@ -117,9 +117,12 @@ $aLang = array(
     'SHOP_MODULE_AFTERBUY_MANUAL_SUBMISSION_ERROR'          => 'Fehler beim Übermitteln der Bestellung',
 
     'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_LOG'             => 'OXID-Log',
-    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG'          => 'API-Log',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG'          => 'Afterbuy API-Log',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DEFAULTLOG'      => 'Modul-Log',
     'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_TRUNCATE'        => 'Zurücksetzen',
     'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DOWNLOAD'        => 'Download',
     'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG_TRUNCATE' => 'Möchten Sie wirklich das API-Log zurücksetzen?',
-    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG_TRUNCATED'=> 'API-Log erfolgreich zurückgesetzt'
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DEFAULTLOG_TRUNCATE' => 'Möchten Sie wirklich das Modul-Log zurücksetzen?',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG_TRUNCATED'=> 'API-Log erfolgreich zurückgesetzt',
+    'SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DEFAULTLOG_TRUNCATED' => 'Modul-Log erfolgreich zurückgesetzt'
 );

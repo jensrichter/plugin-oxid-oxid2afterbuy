@@ -77,6 +77,9 @@ function performAction(msg, action) {
         <td class="edittext" width="50%">
             <b>[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG"}]</b>
         </td>
+        <td class="edittext" width="50%">
+            <b>[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DEFAULTLOG"}]</b>
+        </td>
     </tr>
 
     <tr>
@@ -90,6 +93,13 @@ function performAction(msg, action) {
 
             <input type="button"  value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_TRUNCATE"}]"
                    onClick="Javascript:performAction('[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG_TRUNCATE"}]', 'fcTruncateApiLog')"/>
+        </td>
+        <td class="edittext" valign="bottom" width="50%">
+            <input type="button"  value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DOWNLOAD"}]"
+                   onClick="Javascript:performAction('', 'fcDownloadDefaultLog')"/>
+
+            <input type="button"  value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_TRUNCATE"}]"
+                   onClick="Javascript:performAction('[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DEFAULTLOG_TRUNCATE"}]', 'fcTruncateDefaultLog')"/>
         </td>
     </tr>
 </table>

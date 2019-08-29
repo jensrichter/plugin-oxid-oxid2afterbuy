@@ -39,6 +39,18 @@ class fcafterbuy_actions extends oxAdminDetails
     }
 
     /**
+     * Download the Afterbuy module log
+     *
+     * @param void
+     * @return void
+     */
+    public function fcDownloadDefaultLog() {
+        $sLogFile = getShopBasePath().'/log/fco2a_default.log';
+
+        $this->fcDownloadFile($sLogFile);
+    }
+
+    /**
      * Download the Afterbuy API log
      *
      * @param void
@@ -62,10 +74,32 @@ class fcafterbuy_actions extends oxAdminDetails
 
         $sLogFile = getShopBasePath().'/log/fco2a_api.log';
 
-        file_put_contents($sLogFile, '');
+        $this->fcTruncateLogFile($sLogFile);
 
         $sMessage = $oLang->translateString('SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG_TRUNCATED');
         $oUtilsView->addErrorToDisplay(oxNew('oxException', $sMessage));
+    }
+
+    /**
+     * Download the Afterbuy API log
+     *
+     * @param void
+     * @return void
+     */
+    public function fcTruncateDefaultLog() {
+        $oLang = oxRegistry::getLang();
+        $oUtilsView = oxRegistry::get('oxUtilsView');
+
+        $sLogFile = getShopBasePath().'/log/fco2a_default.log';
+
+        $this->fcTruncateLogFile($sLogFile);
+
+        $sMessage = $oLang->translateString('SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DEFAULTLOG_TRUNCATED');
+        $oUtilsView->addErrorToDisplay(oxNew('oxException', $sMessage));
+    }
+
+    protected function fcTruncateLogFile($file) {
+        file_put_contents($file, '');
     }
 
     /**
