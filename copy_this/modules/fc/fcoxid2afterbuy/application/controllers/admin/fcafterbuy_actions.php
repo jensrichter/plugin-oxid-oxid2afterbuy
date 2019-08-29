@@ -77,6 +77,12 @@ class fcafterbuy_actions extends oxAdminDetails
         header('Content-Type: application/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . basename($file) . '";');
 
-        file_put_contents('php://output', file_get_contents($file), FILE_APPEND);
+        if(file_exists($file)) {
+            file_put_contents('php://output', file_get_contents($file), FILE_APPEND);
+        } else {
+            file_put_contents('php://output', '', FILE_APPEND);
+        }
+
+        exit();
     }
 }
