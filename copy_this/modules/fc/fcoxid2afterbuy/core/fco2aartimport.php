@@ -201,7 +201,7 @@ class fco2aartimport extends fco2abase
             $oArticle->load($sOxid);
         }
 
-        $this->fcWriteLog(
+        $this->oApiLogger->fcWriteLog(
             "DEBUG: Trying to add/update XML Product: \n".
             print_r($oXmlProduct ,true), 4);
 
@@ -339,7 +339,7 @@ class fco2aartimport extends fco2abase
         $sArtNum = $this->_fcGetArticleNumber($oXmlProduct);
 
         if(empty($sArtNum) || $sArtNum == 0) {
-            $this->fcWriteLog(
+            $this->oDefaultLogger->fcWriteLog(
                 "INFO: Product has been discarded because of missing article number \n".
                 print_r($oXmlProduct ,true), 2);
             return false;
