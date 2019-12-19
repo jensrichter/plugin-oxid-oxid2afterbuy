@@ -33,11 +33,24 @@ class fcafterbuy_actions extends oxAdminDetails
      * @return void
      */
     public function fcDownloadOxidLog() {
-        $sLogFile = getShopBasePath().'/log/oxideshop.log';
+        $sLogFileName = $this->fcGetOxidLogFileName();
+        $sLogFile = getShopBasePath().'/log/'.$sLogFileName;
 
         $this->fcDownloadFile($sLogFile);
     }
 
+    /**
+     * Returns matching logfilename
+     *
+     * @return string
+     */
+    public function fcGetOxidLogFileName() {
+        $oConfig = $this->getConfig();
+        $sVersion = $oConfig->getVersion();
+        $blIsOxid5 = version_compare($sVersion, '6.0.0', '<');
+
+        return ($blIsOxid5) ? 'EXCEPTION_LOG.txt' : 'oxideshop.log';
+    }
     /**
      * Download the Afterbuy module log
      *

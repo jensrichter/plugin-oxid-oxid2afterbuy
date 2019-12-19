@@ -72,7 +72,7 @@ function performAction(msg, action) {
 <table style="border : 1px #A9A9A9; border-style : solid solid solid solid; padding-top: 5px; padding-bottom: 5px; padding-right: 5px; padding-left: 5px; margin-top: 20px; width: 600px;">
     <tr>
         <td class="edittext" width="50%">
-            <b>[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_LOG"}]</b>
+            <b>[{$oView->fcGetOxidLogFileName()}]</b>
         </td>
         <td class="edittext" width="50%">
             <b>[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG"}]</b>

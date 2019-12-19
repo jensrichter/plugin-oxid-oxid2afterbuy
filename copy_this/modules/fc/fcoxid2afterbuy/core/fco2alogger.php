@@ -1,11 +1,9 @@
 <?php
 
-use OxidEsales\EshopCommunity\Core\Registry;
-
 /**
- * Class fco2Alogger
+ * Class fco2alogger
  */
-class fco2Alogger {
+class fco2alogger extends oxBase {
 
     /**
      * @var string
@@ -28,8 +26,9 @@ class fco2Alogger {
      */
     public function __construct($sLogFile)
     {
+        $oConfig = $this->getConfig();
         $this->sLogPath = getShopBasePath() . '/log/';
-        $this->iLogLevel = (int)Registry::getConfig()->getConfigParam('iFcAfterbuyLogLevel');
+        $this->iLogLevel = (int)$oConfig->getConfigParam('iFcAfterbuyLogLevel');
         $this->sLogFile = $sLogFile;
     }
 

@@ -36,7 +36,17 @@ class fco2abase extends oxBase {
      */
     protected $_oAfterbuyApi = null;
 
+    /**
+     * Default logger object
+     * @var object
+     */
     protected $oDefaultLogger;
+
+    /**
+     * Default logger object
+     * @var object
+     */
+    protected $oApiLogger;
 
     /**
      * Afterbuy settings
@@ -193,7 +203,6 @@ class fco2abase extends oxBase {
         if ($this->_oAfterbuyApi === null) {
             $aConfig = $this->_fcGetAfterbuyConfigArray();
             $oAfterbuyApi = oxNew("fcafterbuyapi",$aConfig);
-            $oAfterbuyApi->setLogFilePath(getShopBasePath()."/log/fco2a_api.log");
             $this->_oAfterbuyApi = $oAfterbuyApi;
         }
 

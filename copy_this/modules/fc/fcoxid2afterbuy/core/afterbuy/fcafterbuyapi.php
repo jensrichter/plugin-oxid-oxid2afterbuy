@@ -16,12 +16,6 @@ class fcafterbuyapi {
     public static $ARTICLE_TYPE_SINGLES = 'singles';
 
     /**
-     * Error log level 1=Only errors, 2= Errors and warnings, 3=Output all
-     * @var int
-     */
-    protected $logLevel;
-
-    /**
      * Ident for last requested order
      * @var string
      */
