@@ -48,7 +48,7 @@ class fco2astatusimport extends fco2abase {
             '?:'.
             (string) $blFlag;
 
-        $this->fcWriteLog($sMessage, 3);
+        $this->oDefaultLogger->fcWriteLog($sMessage, 3);
 
     }
 
@@ -79,15 +79,15 @@ class fco2astatusimport extends fco2abase {
     protected function _fcParseApiResponse($oXmlResponse, &$oOrder)
     {
         if (!isset($oXmlResponse->Result->Orders->Order)) {
-            $this->fcWriteLog('ERROR: No valid Response from API while trying to fetch ab orderstatus. Content of Response is'.print_r($oXmlResponse,true),1);
+            $this->oApiLogger->fcWriteLog('ERROR: No valid Response from API while trying to fetch ab orderstatus. Content of Response is'.print_r($oXmlResponse,true),1);
             return;
         }
 
         foreach ($oXmlResponse->Result->Orders->Order as $oXmlOrder) {
-            $this->fcWriteLog("DEBUG: oXmlOrder:\n".print_r($oXmlOrder,true), 4);
+            $this->oApiLogger->fcWriteLog("DEBUG: oXmlOrder:\n".print_r($oXmlOrder,true), 4);
             $oAfterbuyOrder = $this->_fcGetAfterbuyOrder();
             $oAfterbuyOrder->createOrderByApiResponse($oXmlOrder);
-            $this->fcWriteLog("DEBUG: Created result in oAfterbuyOrder:\n".print_r($oAfterbuyOrder,true), 4);
+            $this->oApiLogger->fcWriteLog("DEBUG: Created result in oAfterbuyOrder:\n".print_r($oAfterbuyOrder,true), 4);
             $this->_fcUpdateOxidOrderStatus($oAfterbuyOrder, $oOrder);
         }
     }
@@ -128,7 +128,7 @@ class fco2astatusimport extends fco2abase {
         }
 
         if ($blValuesUpdated) {
-            $this->fcWriteLog('DEBUG: UpdateOxidOrderStatus:'.print_r($oOrder, true), 4);
+            $this->oDefaultLogger->fcWriteLog('DEBUG: UpdateOxidOrderStatus:'.print_r($oOrder, true), 4);
             $oOrder->save();
         }
     }

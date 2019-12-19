@@ -66,6 +66,7 @@ $aModule = array(
         'fco2astatusexport'                 => 'fc/fcoxid2afterbuy/core/fco2astatusexport.php',
         'fco2astatusimport'                 => 'fc/fcoxid2afterbuy/core/fco2astatusimport.php',
         'fco2aartimport'                    => 'fc/fcoxid2afterbuy/core/fco2aartimport.php',
+        'fco2alogger'                       => 'fc/fcoxid2afterbuy/core/fco2alogger.php',
         // controllers->admin
         'fcafterbuy_article_admin'          => 'fc/fcoxid2afterbuy/application/controllers/admin/fcafterbuy_article_admin.php',
         'fcafterbuy_admin'                  => 'fc/fcoxid2afterbuy/application/controllers/admin/fcafterbuy_admin.php',

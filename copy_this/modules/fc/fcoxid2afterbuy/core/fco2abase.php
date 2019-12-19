@@ -24,18 +24,6 @@ class fco2abase extends oxBase {
     protected $sAfterbuyInterfaceUrl = "https://api.afterbuy.de/afterbuy/ABInterface.aspx";
 
     /**
-     * Current loglevel
-     * @var int
-     */
-    protected $_iFcLogLevel = null;
-
-    /**
-     * Logfile for standard output
-     * @var string
-     */
-    protected $_sLogFile = 'fco2a_default.log';
-
-    /**
      * Ident for oxid counter
      * @var string
      */
@@ -47,6 +35,18 @@ class fco2abase extends oxBase {
      * @var object
      */
     protected $_oAfterbuyApi = null;
+
+    /**
+     * Default logger object
+     * @var object
+     */
+    protected $oDefaultLogger;
+
+    /**
+     * Default logger object
+     * @var object
+     */
+    protected $oApiLogger;
 
     /**
      * Afterbuy settings
@@ -74,26 +74,8 @@ class fco2abase extends oxBase {
      */
     public function __construct() {
         parent::__construct();
-        $oConfig = $this->getConfig();
-        $this->_iFcLogLevel = (int)$oConfig->getConfigParam('iFcAfterbuyLogLevel');
-    }
-
-    /**
-     * Central logging method. Timestamp will be added automatically.
-     * Logs only if loglevel matches
-     *
-     * @param string $sMessage
-     * @param int $iLogLevel
-     * @return void
-     * @access protected
-     */
-    public function fcWriteLog($sMessage, $iLogLevel = 1) {
-        $sTime = date("Y-m-d H:i:s");
-        $sFullMessage = "[" . $sTime . "] " . $sMessage . "\n";
-        if ($iLogLevel <= $this->_iFcLogLevel) {
-            $oUtils = oxRegistry::getUtils();
-            $oUtils->writeToLog($sFullMessage, $this->_sLogFile);
-        }
+        $this->oDefaultLogger = oxNew('fco2alogger', 'fco2a_default.log');
+        $this->oApiLogger = oxNew('fco2alogger', 'fco2a_api.log');
     }
 
     /**
@@ -221,7 +203,6 @@ class fco2abase extends oxBase {
         if ($this->_oAfterbuyApi === null) {
             $aConfig = $this->_fcGetAfterbuyConfigArray();
             $oAfterbuyApi = oxNew("fcafterbuyapi",$aConfig);
-            $oAfterbuyApi->setLogFilePath(getShopBasePath()."/log/fco2a_api.log");
             $this->_oAfterbuyApi = $oAfterbuyApi;
         }
 
@@ -260,17 +241,13 @@ class fco2abase extends oxBase {
     protected function _fcGetAfterbuyArticle() {
         $oAfterbuyArticle = oxNew("fcafterbuyart");
 
-        $this->fcWriteLog(
+        $this->oDefaultLogger->fcWriteLog(
             "DEBUG: Created Afterbuy Object:".
             print_r($oAfterbuyArticle,true),
             4
         );
 
         return $oAfterbuyArticle;
-    }
-
-    protected function _fcGetAfterbuyCatalog() {
-
     }
 
     /**

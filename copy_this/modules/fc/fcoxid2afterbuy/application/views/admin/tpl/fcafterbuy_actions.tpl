@@ -12,11 +12,14 @@ function _groupExp(el) {
 /**
  * Asks if sure to reset before performing operation
  */
-function confirmReset() {
-    var question = "[{oxmultilang ident="SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA_SURE"}]";
-    var answer = confirm(question);
-    if (answer == true) {
-        document.myedit.fnc.value = "fcResetTransactionData";
+function performAction(msg, action) {
+
+    if(msg != '') {
+        var answer = confirm(msg);
+    }
+
+    if (answer == true || msg == '') {
+        document.myedit.fnc.value = action;
         document.myedit.submit();
     }
 }
@@ -59,12 +62,49 @@ function confirmReset() {
                     type="button"
                     name="transactionreset"
                     value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA"}]"
-                    onClick="Javascript:confirmReset()"
+                    onClick="Javascript:performAction('[{oxmultilang ident="SHOP_MODULE_AFTERBUY_RESET_TRANSACTIONDATA_SURE"}]', 'fcResetTransactionData')"
                     [{$readonly}]
             >
         </td>
     </tr>
 </table>
+
+<table style="border : 1px #A9A9A9; border-style : solid solid solid solid; padding-top: 5px; padding-bottom: 5px; padding-right: 5px; padding-left: 5px; margin-top: 20px; width: 600px;">
+    <tr>
+        <td class="edittext" width="50%">
+            <b>[{$oView->fcGetOxidLogFileName()}]</b>
+        </td>
+        <td class="edittext" width="50%">
+            <b>[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG"}]</b>
+        </td>
+        <td class="edittext" width="50%">
+            <b>[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DEFAULTLOG"}]</b>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="edittext" valign="middle" width="50%">
+            <input type="button"  value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DOWNLOAD"}]"
+                   onClick="Javascript:performAction('','fcDownloadOxidLog')"/>
+        </td>
+        <td class="edittext" valign="bottom" width="50%">
+            <input type="button"  value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DOWNLOAD"}]"
+                   onClick="Javascript:performAction('', 'fcDownloadApiLog')"/>
+
+            <input type="button"  value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_TRUNCATE"}]"
+                   onClick="Javascript:performAction('[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_APILOG_TRUNCATE"}]', 'fcTruncateApiLog')"/>
+        </td>
+        <td class="edittext" valign="bottom" width="50%">
+            <input type="button"  value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DOWNLOAD"}]"
+                   onClick="Javascript:performAction('', 'fcDownloadDefaultLog')"/>
+
+            <input type="button"  value="[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_TRUNCATE"}]"
+                   onClick="Javascript:performAction('[{oxmultilang ident="SHOP_MODULE_AFTERBUY_ACTIONS_AFTERBUY_DEFAULTLOG_TRUNCATE"}]', 'fcTruncateDefaultLog')"/>
+        </td>
+    </tr>
+</table>
+
+
 <br/><br/><br/>
 [{include file="bottomnaviitem.tpl"}]
 [{include file="bottomitem.tpl"}]
