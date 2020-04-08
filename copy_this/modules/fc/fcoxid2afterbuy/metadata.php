@@ -14,7 +14,7 @@
 /**
  * Metadata version
  */
-$sMetadataVersion = '1.1';
+$sMetadataVersion = '1.2';
 $sImgUrl = "https://www.fatchip.de/out/flow/img/favicons/favicon_16x16.png";
 
 /**
@@ -95,7 +95,7 @@ $aModule = array(
             'name' => 'sFcAfterbuyLeadSystem',
             'type' => 'select',
             'value' => '0',
-            'constrains' => '0|1'
+            'constraints' => '0|1'
         ),
         array(
             'group' => 'fcafterbuy_connect',
@@ -139,7 +139,7 @@ $aModule = array(
             'name' => 'sFcAfterbuyImportArticleNumber',
             'type' => 'select',
             'value' => '0',
-            'constrains' => '0|1|2|3'
+            'constraints' => '0|1|2|3'
         ),
         array(
             'group' => 'fcafterbuy_import',
@@ -160,7 +160,7 @@ $aModule = array(
             'name' => 'sFcSendOrderNrInAdditionalField',
             'type' => 'select',
             'value' => '0',
-            'constrains' => '0|1'
+            'constraints' => '0|1'
         ),
         array(
             'group' => 'fcafterbuy_order',
@@ -207,21 +207,21 @@ $aModule = array(
             'name' => 'sFcAfterbuyFeedbackType',
             'type' => 'select',
             'value' => '0',
-            'constrains' => '0|1|2'
+            'constraints' => '0|1|2'
         ),
         array(
             'group' => 'fcafterbuy_order',
             'name' => 'sFcAfterbuyDeliveryCalculation',
             'type' => 'select',
             'value' => '1',
-            'constrains' => '0|1'
+            'constraints' => '0|1'
         ),
         array(
             'group' => 'fcafterbuy_order',
             'name' => 'sFcAfterbuySendVat',
             'type' => 'select',
             'value' => '0',
-            'constrains' => '0|1'
+            'constraints' => '0|1'
         ),
         array(
             'group' => 'fcafterbuy_order',
@@ -234,14 +234,14 @@ $aModule = array(
             'name' => 'sFcAfterbuyCustIdent',
             'type' => 'select',
             'value' => '1',
-            'constrains' => '0|1|2'
+            'constraints' => '0|1|2'
         ),
         array(
             'group' => 'fcafterbuy_order',
             'name' => 'sFcAfterbuyOverwriteEbayName',
             'type' => 'select',
             'value' => '1',
-            'constrains' => '0|1'
+            'constraints' => '0|1'
         ),
         array(
             'group' => 'fcafterbuy_order',
@@ -295,7 +295,7 @@ $aModule = array(
             'name' => 'sFcAfterbuySendWeight',
             'type' => 'select',
             'value' => '1',
-            'constrains' => '0|1'
+            'constraints' => '0|1'
         ),
         array(
             'group' => 'fcafterbuy_debug',
