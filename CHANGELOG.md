@@ -1,5 +1,19 @@
 # Changelog - oxid 2 afterbuy plugin for OXID 5 and OXID6
 
+## 1.6.0
+Released 2020-04-08
+* Added compatibility to OXID 6.2.x
+
+## 1.5.0
+Released 2019-12-19
+* Added unique logging for OXID5 and OXID6
+* Add feature for downloading and resetting logs
+
+## 1.4.0
+Released 2019-06-17
+* Added option for exporting ordernumber to order in additional field
+* Added import option for making sure article will have an article number
+
 ## 1.3.1
 Released 2019-05-17
 * Fixed order submission
