@@ -103,7 +103,7 @@ class fco2aartimport extends fco2abase
         if (empty($sResponse)) return array();
         $oXmlResponse = simplexml_load_string($sResponse);
 
-        $aCatalogs = (array) $oXmlResponse->Result->Catalogs->Catalog;
+        $aCatalogs = $oXmlResponse->xpath('Result/Catalogs/Catalog');
         foreach ($aCatalogs as $oCatalog) {
             $this->_fcCreateOxidCategory($oCatalog);
         }
@@ -124,9 +124,7 @@ class fco2aartimport extends fco2abase
         // assigned products
         $sCatalogId = (string) $oCatalog->CatalogID;
 
-        $blHasAssignedProducts = isset($oCatalog->CatalogProducts) && isset($oCatalog->CatalogProducts->ProductID);
-        $aCatalogProducts = $blHasAssignedProducts ? (array) $oCatalog->CatalogProducts->ProductID : [];
-
+        $aCatalogProducts = $oCatalog->xpath('CatalogProducts/ProductID');
         foreach ($aCatalogProducts as $sArticleId) {
             $this->_fcAssignCategory($sCatalogId, $sArticleId);
         }
@@ -169,7 +167,7 @@ class fco2aartimport extends fco2abase
     {
         $iPage = $this->_fcGetNextPage($oXmlResponse);
 
-        $aProducts = (array) $oXmlResponse->Result->Products->Product;
+        $aProducts = $oXmlResponse->xpath('Result/Products/Product');
 
         foreach ($aProducts as $oXmlProduct) {
             if($this->_fcCheckIfArticleNumberIsValid($oXmlProduct) == false) {
