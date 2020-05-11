@@ -103,8 +103,8 @@ class fco2aartimport extends fco2abase
         if (empty($sResponse)) return array();
         $oXmlResponse = simplexml_load_string($sResponse);
 
-        $aCatalogs = (array) $oXmlResponse->Result->Catalogs;
-        foreach ($aCatalogs['Catalog'] as $oCatalog) {
+        $aCatalogs = (array) $oXmlResponse->Result->Catalogs->Catalog;
+        foreach ($aCatalogs as $oCatalog) {
             $this->_fcCreateOxidCategory($oCatalog);
         }
     }
@@ -124,16 +124,11 @@ class fco2aartimport extends fco2abase
         // assigned products
         $sCatalogId = (string) $oCatalog->CatalogID;
 
-        $blHasAssignedProducts = (
-            isset($oCatalog->CatalogProducts) &&
-            $aCatalogProducts = (array) $oCatalog->CatalogProducts &&
-            isset($aCatalogProducts['ProductID'])
-        );
+        $blHasAssignedProducts = isset($oCatalog->CatalogProducts) && isset($oCatalog->CatalogProducts->ProductID);
+        $aCatalogProducts = $blHasAssignedProducts ? (array) $oCatalog->CatalogProducts->ProductID : [];
 
-        if ($blHasAssignedProducts) {
-            foreach ($aCatalogProducts['ProductID'] as $sArticleId) {
-                $this->_fcAssignCategory($sCatalogId, $sArticleId);
-            }
+        foreach ($aCatalogProducts as $sArticleId) {
+            $this->_fcAssignCategory($sCatalogId, $sArticleId);
         }
 
         if (!isset($oCatalog->Catalog)) return;
@@ -174,9 +169,9 @@ class fco2aartimport extends fco2abase
     {
         $iPage = $this->_fcGetNextPage($oXmlResponse);
 
-        $aProducts = (array) $oXmlResponse->Result->Products;
+        $aProducts = (array) $oXmlResponse->Result->Products->Product;
 
-        foreach ($aProducts['Product'] as $oXmlProduct) {
+        foreach ($aProducts as $oXmlProduct) {
             if($this->_fcCheckIfArticleNumberIsValid($oXmlProduct) == false) {
                 continue;
             }
@@ -674,7 +669,7 @@ class fco2aartimport extends fco2abase
         $oDb = oxDb::getDb();
 
         $sQuery = "
-            REPLACE INTO oxcategories
+            INSERT INTO oxcategories
             (
                 OXID,
                 OXACTIVE,
@@ -689,7 +684,11 @@ class fco2aartimport extends fco2abase
                 ".$oDb->quote((string) htmlspecialchars_decode($aCatalog['Name'])).",
                 ".$oDb->quote((string) $aCatalog['Description']).",
                 ".$oDb->quote((string) $sParentId)."
-            )
+            ) ON DUPLICATE KEY UPDATE 
+                OXACTIVE = VALUES(OXACTIVE),
+                OXTITLE = VALUES(OXTITLE),
+                OXLONGDESC = VALUES(OXLONGDESC),
+                OXPARENTID = VALUES(OXPARENTID)
         ";
 
         $oDb->execute($sQuery);
