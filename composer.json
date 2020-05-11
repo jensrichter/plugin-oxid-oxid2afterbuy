@@ -1,5 +1,5 @@
 {
-    "name": "fatchip/oxid2afterbuy",
+    "name": "fc/fcoxid2afterbuy",
     "type": "oxideshop-module",
     "require": {
         "ext-simplexml": "*",
