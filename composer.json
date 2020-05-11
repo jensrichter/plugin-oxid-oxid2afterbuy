@@ -1,0 +1,15 @@
+{
+    "name": "fc/fcoxid2afterbuy",
+    "type": "oxideshop-module",
+    "require": {
+        "ext-simplexml": "*",
+        "ext-libxml": "*",
+        "ext-curl": "*"
+    },
+    "extra": {
+        "oxideshop": {
+            "target-directory": "fc/fcoxid2afterbuy",
+            "source-directory": "copy_this/modules/fc/fcoxid2afterbuy"
+        }
+    }
+}
