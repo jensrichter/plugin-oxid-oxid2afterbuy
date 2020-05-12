@@ -420,7 +420,7 @@ class fcafterbuyapi {
         $sXmlData .= "<DataFilter>";
         $sXmlData .= "<Filter>";
         $sXmlData .= "<FilterName>DefaultFilter</FilterName>";
-        $sXmlData .= "<FilterValue>".$sFilterMode."</FilterValue>";
+        $sXmlData .= "<FilterValues><FilterValue>".$sFilterMode."</FilterValue></FilterValues>";
         $sXmlData .= "</Filter>";
         $sXmlData .= "</DataFilter>";
 
