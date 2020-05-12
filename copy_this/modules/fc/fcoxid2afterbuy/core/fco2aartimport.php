@@ -39,6 +39,29 @@ class fco2aartimport extends fco2abase
         $this->_fcUpdateCategoryIndex();
     }
 
+    public function categoryImport() {
+        $blAllowed = $this->fcJobExecutionAllowed('artimport');
+        if (!$blAllowed) {
+            echo "Execution of artimport is not allowed by configuration\n";
+            exit(1);
+        }
+
+        $this->_fcProcessCategoryTree();
+        $this->_fcUpdateCategoryIndex();
+    }
+
+    public function productImport($isUpdate = false) {
+        $blAllowed = $this->fcJobExecutionAllowed('artimport');
+        if (!$blAllowed) {
+            echo "Execution of artimport is not allowed by configuration\n";
+            exit(1);
+        }
+
+        $this->_fcProcessProducts('variationsets');
+        $this->_fcProcessProducts('nonsets');
+        $this->_fcProcessParentCategoryAssignment();
+    }
+
     /**
      * Rebuilding nested sets information
      *
