@@ -607,10 +607,9 @@ class fco2aartimport extends fco2abase
         $sAttributeName = trim($aProductAttribute['AttributName']);
         $oAttribute = oxNew('oxattribute');
         $oAttribute->oxattribute__oxtitle = new oxField($sAttributeName);
-        $sOxid = $oAttribute->getId();
         $oAttribute->save();
 
-        return $sOxid;
+        return $oAttribute->getId();
     }
 
 
