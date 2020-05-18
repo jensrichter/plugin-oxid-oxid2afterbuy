@@ -216,6 +216,7 @@ class fco2aartimport extends fco2abase
         if ($sOxid) {
             $oArticle->load($sOxid);
         }
+        $this->addProductPostLoad($oArticle, $oXmlProduct);
 
         $this->oApiLogger->fcWriteLog(
             "DEBUG: Trying to add/update XML Product: \n".
@@ -224,6 +225,8 @@ class fco2aartimport extends fco2abase
         $this->_fcAddProductBasicData($oXmlProduct, $oArticle, $sType);
         $this->_fcAddProductPictures($oXmlProduct, $oArticle, $sType);
         $this->_fcAddProductAttributes($oXmlProduct, $oArticle, $sType);
+
+        $this->addProductPreSave($oArticle, $oXmlProduct);
         $oArticle->save();
     }
 
