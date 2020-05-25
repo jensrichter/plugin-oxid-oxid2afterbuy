@@ -819,4 +819,12 @@ class fco2aartimport extends fco2abase
 
         return $mOxid;
     }
+
+    protected function addProductPostLoad(&$oArticle, &$oXmlProduct) {
+        return;
+    }
+
+    protected function addProductPreSave(&$oArticle, $oXmlProduct) {
+        return;
+    }
 }
