@@ -117,6 +117,18 @@ $aModule = array(
         ),
         array(
             'group' => 'fcafterbuy_connect',
+            'name' => 'sFcAfterbuyShopPartnerId',
+            'type' => 'str',
+            'value' => ""
+        ),
+        array(
+            'group' => 'fcafterbuy_connect',
+            'name' => 'sFcAfterbuyShopPartnerPassword',
+            'type' => 'password',
+            'value' => ""
+        ),
+        array(
+            'group' => 'fcafterbuy_connect',
             'name' => 'sFcAfterbuyUsername',
             'type' => 'str',
             'value' => ""
