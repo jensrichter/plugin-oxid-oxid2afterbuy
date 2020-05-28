@@ -57,8 +57,10 @@ class fco2aartimport extends fco2abase
             exit(1);
         }
 
-        $this->_fcProcessProducts('variationsets');
-        $this->_fcProcessProducts('nonsets');
+        $updateFrom = $this->getUpdateFromTimestamp($isUpdate);
+
+        $this->_fcProcessProducts('variationsets', $updateFrom);
+        $this->_fcProcessProducts('nonsets', $updateFrom);
         $this->_fcProcessParentCategoryAssignment();
     }
 
@@ -165,13 +167,13 @@ class fco2aartimport extends fco2abase
      * @param void
      * @return void
      */
-    protected function _fcProcessProducts($sType)
+    protected function _fcProcessProducts($sType, $updateFrom = '')
     {
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
         $iPage = 1;
         while($iPage > 0 && $iPage <= $this->_iMaxPages) {
             $sResponse =
-                $oAfterbuyApi->getShopProductsFromAfterbuy($iPage, $sType);
+                $oAfterbuyApi->getShopProductsFromAfterbuy($iPage, $sType, $updateFrom);
             $oXmlResponse =
                 simplexml_load_string($sResponse, null, LIBXML_NOCDATA);
             $iPage =
@@ -818,6 +820,14 @@ class fco2aartimport extends fco2abase
         $mOxid = $oDb->getOne($sQuery);
 
         return $mOxid;
+    }
+
+    protected function getUpdateFromTimestamp($isUpdate) {
+        if (!$isUpdate) return '';
+
+        $updateInterval = (int) $this->getConfig()->getConfigParam('sFcAfterbuyImportDeltaInterval');
+        // calculate timestamp and fallback to begin of current day
+        return $updateInterval ? date('d.m.Y H:m:s', strtotime("now - $updateInterval minutes")): date('d.m.Y 00:00:00');
     }
 
     protected function addProductPostLoad(&$oArticle, &$oXmlProduct) {

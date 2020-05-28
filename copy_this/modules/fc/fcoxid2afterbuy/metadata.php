@@ -159,6 +159,12 @@ $aModule = array(
             'type' => 'bool',
             'value' => false
         ),
+        array(
+            'group' => 'fcafterbuy_import',
+            'name' => 'sFcAfterbuyImportDeltaInterval',
+            'type' => 'str',
+            'value' => '60'
+        ),
         // array('group' => 'fcafterbuy_export', 'name' => 'sFcAfterbuyArticleIdent', 'type' => 'select', 'value' => '3', 'constrains' => '0|1|2|3' ),
 
         array(

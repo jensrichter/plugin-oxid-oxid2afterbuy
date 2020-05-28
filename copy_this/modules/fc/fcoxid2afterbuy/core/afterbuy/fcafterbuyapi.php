@@ -275,7 +275,7 @@ class fcafterbuyapi {
      * @param string $sType
      * @return int
      */
-    public function getShopProductsFromAfterbuy($iPage=1, $sType) {
+    public function getShopProductsFromAfterbuy($iPage=1, $sType, $updateFrom = '') {
         $blValidType = $this->isValidProductRequestType($sType);
         if (!$blValidType) return 0;
 
@@ -284,7 +284,7 @@ class fcafterbuyapi {
         $sXmlData .= $this->_fcGetSuppressBaseProductData($sType);
         $sXmlData .= "<PaginationEnabled>1</PaginationEnabled>";
         $sXmlData .= "<PageNumber>".$iPage."</PageNumber>";
-        $sXmlData .= $this->getShopProductsFilter($sType);
+        $sXmlData .= $this->getShopProductsFilter($sType, $updateFrom);
         $sXmlData .= $this->getXmlFoot();
         $sOutput = $this->requestAPI($sXmlData);
 
@@ -409,20 +409,17 @@ class fcafterbuyapi {
      * @param void
      * @return string
      */
-    protected function getShopProductsFilter($sType) {
-        $blNoFilter = ($sType==='singles');
-        if ($blNoFilter) return '';
-
-        $sFilterMode =
-            ($sType=='variationsets') ? 'VariationsSets' : 'not_VariationsSets';
+    protected function getShopProductsFilter($sType, $updateFrom = '') {
+        $defaultFilter = $this->getDefaultProductsFilter($sType);
+        $updateFilter = $this->getUpdateProductsFilter($updateFrom);
 
         $sXmlData = "";
-        $sXmlData .= "<DataFilter>";
-        $sXmlData .= "<Filter>";
-        $sXmlData .= "<FilterName>DefaultFilter</FilterName>";
-        $sXmlData .= "<FilterValues><FilterValue>".$sFilterMode."</FilterValue></FilterValues>";
-        $sXmlData .= "</Filter>";
-        $sXmlData .= "</DataFilter>";
+        if ($defaultFilter || $updateFilter) {
+            $sXmlData .= "<DataFilter>";
+            $sXmlData .= $defaultFilter;
+            $sXmlData .= $updateFilter;
+            $sXmlData .= "</DataFilter>";
+        }
 
         return $sXmlData;
     }
@@ -798,4 +795,42 @@ class fcafterbuyapi {
         return $sXml;
     }
 
+    /**
+     * @param string $sType
+     * @return string
+     */
+    protected function getDefaultProductsFilter($sType)
+    {
+        if ($sType==='singles') return '';
+
+        $sFilterMode =
+            ($sType=='variationsets') ? 'VariationsSets' : 'not_VariationsSets';
+
+        $filterXml = "<Filter>";
+        $filterXml .= "<FilterName>DefaultFilter</FilterName>";
+        $filterXml .= "<FilterValues><FilterValue>" . $sFilterMode . "</FilterValue></FilterValues>";
+        $filterXml .= "</Filter>";
+
+        return $filterXml;
+    }
+
+    /**
+     * @param string $sType
+     * @return string
+     */
+    protected function getUpdateProductsFilter($fromDate = '')
+    {
+        if (!$fromDate) return '';
+
+        $filterXml = "<Filter>";
+        $filterXml .= "<FilterName>DateFilter</FilterName>";
+        $filterXml .= "<FilterValues>" .
+                            "<DateFrom>" . $fromDate . "</DateFrom>" .
+                            "<FilterValue>ModDate</FilterValue>" .
+                            "<FilterValue>LastSale</FilterValue>"
+                     ."</FilterValues>";
+        $filterXml .= "</Filter>";
+
+        return $filterXml;
+    }
 }
