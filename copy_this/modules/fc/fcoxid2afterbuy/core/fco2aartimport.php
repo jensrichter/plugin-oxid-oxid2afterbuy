@@ -99,7 +99,7 @@ class fco2aartimport extends fco2abase
         foreach ($aMissingAssignments as $aMissingAssignment) {
             $sArticleId = $aMissingAssignment['sArticleId'];
             $sCategoryId = $aMissingAssignment['sCategoryId'];
-            $this->_fcAssignCategory($sCategoryId, $sArticleId);
+            $this->_fcAssignCategoryProducts($sCategoryId, $sArticleId);
         }
     }
 
@@ -150,9 +150,7 @@ class fco2aartimport extends fco2abase
         $sCatalogId = (string) $oCatalog->CatalogID;
 
         $aCatalogProducts = $oCatalog->xpath('CatalogProducts/ProductID');
-        foreach ($aCatalogProducts as $sArticleId) {
-            $this->_fcAssignCategory($sCatalogId, $sArticleId);
-        }
+        $this->_fcAssignCategoryProducts($sCatalogId, $aCatalogProducts);
 
         if (!isset($oCatalog->Catalog)) return;
 
@@ -624,59 +622,30 @@ class fco2aartimport extends fco2abase
      * @param $sCategoryId
      * @param $sArticleId
      */
-    protected function _fcAssignCategory($sCategoryId, $sArticleId)
+    protected function _fcAssignCategoryProducts($sCategoryId, $aCatalogProducts)
     {
-        $blExists =
-            $this->_fcCategoryAssignmentExists($sCategoryId, $sArticleId);
-
-        if ($blExists) return;
-
         $oUtilsObject = oxRegistry::get('oxUtilsObject');
         $oDb = oxDb::getDb();
-        $sNewId = $oUtilsObject->generateUId();
+        $values = [];
+        foreach ($aCatalogProducts as $sArticleId) {
+            $sNewId = $oUtilsObject->generateUId();
+            $values[] = join(',', array_map([$oDb,'quote'], [$sNewId, $sArticleId, $sCategoryId]));
+        }
+
+        if (0 === count($values)) return;
 
         $sQuery = "
-            INSERT INTO oxobject2category
+            INSERT IGNORE INTO oxobject2category
             (
                 OXID,
                 OXOBJECTID,
                 OXCATNID
             )
             VALUES
-            (
-                ".$oDb->quote($sNewId).",
-                ".$oDb->quote($sArticleId).",
-                ".$oDb->quote($sCategoryId)."
-            )
+            (" . join('),(', $values) . ")
         ";
 
         $oDb->execute($sQuery);
-    }
-
-    /**
-     * Checks for existing assignment
-     *
-     * @param $sCategoryId
-     * @param $sArticleId
-     * @return bool
-     */
-    protected function _fcCategoryAssignmentExists($sCategoryId, $sArticleId)
-    {
-        $oDb = oxDb::getDb();
-
-        $sQuery = "
-            SELECT 
-                OXID 
-            FROM 
-                oxobject2category
-            WHERE
-                OXOBJECTID=".$oDb->quote($sArticleId)." AND
-                OXCATNID=".$oDb->quote($sCategoryId)."
-        ";
-
-        $blExists = (bool) $oDb->getOne($sQuery);
-
-        return $blExists;
     }
 
     /**
