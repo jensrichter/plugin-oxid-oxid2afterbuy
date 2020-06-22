@@ -659,6 +659,8 @@ class fco2aartimport extends fco2abase
         $sParentId = ($aCatalog['ParentID']) ?
             (string) $aCatalog['ParentID'] :
             'oxrootid';
+        $sRootId = $aCatalog['ParentID'] ? '' : $sCategoryId;
+        $sDescription = isset($aCatalog['Description']) ? (string) $aCatalog['Description'] : '';
 
         $oDb = oxDb::getDb();
 
@@ -669,20 +671,23 @@ class fco2aartimport extends fco2abase
                 OXACTIVE,
                 OXTITLE,
                 OXLONGDESC,
-                OXPARENTID
+                OXPARENTID,
+                OXROOTID
             )
             VALUES
             (
                 ".$oDb->quote($sCategoryId).",
                 ".$oDb->quote((int) $aCatalog['Show']).",
                 ".$oDb->quote((string) htmlspecialchars_decode($aCatalog['Name'])).",
-                ".$oDb->quote((string) $aCatalog['Description']).",
-                ".$oDb->quote((string) $sParentId)."
+                ".$oDb->quote($sDescription).",
+                ".$oDb->quote($sParentId).",
+                ".$oDb->quote($sRootId)."
             ) ON DUPLICATE KEY UPDATE 
                 OXACTIVE = VALUES(OXACTIVE),
                 OXTITLE = VALUES(OXTITLE),
                 OXLONGDESC = VALUES(OXLONGDESC),
-                OXPARENTID = VALUES(OXPARENTID)
+                OXPARENTID = VALUES(OXPARENTID),
+                OXROOTID = VALUES(OXROOTID)
         ";
 
         $oDb->execute($sQuery);
