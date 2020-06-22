@@ -279,7 +279,7 @@ class fcafterbuyapi {
         $blValidType = $this->isValidProductRequestType($sType);
         if (!$blValidType) return 0;
 
-        $sXmlData = $this->getXmlHead('GetShopProducts', 30);
+        $sXmlData = $this->getXmlHead('GetShopProducts');
         $sXmlData .= "<MaxShopItems>250</MaxShopItems>";
         $sXmlData .= $this->_fcGetSuppressBaseProductData($sType);
         $sXmlData .= "<PaginationEnabled>1</PaginationEnabled>";
@@ -316,7 +316,7 @@ class fcafterbuyapi {
      */
     public function getShopCatalogs()
     {
-        $sXmlData = $this->getXmlHead('GetShopCatalogs', 30);
+        $sXmlData = $this->getXmlHead('GetShopCatalogs', 2);
         $sXmlData .= "<MaxCatalogs>200</MaxCatalogs>";
         $sXmlData .= $this->getXmlFoot();
         $sOutput = $this->requestAPI($sXmlData);
