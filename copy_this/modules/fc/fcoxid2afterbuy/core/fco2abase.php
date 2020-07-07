@@ -112,6 +112,10 @@ class fco2abase extends oxBase {
                     $oConfig->getConfigParam('sFcAfterbuyPartnerId'),
                 'afterbuyPartnerPassword' =>
                     $oConfig->getConfigParam('sFcAfterbuyPartnerPassword'),
+                'afterbuyShopPartnerId' =>
+                    $oConfig->getConfigParam('sFcAfterbuyShopPartnerId'),
+                'afterbuyShopPartnerPassword' =>
+                    $oConfig->getConfigParam('sFcAfterbuyShopPartnerPassword'),
                 'afterbuyUsername' =>
                     $oConfig->getConfigParam('sFcAfterbuyUsername'),
                 'afterbuyUserPassword' =>
