@@ -11,7 +11,7 @@ class fco2aartimport extends fco2abase
      * Number ox maximum pages that will be processed
      * @var int
      */
-    protected $_iMaxPages = 500;
+    protected $_iMaxPages = 5000;
 
     /**
      * List of variation ids and their correspending parentid
