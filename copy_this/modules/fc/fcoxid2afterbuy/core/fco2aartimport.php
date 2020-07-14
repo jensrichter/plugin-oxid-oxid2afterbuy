@@ -260,11 +260,11 @@ class fco2aartimport extends fco2abase
     protected function _fcAddProductPrices($oXmlProduct, &$oArticle, $sType)
     {
         $oArticle->oxarticles__oxprice =
-            new oxField((double) $oXmlProduct->SellingPrice);
+            new oxField((double) str_replace(',', '.', $oXmlProduct->SellingPrice));
         $oArticle->oxarticles__oxbprice =
-            new oxField((double) $oXmlProduct->BuyingPrice);
+            new oxField((double) str_replace(',', '.', $oXmlProduct->BuyingPrice));
         $oArticle->oxarticles__oxpricea =
-            new oxField((double) $oXmlProduct->DealerPrice);
+            new oxField((double) str_replace(',', '.', $oXmlProduct->DealerPrice));
         $oArticle->oxarticles__oxvat =
             new oxField((int) $oXmlProduct->TaxRate);
 
