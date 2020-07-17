@@ -50,7 +50,7 @@ class fco2aartimport extends fco2abase
         $this->_fcUpdateCategoryIndex();
     }
 
-    public function productImport($isUpdate = false) {
+    public function productImport($isUpdate = false, $lastSale = false) {
         $blAllowed = $this->fcJobExecutionAllowed('artimport');
         if (!$blAllowed) {
             echo "Execution of artimport is not allowed by configuration\n";
@@ -59,8 +59,8 @@ class fco2aartimport extends fco2abase
 
         $updateFrom = $this->getUpdateFromTimestamp($isUpdate);
 
-        $this->_fcProcessProducts('variationsets', $updateFrom);
-        $this->_fcProcessProducts('nonsets', $updateFrom);
+        $this->_fcProcessProducts('variationsets', $updateFrom, $lastSale);
+        $this->_fcProcessProducts('nonsets', $updateFrom, $lastSale);
         $this->_fcProcessParentCategoryAssignment();
     }
 
@@ -165,13 +165,13 @@ class fco2aartimport extends fco2abase
      * @param void
      * @return void
      */
-    protected function _fcProcessProducts($sType, $updateFrom = '')
+    protected function _fcProcessProducts($sType, $updateFrom = '', $lastSale = false)
     {
         $oAfterbuyApi = $this->_fcGetAfterbuyApi();
         $iPage = 1;
         while($iPage > 0 && $iPage <= $this->_iMaxPages) {
             $sResponse =
-                $oAfterbuyApi->getShopProductsFromAfterbuy($iPage, $sType, $updateFrom);
+                $oAfterbuyApi->getShopProductsFromAfterbuy($iPage, $sType, $updateFrom, $lastSale);
             $oXmlResponse =
                 simplexml_load_string($sResponse, null, LIBXML_NOCDATA);
             $iPage =

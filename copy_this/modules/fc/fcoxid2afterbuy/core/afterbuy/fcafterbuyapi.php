@@ -275,7 +275,7 @@ class fcafterbuyapi {
      * @param string $sType
      * @return int
      */
-    public function getShopProductsFromAfterbuy($iPage=1, $sType, $updateFrom = '') {
+    public function getShopProductsFromAfterbuy($iPage=1, $sType, $updateFrom = '', $lastSale = false) {
         $blValidType = $this->isValidProductRequestType($sType);
         if (!$blValidType) return 0;
 
@@ -284,7 +284,7 @@ class fcafterbuyapi {
         $sXmlData .= $this->_fcGetSuppressBaseProductData($sType);
         $sXmlData .= "<PaginationEnabled>1</PaginationEnabled>";
         $sXmlData .= "<PageNumber>".$iPage."</PageNumber>";
-        $sXmlData .= $this->getShopProductsFilter($sType, $updateFrom);
+        $sXmlData .= $this->getShopProductsFilter($sType, $updateFrom, $lastSale);
         $sXmlData .= $this->getXmlFoot();
         $sOutput = $this->requestAPI($sXmlData);
 
@@ -409,9 +409,9 @@ class fcafterbuyapi {
      * @param void
      * @return string
      */
-    protected function getShopProductsFilter($sType, $updateFrom = '') {
+    protected function getShopProductsFilter($sType, $updateFrom = '', $lastSale = false) {
         $defaultFilter = $this->getDefaultProductsFilter($sType);
-        $updateFilter = $this->getUpdateProductsFilter($updateFrom);
+        $updateFilter = $this->getUpdateProductsFilter($updateFrom, $lastSale);
 
         $sXmlData = "";
         if ($defaultFilter || $updateFilter) {
@@ -818,16 +818,16 @@ class fcafterbuyapi {
      * @param string $sType
      * @return string
      */
-    protected function getUpdateProductsFilter($fromDate = '')
+    protected function getUpdateProductsFilter($fromDate = '', $lastSale = false)
     {
         if (!$fromDate) return '';
+        $filterValue = $lastSale ? 'LastSale' : 'ModDate';
 
         $filterXml = "<Filter>";
         $filterXml .= "<FilterName>DateFilter</FilterName>";
         $filterXml .= "<FilterValues>" .
-                            "<DateFrom>" . $fromDate . "</DateFrom>" .
-                            "<FilterValue>ModDate</FilterValue>" .
-                            "<FilterValue>LastSale</FilterValue>"
+                            "<DateFrom>{$fromDate}</DateFrom>" .
+                            "<FilterValue>{$filterValue}</FilterValue>"
                      ."</FilterValues>";
         $filterXml .= "</Filter>";
 
